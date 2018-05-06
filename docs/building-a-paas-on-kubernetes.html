@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="http://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Opinionated Deployment Tools & Kubernetes</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="./static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="./static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="./static/pygments.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>February 10, 2016</time>
+    · <a href="./index.html">view all posts</a>
+  </aside>
+  <h1>Opinionated Deployment Tools & Kubernetes</h1>
+  <content>
+    <p><em>Note: This post expects you to be familiar with <a href="kubernetes.io">Kubernetes</a> concepts.</em></p>
+<p><strong>You should be building on top of Kubernetes</strong>. Seriously.</p>
+<p>To me, a large shift in my understanding of Kubernetes came when I started thinking about the things that it provides, such as replication controllers, services, pods, etc., as building blocks. Sure, you can write a few yaml files and deploy a wide variety of things. However, in some situations it's more useful to approach things at a higher level.</p>
+<p>Consider the usual process of deploying an application to a Platform-as-a-Service. For Heroku, you run <code>git push</code>. For Google App Engine, you run <code>appcfg.py update</code>. The platform handles creating and configuring an opinionated set of resources to run your application. You don't have to think about &quot;well, I need a replication controller, a service, etc.&quot;. You simply deploy your code in one step. In a Platform-as-a-Service, you're no longer concerned with the individual resources needed to run your app.</p>
+<p>I feel that building this sort of workflow on Kubernetes is critical when bridging the gap from Development to DevOps. Developers typically aren't overly concerned without how the platform handles deploying the app. They write code and they need a way to say 'this is ready to deploy'. DevOps should enable this.</p>
+<p>Kubernetes gives us the tools to build a Platform-as-a-Service experience. In fact, it's a great idea! The good folks over at <a href="https://deis.io">Deis</a> are currently rebuilding Deis v2 on Kubernetes. Although you can explicitly define every Kubernetes resource required to deploy your app, you don’t necessarily need to, in fact, it may be an anti-pattern.</p>
+<h2>Noel: A minimal cluster-native PaaS</h2>
+<p>I decided to see just how difficult it would be to create a tool that enables a 'minimal' PaaS workflow on Kubernetes. A 'minimal' PaaS would need to provide:</p>
+<ol>
+<li><strong>Zero-config deployment</strong>: A Dockerfile should be the only requirement for deploying code.</li>
+<li><strong>Multiple apps/microservices</strong>: The PaaS should be able to host any number of apps/microservices, and they should be able to communicate with each other.</li>
+<li><strong>Scaling</strong>: the cluster administrator should be able to easily manually scale applications up and down.</li>
+<li><strong>Configuration management</strong>: There should be a way to set configuration values independently of the code base, as spelled in <a href="http://12factor.net/">12 factor app</a>.</li>
+</ol>
+<p>When creating the tool, I decided to try to create something somewhere between <a href="http://dokku.viewdocs.io/dokku/">dokku</a> and <a href="https://deis.io">deis</a>. Both of these provide a great, straightforward developer experience. I decided to provide two workflows for deploying applications:</p>
+<ol>
+<li><strong>Local build</strong>: you can run <code>noel build-and-deploy</code> in a directory containing a Dockerfile to build deploy an application. This is similar to how <a href="https://cloud.google.com/appengine">Google App Engine</a> works.</li>
+<li><strong>Remote build</strong>: you can add a special remote and run <code>git push noel master</code> to remotely build and deploy an application.</li>
+</ol>
+<p>Both of these present a much more straightforward workflow to developers over interacting directly with the Kubernetes cluster. As a bonus, they're both trivial to integrate into a continuous integration pipeline.</p>
+<p><a href="https://github.com/jonparrott/noel">Noel</a> is available on github. Here's a demonstration of using the remote build workflow to deploy a simple application. Once deployed, you can see it takes only a few seconds for the application to come up and serve traffic:</p>
+<script type="text/javascript" src="https://asciinema.org/a/4r2lhzq9tq63qmk0xv4wtlvng.js" id="asciicast-4r2lhzq9tq63qmk0xv4wtlvng" async></script>
+<h2>Putting the pieces together</h2>
+<p>Noel uses the following Kubernetes resources to deploy applications onto the cluster:</p>
+<ul>
+<li><strong>Replication Controller</strong>: Noel creates a unique replication controller for every <em>version</em> of a deployed application. In the future, the Kubernetes Deployment API can be used to do rolling updates to avoid downtime.</li>
+<li><strong>Secrets</strong>: Each application has a secret associated with it that is used to store the application configuration. Noel configures the application's replication controller to mount the secret on its pods.</li>
+<li><strong>Service</strong>: Each application has a service that routes cluster-internal traffic to its pods. This allows applications/microservices to talk directly to each other within the cluster.</li>
+</ul>
+<p>Noel runs two services itself on the cluster:</p>
+<ol start="2">
+<li><strong>Remote Builder</strong>: Handles <code>git push</code> requests and runs <code>noel build-and-deploy</code> to build and deploy applications.</li>
+<li><strong>Nginx Frontend</strong>: Handles proxying external traffic from <code>app.example.com</code> to the appropriate application's service.</li>
+</ol>
+<h2>A multi-mode cluster</h2>
+<p>Noel, along with applications developed with Noel, are able to run alongside anything else that is deployed on the cluster. This is a truly powerful aspect of Kubernetes. Consider an application that consists of three microservices and requires Redis and PostgreSQL. The microservices are stateless and can be easily deployed via something like Noel or Deis v2. The Redis and PostgreSQL resources can be maintained directly by the cluster administrator or via something like <a href="https://helm.sh">helm</a>. You can connect them all together using the Kubernetes DNS service and Secrets.</p>
+<p>In short, you do not need to stick with a particular way of Kubernetes deployment. You should choose what's right for each subset of what you need to deploy and build tools to support that. Noel is a very small tool, and proof-positive that it is possible to build your own tools to handle <strong>opinionated workflows</strong> on top of Kubernetes.</p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="./static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="./static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="http://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'jonparrott.com');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>

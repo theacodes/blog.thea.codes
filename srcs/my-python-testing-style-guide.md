@@ -1,6 +1,6 @@
 ---
 title: My Python testing style guide
-date: 2017-07-15
+date: 2017-07-15T06:08:04.000Z
 ---
 
 This post is an attempt to catalog some of my practices around testing Python projects. It's not meant to be treated as dogma- I anticipate I'll update this significantly over time.

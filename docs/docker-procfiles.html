@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="http://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Docker, Procfiles, and Health Checks</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="./static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="./static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="./static/pygments.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>August 05, 2015</time>
+    · <a href="./index.html">view all posts</a>
+  </aside>
+  <h1>Docker, Procfiles, and Health Checks</h1>
+  <content>
+    <p><em>(full source code is available on <a href="https://github.com/jonparrott/docker-procfile">github</a>)</em></p>
+<p><a href="https://docker.io">Docker</a> has an interesting best practice of only executing <a href="https://docs.docker.com/articles/dockerfile_best-practices/">one process per container</a>:</p>
+<blockquote>
+<p>In almost all cases, you should only run a single process in a single container. Decoupling applications into multiple containers makes it much easier to scale horizontally and reuse containers. If that service depends on another service, make use of container linking.</p>
+</blockquote>
+<p>This is a great rule of thumb, but there are a few cases where running multiple processes <em>is</em> actually necessary. In fact, Docker acknowledges this in their tutorial on <a href="https://docs.docker.com/articles/using_supervisord/">running supervisord</a> in Docker.</p>
+<p>I came across one such case recently. I wanted to run an <a href="http://python-rq.org/">rq</a> worker on <a href="">Google App Engine Managed VMs</a>. It's highly recommended to provide a simple HTTP health check. Usually this is trivial to provide as you are usually running an actual web application. But in the case of rq it's not that simple - rq is not a web application and there's no way to make it respond to these health checks by itself.</p>
+<p>I needed to run two processes: the rq worker process and a simple web application that could respond to health checks.</p>
+<h3>Running multiple processes</h3>
+<p>As mentioned above, <a href="https://docs.docker.com/articles/using_supervisord/">using supervisord</a> is a completely valid solution. However, I wanted something that required a little less configuration. This is where I decided on using <a href="http://ddollar.github.io/foreman/">foreman's</a> <a href="http://ddollar.github.io/foreman/#PROCFILE">procfile</a>. Foreman is an extremely lightweight process manager. An added bonus is that Foreman can export a supervisord config file if you decide to switch. For this project, I decided to use <a href="https://github.com/nickstenning/honcho">Honcho</a> which is a python clone of Foreman primarily because it didn't require me to install ruby in my container.</p>
+<p>With Honcho, our Procfile looks like this:</p>
+<pre><code>worker: rqworker
+monitor: python monitor.py
+</code></pre>
+<p>Both processes can be started locally by executing <code>honcho start</code>, but how do I get docker to start this? My first attempt was:</p>
+<pre><code>CMD /env/bin/honcho start
+</code></pre>
+<p>However, this created a small problem: when Honcho starts processes it uses the system Python and the system site-packages. This is unfortunate because my Dockerfile is set up to install all dependencies into a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtualenv</a>:</p>
+<pre><code>WORKDIR /app
+RUN virtualenv /env
+ADD requirements.txt /app/requirements.txt
+RUN /env/bin/pip install -r /app/requirements.txt
+ADD . /app
+</code></pre>
+<p>Thankfully, there's a small trick to execute honcho within the context of a virtualenv:</p>
+<pre><code>CMD . /env/bin/activate; /env/bin/honcho start
+</code></pre>
+<p>Running in docker now starts both the monitor and the worker:</p>
+<script type="text/javascript" src="https://asciinema.org/a/23417.js" id="asciicast-23417" async></script>
+<h3>Monitoring processes with Python, Flask, and psutil.</h3>
+<p>The monitoring application is a simple <a href="http://flask.pocoo.org/">Flask</a> application that uses <a href="https://github.com/giampaolo/psutil">psutil</a> to monitor the status of the worker process. Luckily, <code>rqworker</code> has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on <a href="https://github.com/jonparrott/docker-procfile/blob/master/monitor.py">github</a>.</p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="./static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="./static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="http://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'jonparrott.com');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>

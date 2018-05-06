@@ -23,13 +23,15 @@ def load_source(source):
 
 
 def render_markdown(content):
-    content = cmarkgfm.github_flavored_markdown_to_html(content)
+    content = cmarkgfm.markdown_to_html_with_extensions(
+        content,
+        extensions=['table', 'autolink', 'strikethrough'])
     content = _highlight(content)
     return content
 
 
-def write_post(slug, post, content):
-    path = pathlib.Path("./docs/{}.html".format(slug))
+def write_post(post, content):
+    path = pathlib.Path("./docs/{}.html".format(post['stem']))
     template = jinja_env.get_template('post.html')
     rendered = template.render(post=post, content=content)
     path.write_text(rendered)
@@ -42,15 +44,28 @@ def make_pygments_style_sheet():
     pathlib.Path("./docs/static/pygments.css").write_text(css)
 
 
+def write_index(posts):
+    path = pathlib.Path("./docs/index.html")
+    template = jinja_env.get_template('index.html')
+    rendered = template.render(posts=posts)
+    path.write_text(rendered)
+
+
 def main():
     make_pygments_style_sheet()
 
+    posts = []
     sources = get_sources()
 
     for source in sources:
         post = load_source(source)
         content = render_markdown(post.content)
-        write_post(source.stem, post, content)
+        post['stem'] = source.stem
+        write_post(post, content)
+        posts.append(post)
+
+    posts = sorted(posts, key=lambda post: post['date'], reverse=True)
+    write_index(posts)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<nav>
+  <h1>My blog posts</h1>
+  <dl class="posts-list">
+  {% for post in posts %}
+    <a href="./{{post.stem}}.html">
+      <dt>{{post.title}}</dt>
+      <dd>
+        <time>{{post['date'].strftime('%B %d, %Y')}}</time>
+      </dd>
+    </a>
+  {% endfor %}
+  </dl>
+</nav>
+{% endblock %}

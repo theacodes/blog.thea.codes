@@ -28,6 +28,29 @@ body {
   text-align: left;
 }
 
+/* Index page */
+
+nav {
+  margin-top: 2em;
+}
+
+nav time {
+  font-style: italic;
+  color: #607d8b;
+  font-size: 80%;
+}
+
+nav dl a,
+nav dl a:focus {
+  color: #333;
+  text-decoration: none;
+}
+
+nav dl a:hover {
+  color: #63c8f6;
+  text-decoration: none;
+}
+
 /* Post page */
 
 h1 {
