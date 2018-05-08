@@ -14,7 +14,7 @@ For me personally, it's incredibly fulfilling to be in a position where nearly e
 
 ## Noel
 
-[Noel](https://github.com/jonparrott/noel) was really my first attempt at writing something for the Kubernetes ecosystem. I [wrote in detail](http://blog.jonparrott.com/building-a-paas-on-kubernetes/) about Noel in another blog post. Basically, it's another layer of abstraction on top of Kubernetes that lets you take a container and deploy it straight to Kubernetes without thinking about Kubernetes. I was rather surprised at the positive response to this - the Kubernetes Deployment SIG was kind enough to invite me to talk about it during their meeting. [KubeWeekly](https://twitter.com/kubeweekly) was nice enough to post it in their newletter. I plan on coming back to Noel soon and taking advantage of some new Kubernetes features.
+[Noel](https://github.com/theacodes/noel) was really my first attempt at writing something for the Kubernetes ecosystem. I [wrote in detail](http://blog.thea.codes/building-a-paas-on-kubernetes/) about Noel in another blog post. Basically, it's another layer of abstraction on top of Kubernetes that lets you take a container and deploy it straight to Kubernetes without thinking about Kubernetes. I was rather surprised at the positive response to this - the Kubernetes Deployment SIG was kind enough to invite me to talk about it during their meeting. [KubeWeekly](https://twitter.com/kubeweekly) was nice enough to post it in their newletter. I plan on coming back to Noel soon and taking advantage of some new Kubernetes features.
 
 ## PSQ
 

@@ -11,13 +11,13 @@
   <title>Thea Flowers - Docker, Procfiles, and Health Checks</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="./static/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
 
   <!-- Custom styles for this template -->
-  <link href="./static/style.css" rel="stylesheet">
+  <link href="/static/style.css" rel="stylesheet">
 
   <!-- Syntax highlighting css -->
-  <link href="./static/pygments.css" rel="stylesheet">
+  <link href="/static/pygments.css" rel="stylesheet">
 </head>
 <body>
   <div class="container">
@@ -30,7 +30,7 @@
   </aside>
   <h1>Docker, Procfiles, and Health Checks</h1>
   <content>
-    <p><em>(full source code is available on <a href="https://github.com/jonparrott/docker-procfile">github</a>)</em></p>
+    <p><em>(full source code is available on <a href="https://github.com/theacodes/docker-procfile">github</a>)</em></p>
 <p><a href="https://docker.io">Docker</a> has an interesting best practice of only executing <a href="https://docs.docker.com/articles/dockerfile_best-practices/">one process per container</a>:</p>
 <blockquote>
 <p>In almost all cases, you should only run a single process in a single container. Decoupling applications into multiple containers makes it much easier to scale horizontally and reuse containers. If that service depends on another service, make use of container linking.</p>
@@ -60,7 +60,7 @@ ADD . /app
 <p>Running in docker now starts both the monitor and the worker:</p>
 <script type="text/javascript" src="https://asciinema.org/a/23417.js" id="asciicast-23417" async></script>
 <h3>Monitoring processes with Python, Flask, and psutil.</h3>
-<p>The monitoring application is a simple <a href="http://flask.pocoo.org/">Flask</a> application that uses <a href="https://github.com/giampaolo/psutil">psutil</a> to monitor the status of the worker process. Luckily, <code>rqworker</code> has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on <a href="https://github.com/jonparrott/docker-procfile/blob/master/monitor.py">github</a>.</p>
+<p>The monitoring application is a simple <a href="http://flask.pocoo.org/">Flask</a> application that uses <a href="https://github.com/giampaolo/psutil">psutil</a> to monitor the status of the worker process. Luckily, <code>rqworker</code> has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on <a href="https://github.com/theacodes/docker-procfile/blob/master/monitor.py">github</a>.</p>
 
   </content>
 </article>
@@ -92,7 +92,7 @@ ADD . /app
 
   <!-- webfonts & icons-->
   <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
-  <link href="./static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
 
   <!-- Google Analytics (that's right, I'm tracking you) -->
   <script async="" src="http://www.google-analytics.com/analytics.js"></script>
@@ -102,7 +102,7 @@ ADD . /app
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-47725506-1', 'jonparrott.com');
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
     ga('send', 'pageview');
 
   </script>

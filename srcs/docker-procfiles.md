@@ -4,7 +4,7 @@ date: 2015-08-05T19:50:31.000Z
 legacy_url: yes
 ---
 
-*(full source code is available on [github](https://github.com/jonparrott/docker-procfile))*
+*(full source code is available on [github](https://github.com/theacodes/docker-procfile))*
 
 [Docker](https://docker.io) has an interesting best practice of only executing [one process per container](https://docs.docker.com/articles/dockerfile_best-practices/):
 
@@ -55,4 +55,4 @@ Running in docker now starts both the monitor and the worker:
 
 ### Monitoring processes with Python, Flask, and psutil.
 
-The monitoring application is a simple [Flask](http://flask.pocoo.org/) application that uses [psutil](https://github.com/giampaolo/psutil) to monitor the status of the worker process. Luckily, ``rqworker`` has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on [github](https://github.com/jonparrott/docker-procfile/blob/master/monitor.py).
+The monitoring application is a simple [Flask](http://flask.pocoo.org/) application that uses [psutil](https://github.com/giampaolo/psutil) to monitor the status of the worker process. Luckily, ``rqworker`` has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on [github](https://github.com/theacodes/docker-procfile/blob/master/monitor.py).

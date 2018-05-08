@@ -32,7 +32,7 @@ When creating the tool, I decided to try to create something somewhere between [
 
 Both of these present a much more straightforward workflow to developers over interacting directly with the Kubernetes cluster. As a bonus, they're both trivial to integrate into a continuous integration pipeline.
 
-[Noel](https://github.com/jonparrott/noel) is available on github. Here's a demonstration of using the remote build workflow to deploy a simple application. Once deployed, you can see it takes only a few seconds for the application to come up and serve traffic:
+[Noel](https://github.com/theacodes/noel) is available on github. Here's a demonstration of using the remote build workflow to deploy a simple application. Once deployed, you can see it takes only a few seconds for the application to come up and serve traffic:
 
 <script type="text/javascript" src="https://asciinema.org/a/4r2lhzq9tq63qmk0xv4wtlvng.js" id="asciicast-4r2lhzq9tq63qmk0xv4wtlvng" async></script>
 
