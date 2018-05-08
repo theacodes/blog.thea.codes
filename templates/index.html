@@ -5,7 +5,7 @@
   <h1>My blog posts</h1>
   <dl class="posts-list">
   {% for post in posts %}
-    <a href="./{{post.stem}}.html">
+    <a href="./{{post.stem}}">
       <dt>{{post.title}}</dt>
       <dd>
         <time>{{post['date'].strftime('%B %d, %Y')}}</time>
