@@ -37,6 +37,14 @@ def write_post(post, content):
     path.write_text(rendered)
 
 
+def write_legacy_redirect(post):
+    path = pathlib.Path("./docs/{}/index.html".format(post['stem']))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    template = jinja_env.get_template('redirect.html')
+    rendered = template.render(post=post)
+    path.write_text(rendered)
+
+
 def make_pygments_style_sheet():
     formatter = pygments.formatters.HtmlFormatter(
         style=witchhazel.WitchHazelStyle)
@@ -62,6 +70,10 @@ def main():
         content = render_markdown(post.content)
         post['stem'] = source.stem
         write_post(post, content)
+
+        if post.get('legacy_redirect'):
+            write_legacy_redirect(post)
+
         posts.append(post)
 
     posts = sorted(posts, key=lambda post: post['date'], reverse=True)
