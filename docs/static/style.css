@@ -42,13 +42,12 @@ nav time {
 
 nav dl a,
 nav dl a:focus {
-  color: #333;
+  color: #41b990;
   text-decoration: none;
 }
 
 nav dl a:hover {
-  color: #63c8f6;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 nav dt {
@@ -119,11 +118,14 @@ footer {
 }
 
 .info a,
-.info a:focus,
-.info a:hover  {
+.info a:focus {
   color: #41b990;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.info a:hover {
+  color: #63c8f6;
 }
 
 .name {
