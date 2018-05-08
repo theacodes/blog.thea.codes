@@ -1,6 +1,7 @@
 ---
 title: Github-Flavored Markdown Descriptions on PyPI
 date: 2018-04-02T18:15:38.000Z
+legacy_url: yes
 ---
 
 Last month Dustin Ingram happily proclaimed that [PyPI supports Markdown Descriptions](https://dustingram.com/articles/2018/03/16/markdown-descriptions-on-pypi). This took a lot of work - go check out his wonderful blog post on everything it took to get there.
@@ -17,4 +18,4 @@ What's so beautiful about all of this is you can continue to follow Dustin's [in
 
 ## A big round of thanks
 
-None of this would have happened if it weren't for [Sumana Harihareswara](https://github.com/brainwane), [Dustin Ingram](https://github.com/di), and [Cosimo Lupo](https://github.com/anthrotype) (who helped me crack the Windows wheel building puzzle for [cmarkgfm](https://github.com/jonparrott/cmarkgfm)). And of course, this is just building on the work of all the wonderful people who made Markdown descriptions possible in the first place.  
+None of this would have happened if it weren't for [Sumana Harihareswara](https://github.com/brainwane), [Dustin Ingram](https://github.com/di), and [Cosimo Lupo](https://github.com/anthrotype) (who helped me crack the Windows wheel building puzzle for [cmarkgfm](https://github.com/jonparrott/cmarkgfm)). And of course, this is just building on the work of all the wonderful people who made Markdown descriptions possible in the first place.

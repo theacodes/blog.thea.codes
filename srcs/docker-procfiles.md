@@ -1,6 +1,7 @@
 ---
 title: Docker, Procfiles, and Health Checks
 date: 2015-08-05T19:50:31.000Z
+legacy_url: yes
 ---
 
 *(full source code is available on [github](https://github.com/jonparrott/docker-procfile))*

@@ -1,6 +1,7 @@
 ---
 title: Managing vendored packages on App Engine
 date: 2014-09-02T21:38:31.000Z
+legacy_url: yes
 ---
 
 **N.B.:** You don't need to follow this post anymore. I've gotten this functionality built-in to the Google App Engine standard environment. See the [official documentation](https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27).

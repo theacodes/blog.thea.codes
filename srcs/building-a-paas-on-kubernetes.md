@@ -1,6 +1,7 @@
 ---
 title: Opinionated Deployment Tools & Kubernetes
 date: 2016-02-10T05:49:12.000Z
+legacy_url: yes
 ---
 
 *Note: This post expects you to be familiar with [Kubernetes](kubernetes.io) concepts.*

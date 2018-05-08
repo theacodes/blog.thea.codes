@@ -1,6 +1,7 @@
 ---
 title: App Engine is (sometimes) the wrong hammer.
 date: 2014-09-25T23:17:23.000Z
+legacy_url: yes
 ---
 
 I **love** Google App Engine. I've spent over 3 years working with the platform - building apps inside of App Engine's limitations long before the rest of the Cloud Platform had come to light. Because I've been working with App Engine so long it's become my hammer of choice, my *Mjolnir*.

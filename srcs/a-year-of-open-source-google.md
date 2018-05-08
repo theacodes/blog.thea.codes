@@ -1,7 +1,7 @@
 ---
 title: A Year of Open-Source @ Google
 date: 2016-03-24T06:26:57.000Z
-legacy_redirect: yes
+legacy_url: yes
 ---
 
 It's been just over a year since I joined the amazing Cloud Platform Developer Relations team at Google. I'm incredibly happy to be part of a team filled with passionate and brilliant people who are always excited about technology and fanatical about open-source.

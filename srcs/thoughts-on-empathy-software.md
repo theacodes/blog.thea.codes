@@ -1,6 +1,7 @@
 ---
 title: Thoughts on empathy & software
 date: 2016-07-02T05:24:02.000Z
+legacy_url: yes
 ---
 
 *N.B.:* This is a collection of various, vaguely connected thoughts. I apologize if this seems to ramble and doesn't have a coherent point.

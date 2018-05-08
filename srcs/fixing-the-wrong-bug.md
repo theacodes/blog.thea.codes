@@ -1,6 +1,7 @@
 ---
 title: Fixing the wrong bug to discover the right one
 date: 2014-09-14T22:09:51.000Z
+legacy_url: yes
 ---
 
 Recently I was pulled in to help troubleshoot a issue with an application. The bug report stated that users were not able to load the home page. The application is an intranet that contains a couple hundred pages and a small amount of other content.
