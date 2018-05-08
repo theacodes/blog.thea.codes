@@ -51,6 +51,10 @@ nav dl a:hover {
   text-decoration: none;
 }
 
+nav dt {
+  font-weight: normal;
+}
+
 /* Post page */
 
 h1 {
