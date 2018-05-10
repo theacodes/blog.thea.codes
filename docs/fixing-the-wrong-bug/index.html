@@ -43,9 +43,9 @@
 </pre>
 <p>It's relatively straightforward but it's easy to guess what might be eating all of our time. We're making a synchronous RPC call (<code>query.get()</code>) for every group the user is in. This had been working fine up to this point but we assumed some RPC latency was dragging the application down.</p>
 <p>Because of my assumption, my first instinct was to go ahead and optimize this. Since there's only about 6 or so pages that operate as the home page for any group it makes sense to grab all those ahead of time and cache them.</p>
-<pre><span class="nd">@caching.cache</span><span class="p">(</span><span class="s1">&#39;home-pages&#39;</span><span class="p">)</span>
+<pre><span class="nd">@caching</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="s1">&#39;home-pages&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_home_pages</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">Page</span><span class="o">.</span><span class="n">query</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Page</span><span class="o">.</span><span class="n">is_a_home_page</span> <span class="o">==</span> <span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="o">.</span><span class="n">query</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Page</span><span class="o">.</span><span class="n">is_a_home_page</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">find_home_page_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>

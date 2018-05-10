@@ -1,3 +1,4 @@
+import datetime
 import pathlib
 
 import cmarkgfm
@@ -67,6 +68,10 @@ def main():
         content = render_markdown(post.content)
         post['stem'] = source.stem
         write_post(post, content)
+
+        if isinstance(post['date'], datetime.datetime):
+            post['date'] = post['date'].date()
+
         posts.append(post)
 
     posts = sorted(posts, key=lambda post: post['date'], reverse=True)

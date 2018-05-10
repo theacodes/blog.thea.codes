@@ -92,7 +92,7 @@
 <h3>Use real objects for collaborators whenever possible</h3>
 <p>Sure, unit test purists may balk at this, but being able to use a collaborator directly catches bugs and encourages you to implement functions and classes in a way that their logic can be used without unintended side-effects. If you're having a really hard time using collaborators without side-effects, it might be useful to consider how you can refactor and simplify it.</p>
 <p>Here's an example of making a mock of a collaborator (re-using a previous example):</p>
-<pre><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">make_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<pre><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">make_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">signer</span><span class="o">.</span><span class="n">key_id</span> <span class="o">=</span> <span class="mi">1</span>
 
 <span class="n">test_payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}</span>
@@ -128,7 +128,7 @@
 <span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>The <em>right</em> way to do this is to use <code>mock.create_autospec()</code> or <code>mock.patch(..., autospec=True)</code>. This ensures there's some connection between your mock and the real collaborator's interface. If you change the collaborator's interface in a way that breaks downstream targets, those targets tests will rightfully fail:</p>
-<pre><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<pre><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">encoded</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">signer</span><span class="p">,</span> <span class="n">test_payload</span><span class="p">)</span>
 <span class="o">...</span>
@@ -139,11 +139,11 @@
 <p>Mock is extremely powerful, but if you find yourself bending over backwards to get a mock to behave how you expect, consider creating a stub. A <strong>stub</strong> has a few canned responses or behavior useful for unit tests and a <strong>fake</strong> has essentially a working implementation but takes shortcuts that wouldn't happen with a real collaborator (like an in-memory database).</p>
 <p>Here's a simple stub that implements an abstract class for the purposes of testing:</p>
 <pre><span class="k">class</span> <span class="nc">CredentialsStub</span><span class="p">(</span><span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">credentials</span><span class="o">.</span><span class="n">Credentials</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s1">&#39;token&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s1">&#39;token&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CredentialsStub</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
 
-    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">headers</span><span class="p">[</span><span class="s1">&#39;authorization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
 
     <span class="k">def</span> <span class="nf">before_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="p">):</span>
@@ -154,7 +154,7 @@
 </pre>
 <p>Here's a simple fake of an in-memory Memcache client:</p>
 <pre><span class="k">class</span> <span class="nc">MemcacheFake</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -172,19 +172,19 @@
 </pre>
 <h3>Don't give mock/stubs/fakes special names</h3>
 <p>Mocks should be named just the same as if they were a real collaborator. Don't use <code>mock_x</code>, <code>x_mock</code>, <code>mocked_x</code>, <code>fake_x</code>, etc., just use <code>x</code>. The reasoning for this is that it encourages you to think of the mocks as the same as real collaborators and makes the intent of the test clearer. For example, this is unnecessary:</p>
-<pre><span class="n">mock_signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<pre><span class="n">mock_signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre>
 <p>Just call it <code>signer</code>:</p>
-<pre><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<pre><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre>
 <p>Same with patching, don't do this:</p>
-<pre><span class="nd">@mock.patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
+<pre><span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_refresh_success</span><span class="p">(</span><span class="n">mock_utcnow</span><span class="p">):</span>
     <span class="n">mock_utcnow</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">min</span>
     <span class="o">...</span>
 </pre>
 <p>Just call it <code>utcnow</code>:</p>
-<pre><span class="nd">@mock.patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
+<pre><span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_refresh_success</span><span class="p">(</span><span class="n">utcnow</span><span class="p">):</span>
     <span class="n">utcnow</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">min</span>
     <span class="o">...</span>
@@ -197,14 +197,14 @@
 </pre>
 <p>Note the <code>utcnow_patch as utcnow:</code> makes it even clearer why this recommendation makes sense: you are creating a substitute, a stand-in, call it the same name.</p>
 <p>Also, if you using a patch decorator and not using the mock it's fine to name it <code>unused_x</code>:</p>
-<pre><span class="nd">@mock.patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
+<pre><span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_refresh_success</span><span class="p">(</span><span class="n">unused_utcnow</span><span class="p">):</span>
     <span class="o">...</span>
 </pre>
 <h3>Use factory helpers to create complex collaborators</h3>
 <p>Tests sometimes need complex setup. In general, favor helper methods and factories to create collaborators. For example, this factory creates a mock http object that returns a specific response:</p>
-<pre><span class="k">def</span> <span class="nf">make_http</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">http_client</span><span class="o">.</span><span class="n">OK</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<pre><span class="k">def</span> <span class="nf">make_http</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">http_client</span><span class="o">.</span><span class="n">OK</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
     <span class="n">response</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">_helpers</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">response</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -226,7 +226,7 @@
 </pre>
 <h3>Use fixtures sparingly</h3>
 <p><a href="https://docs.pytest.org/en/latest/fixture.html">pytest's fixtures</a> are a great feature for re-using setup and teardown logic. In general, prefer factory and helper methods over fixtures as it's easier to reason about and pass arguments into helper methods. Fixtures are great for things that are largely identical across tests and require both setup and teardown logic, for example, this is a fixture that starts a web server in the background for each test and shuts it down after the test is complete:</p>
-<pre><span class="nd">@pytest.fixture</span><span class="p">()</span>
+<pre><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">server</span><span class="p">():</span>
     <span class="n">server</span> <span class="o">=</span> <span class="n">WSGIServer</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="n">TEST_APP</span><span class="p">)</span>
     <span class="n">server</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -234,14 +234,14 @@
     <span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre>
 <p>Fixtures can also be useful in system tests for injecting complex dependencies that may require cleanup, for example, this is a fixture that returns a database client and deletes all items in the database once the test is complete:</p>
-<pre><span class="nd">@pytest.fixture</span><span class="p">()</span>
+<pre><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">database</span><span class="p">():</span>
     <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
     <span class="k">yield</span> <span class="n">db</span>
     <span class="n">db</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">list_all</span><span class="p">())</span>
 </pre>
 <p>Another good reason to use a fixture is for <em>dependency injection</em>, such as if you want to ensure you test multiple implementations of an abstract class. Again, this is more useful in system tests. For example, this fixture makes sure all tests are run with the urllib3 and requests transports:</p>
-<pre><span class="nd">@pytest.fixture</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;urllib3&#39;</span><span class="p">,</span> <span class="s1">&#39;requests&#39;</span><span class="p">])</span>
+<pre><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;urllib3&#39;</span><span class="p">,</span> <span class="s1">&#39;requests&#39;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">http_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;urllib3&#39;</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">urllib3</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">URLLIB3_HTTP</span><span class="p">)</span>
