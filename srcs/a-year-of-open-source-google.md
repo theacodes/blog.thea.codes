@@ -1,5 +1,5 @@
 ---
-title: A Year of Open-Source @ Google
+title: A year of open-source @ Google
 date: 2016-03-24
 legacy_url: yes
 ---

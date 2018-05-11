@@ -1,5 +1,6 @@
 import datetime
 import pathlib
+from typing import Sequence
 
 import cmarkgfm
 import frontmatter
@@ -42,7 +43,7 @@ def write_post(post: dict, content: str) -> str:
     path.write_text(rendered)
 
 
-def write_posts() -> list[dict]:
+def write_posts() -> Sequence[dict]:
     posts = []
     sources = get_sources()
 
@@ -65,7 +66,7 @@ def write_pygments_style_sheet():
     pathlib.Path("./docs/static/pygments.css").write_text(css)
 
 
-def write_index(posts: list[dict]):
+def write_index(posts: Sequence[dict]):
     posts = sorted(posts, key=lambda post: post['date'], reverse=True)
     path = pathlib.Path("./docs/index.html")
     template = jinja_env.get_template('index.html')

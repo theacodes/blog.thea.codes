@@ -1,5 +1,5 @@
 ---
-title: Hello, World, I am Thea
+title: Hello, world, I am Thea
 date: 2018-05-10
 ---
 

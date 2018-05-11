@@ -1,5 +1,5 @@
 ---
-title: Github-Flavored Markdown Descriptions on PyPI
+title: Github-flavored Markdown descriptions on PyPI
 date: 2018-04-02
 legacy_url: yes
 ---

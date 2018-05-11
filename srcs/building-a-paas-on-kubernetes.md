@@ -1,5 +1,5 @@
 ---
-title: Opinionated Deployment Tools & Kubernetes
+title: Opinionated deployment tools & Kubernetes
 date: 2016-02-10
 legacy_url: yes
 ---

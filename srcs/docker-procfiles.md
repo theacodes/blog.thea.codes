@@ -1,5 +1,5 @@
 ---
-title: Docker, Procfiles, and Health Checks
+title: Docker, procfiles, and health checks
 date: 2015-08-05
 legacy_url: yes
 ---
