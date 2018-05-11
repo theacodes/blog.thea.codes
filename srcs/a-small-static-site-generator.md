@@ -1,6 +1,7 @@
 ---
 title: Writing a small static site generator
 date: 2018-05-11
+legacy_url: yes
 ---
 
 There are like, a hundred different static site generators written in Python (and even more written in other languages).
