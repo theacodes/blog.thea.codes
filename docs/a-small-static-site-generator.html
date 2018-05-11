@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="http://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Writing a small static site generator</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>May 11, 2018</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Writing a small static site generator</h1>
+  <content>
+    <p>There are like, a hundred different static site generators written in Python (and even more written in other languages).</p>
+<p>So I decided to write my own. Why? Well, I just kind of wanted to. I had a
+desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wanted to keep things really minimalistic. I decided to use <a href="https://pages.github.com/">GitHub Pages</a> to host the output as they recently announced support for <a href="https://blog.github.com/2018-05-01-github-pages-custom-domains-https/">SSL for custom domains</a>.</p>
+<h2>Rendering content</h2>
+<p>Every static site generator needs to take some source format (like Markdown or ReStructuredText) and turn it into HTML. Since I was moving from Ghost I decided to stick with Markdown.</p>
+<p>Since I recently integrated <a href="https://github.github.com/gfm/">Github-flavored Markdown</a> rendering into <a href="https://github.com/pypa/warehouse">Warehouse</a>, I decided to use the underlying library I made for that - <a href="https://pypi.org/project/cmarkgfm">cmarkgfm</a>. Rendering Markdown to HTML with <code>cmarkgfm</code> looks something like this:</p>
+<pre><span class="kn">import</span> <span class="nn">cmarkgfm</span>
+
+
+<span class="k">def</span> <span class="nf">render_markdown</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">cmarkgfm</span><span class="o">.</span><span class="n">markdown_to_html_with_extensions</span><span class="p">(</span>
+        <span class="n">content</span><span class="p">,</span>
+        <span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;autolink&#39;</span><span class="p">,</span> <span class="s1">&#39;strikethrough&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">content</span>
+</pre>
+<p><code>cmarkgfm</code> does have convenience method called <code>github_flavored_markdown_to_html</code>, but it uses GitHub's <a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">tagfilter</a> extension which isn't desirable when I want to embed scripts and stuff into posts. So I just hand-picked the extensions I wanted to use.</p>
+<h2>Collecting sources</h2>
+<p>Okay, we have a way to render Markdown but we also need a way to collect all
+of our source files. I decided to store all of sources under <code>./src</code>. We can
+use <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a> to collect them all:</p>
+<pre><span class="kn">import</span> <span class="nn">pathlib</span>
+
+<span class="k">def</span> <span class="nf">get_sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;srcs/*.md&#39;</span><span class="p">)</span>
+</pre>
+<h2>Frontmatter</h2>
+<p>Many static site generators have a concept of <em>frontmatter</em>- a way to set metadata and such for each source file. I wanted to support frontmatter that
+let me to set a date and title for each post. It looks like this:</p>
+<pre>---
+title: Post time
+date: 2018-05-11
+---
+
+# Markdown content here.
+</pre>
+<p>There's a really nice and simple existing library for frontmatter called <a href="https://pypi.org/project/python-frontmatter/">python-frontmatter</a>. I can use
+this to extract the frontmatter as a <code>dict</code> and separate it from the content:</p>
+<pre><span class="kn">import</span> <span class="nn">frontmatter</span>
+
+<span class="k">def</span> <span class="nf">parse_source</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">post</span>
+</pre>
+<p>The returned <code>post</code> object has <code>.content</code> property that has the post content and otherwise acts as a dictionary to fetch the frontmatter keys.</p>
+<h2>Rendering the posts</h2>
+<p>Now that we have the post content and frontmatter, we can render them. I decided to use <a href="https://pypi.org/project/jinja2">jinja2</a> to place the <code>cmarkgfm</code>-rendered post Markdown and frontmatter into a simple HTML template.</p>
+<p>Here's the template:</p>
+<pre><span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{post.title}}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>{{post.title}}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">em</span><span class="p">&gt;</span>Posted on {{post.date.strftime(&#39;%B %d, %Y&#39;)}}<span class="p">&lt;/</span><span class="nt">em</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">article</span><span class="p">&gt;</span>
+    {{content}}
+  <span class="p">&lt;/</span><span class="nt">article</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre>
+<p>And here's the Python code to render it:</p>
+<pre><span class="kn">import</span> <span class="nn">jinja2</span>
+
+<span class="n">jinja_env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>
+    <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;templates&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">write_post</span><span class="p">(</span><span class="n">post</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./docs/</span><span class="si">{}</span><span class="s2">.html&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;stem&#39;</span><span class="p">]))</span>
+
+    <span class="n">template</span> <span class="o">=</span> <span class="n">jinja_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;post.html&#39;</span><span class="p">)</span>
+    <span class="n">rendered</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
+</pre>
+<p>Notice that I store the rendered HTML in <code>./docs</code>. This is because I configured GitHub Pages to publish content from the <a href="https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch">doc directory</a>.</p>
+<p>Now that we can render a single post, we can loop through all of the posts using the <code>get_sources</code> function we created above:</p>
+<pre><span class="k">def</span> <span class="nf">write_posts</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+    <span class="n">posts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="n">get_sources</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+        <span class="c1"># Get the Markdown and frontmatter.</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="n">parse_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="c1"># Render the markdown to HTML.</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">render_markdown</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="c1"># Write the post content and metadata to the final HTML file.</span>
+        <span class="n">post</span><span class="p">[</span><span class="s1">&#39;stem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">stem</span>
+        <span class="n">write_post</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+
+        <span class="n">posts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">posts</span>
+</pre>
+<h2>Writing the index</h2>
+<p>We can now render posts but we should also render a top-level <code>index.html</code> that lists all of the posts. We can do this with another jinja2 template and the list of posts returned from <code>write_posts</code>.</p>
+<p>Here's the template:</p>
+<pre><span class="cp">&lt;!doctype html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>My blog posts<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">ol</span><span class="p">&gt;</span>
+    {% for post in posts %}
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/{{post.stem}}&quot;</span><span class="p">&gt;</span>{{post.title}}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
+    {% endfor %}
+  <span class="p">&lt;/</span><span class="nt">ol</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre>
+<p>And here's the Python code to render it:</p>
+<pre><span class="k">def</span> <span class="nf">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+    <span class="c1"># Sort the posts from newest to oldest.</span>
+    <span class="n">posts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">posts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">post</span><span class="p">:</span> <span class="n">post</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./docs/index.html&quot;</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">jinja_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span>
+    <span class="n">rendered</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">posts</span><span class="o">=</span><span class="n">posts</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
+</pre>
+<h2>Finishing up</h2>
+<p>All that's left now is to just wire this all up using a <code>main</code> function.</p>
+<pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">posts</span> <span class="o">=</span> <span class="n">write_posts</span><span class="p">()</span>
+    <span class="n">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre>
+<h2>Check this out on GitHub</h2>
+<p>So the page you're reading now was rendered with this code! You can go and see the full source code for this, including syntax highlighting support, over at <a href="https://github.com/theacodes/blog.thea.codes/">theacodes/blog.thea.codes</a></p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="http://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>

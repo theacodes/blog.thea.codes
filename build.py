@@ -18,7 +18,7 @@ def get_sources() -> pathlib.Path:
     return pathlib.Path('.').glob('srcs/*.md')
 
 
-def load_source(source: pathlib.Path) -> dict:
+def parse_source(source: pathlib.Path) -> dict:
     post = frontmatter.load(str(source))
     return post
 
@@ -48,13 +48,10 @@ def write_posts() -> Sequence[dict]:
     sources = get_sources()
 
     for source in sources:
-        post = load_source(source)
+        post = parse_source(source)
         content = render_markdown(post.content)
         post['stem'] = source.stem
         write_post(post, content)
-
-        if isinstance(post['date'], datetime.datetime):
-            post['date'] = post['date'].date()
 
         posts.append(post)
 
