@@ -51,8 +51,10 @@ desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wa
 of our source files. I decided to store all of sources under <code>./src</code>. We can
 use <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a> to collect them all:</p>
 <pre><span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Iterator</span>
 
-<span class="k">def</span> <span class="nf">get_sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">:</span>
+
+<span class="k">def</span> <span class="nf">get_sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;srcs/*.md&#39;</span><span class="p">)</span>
 </pre>
 <h2>Frontmatter</h2>
@@ -66,10 +68,11 @@ date: 2018-05-11
 # Markdown content here.
 </pre>
 <p>There's a really nice and simple existing library for frontmatter called <a href="https://pypi.org/project/python-frontmatter/">python-frontmatter</a>. I can use
-this to extract the frontmatter as a <code>dict</code> and separate it from the content:</p>
+this to extract the frontmatter and the the raw content:</p>
 <pre><span class="kn">import</span> <span class="nn">frontmatter</span>
 
-<span class="k">def</span> <span class="nf">parse_source</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+<span class="k">def</span> <span class="nf">parse_source</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">:</span>
     <span class="n">post</span> <span class="o">=</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">post</span>
 </pre>
@@ -97,7 +100,7 @@ this to extract the frontmatter as a <code>dict</code> and separate it from the 
 <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">write_post</span><span class="p">(</span><span class="n">post</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">write_post</span><span class="p">(</span><span class="n">post</span><span class="p">:</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./docs/</span><span class="si">{}</span><span class="s2">.html&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">post</span><span class="p">[</span><span class="s1">&#39;stem&#39;</span><span class="p">]))</span>
 
     <span class="n">template</span> <span class="o">=</span> <span class="n">jinja_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;post.html&#39;</span><span class="p">)</span>
@@ -106,7 +109,10 @@ this to extract the frontmatter as a <code>dict</code> and separate it from the 
 </pre>
 <p>Notice that I store the rendered HTML in <code>./docs</code>. This is because I configured GitHub Pages to publish content from the <a href="https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch">doc directory</a>.</p>
 <p>Now that we can render a single post, we can loop through all of the posts using the <code>get_sources</code> function we created above:</p>
-<pre><span class="k">def</span> <span class="nf">write_posts</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<pre><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Sequence</span>
+
+
+<span class="k">def</span> <span class="nf">write_posts</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">]:</span>
     <span class="n">posts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">sources</span> <span class="o">=</span> <span class="n">get_sources</span><span class="p">()</span>
 
@@ -141,7 +147,7 @@ this to extract the frontmatter as a <code>dict</code> and separate it from the 
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </pre>
 <p>And here's the Python code to render it:</p>
-<pre><span class="k">def</span> <span class="nf">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<pre><span class="k">def</span> <span class="nf">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">]):</span>
     <span class="c1"># Sort the posts from newest to oldest.</span>
     <span class="n">posts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">posts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">post</span><span class="p">:</span> <span class="n">post</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./docs/index.html&quot;</span><span class="p">)</span>

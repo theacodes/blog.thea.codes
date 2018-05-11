@@ -37,8 +37,10 @@ use [`pathlib`](https://docs.python.org/3/library/pathlib.html) to collect them 
 
 ```python
 import pathlib
+from typing import Iterator
 
-def get_sources() -> pathlib.Path:
+
+def get_sources() -> Iterator[pathlib.Path]:
     return pathlib.Path('.').glob('srcs/*.md')
 ```
 
@@ -57,12 +59,13 @@ date: 2018-05-11
 ```
 
 There's a really nice and simple existing library for frontmatter called [python-frontmatter](https://pypi.org/project/python-frontmatter/). I can use
-this to extract the frontmatter as a `dict` and separate it from the content:
+this to extract the frontmatter and the the raw content:
 
 ```python
 import frontmatter
 
-def parse_source(source: pathlib.Path) -> dict:
+
+def parse_source(source: pathlib.Path) -> frontmatter.Post:
     post = frontmatter.load(str(source))
     return post
 ```
@@ -99,7 +102,7 @@ jinja_env = jinja2.Environment(
 )
 
 
-def write_post(post: dict, content: str) -> str:
+def write_post(post: frontmatter.Post, content: str):
     path = pathlib.Path("./docs/{}.html".format(post['stem']))
 
     template = jinja_env.get_template('post.html')
@@ -112,7 +115,10 @@ Notice that I store the rendered HTML in `./docs`. This is because I configured 
 Now that we can render a single post, we can loop through all of the posts using the `get_sources` function we created above:
 
 ```python
-def write_posts() -> Sequence[dict]:
+from typing import Sequence
+
+
+def write_posts() -> Sequence[frontmatter.Post]:
     posts = []
     sources = get_sources()
 
@@ -156,7 +162,7 @@ Here's the template:
 And here's the Python code to render it:
 
 ```python
-def write_index(posts: Sequence[dict]):
+def write_index(posts: Sequence[frontmatter.Post]):
     # Sort the posts from newest to oldest.
     posts = sorted(posts, key=lambda post: post['date'], reverse=True)
     path = pathlib.Path("./docs/index.html")

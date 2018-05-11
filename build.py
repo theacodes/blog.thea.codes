@@ -1,6 +1,5 @@
-import datetime
 import pathlib
-from typing import Sequence
+from typing import Iterator, Sequence
 
 import cmarkgfm
 import frontmatter
@@ -14,11 +13,11 @@ jinja_env = jinja2.Environment(
 )
 
 
-def get_sources() -> pathlib.Path:
+def get_sources() -> Iterator[pathlib.Path]:
     return pathlib.Path('.').glob('srcs/*.md')
 
 
-def parse_source(source: pathlib.Path) -> dict:
+def parse_source(source: pathlib.Path) -> frontmatter.Post:
     post = frontmatter.load(str(source))
     return post
 
@@ -31,7 +30,7 @@ def render_markdown(content: str) -> str:
     return content
 
 
-def write_post(post: dict, content: str) -> str:
+def write_post(post: frontmatter.Post, content: str):
     if post.get('legacy_url'):
         path = pathlib.Path("./docs/{}/index.html".format(post['stem']))
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -43,7 +42,7 @@ def write_post(post: dict, content: str) -> str:
     path.write_text(rendered)
 
 
-def write_posts() -> Sequence[dict]:
+def write_posts() -> Sequence[frontmatter.Post]:
     posts = []
     sources = get_sources()
 
@@ -63,7 +62,7 @@ def write_pygments_style_sheet():
     pathlib.Path("./docs/static/pygments.css").write_text(css)
 
 
-def write_index(posts: Sequence[dict]):
+def write_index(posts: Sequence[frontmatter.Post]):
     posts = sorted(posts, key=lambda post: post['date'], reverse=True)
     path = pathlib.Path("./docs/index.html")
     template = jinja_env.get_template('index.html')
