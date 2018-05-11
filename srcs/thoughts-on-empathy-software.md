@@ -1,6 +1,6 @@
 ---
 title: Thoughts on empathy & software
-date: 2016-07-02T05:24:02.000Z
+date: 2016-07-02
 legacy_url: yes
 ---
 

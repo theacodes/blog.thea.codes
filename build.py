@@ -2,11 +2,10 @@ import datetime
 import pathlib
 
 import cmarkgfm
-from readme_renderer.markdown import _highlight
 import frontmatter
 import jinja2
-import pygments.formatters
 
+import highlighting
 import witchhazel
 
 jinja_env = jinja2.Environment(
@@ -14,24 +13,24 @@ jinja_env = jinja2.Environment(
 )
 
 
-def get_sources():
+def get_sources() -> pathlib.Path:
     return pathlib.Path('.').glob('srcs/*.md')
 
 
-def load_source(source):
+def load_source(source: pathlib.Path) -> dict:
     post = frontmatter.load(str(source))
     return post
 
 
-def render_markdown(content):
+def render_markdown(content: str) -> str:
     content = cmarkgfm.markdown_to_html_with_extensions(
         content,
         extensions=['table', 'autolink', 'strikethrough'])
-    content = _highlight(content)
+    content = highlighting.highlight(content)
     return content
 
 
-def write_post(post, content):
+def write_post(post: dict, content: str) -> str:
     if post.get('legacy_url'):
         path = pathlib.Path("./docs/{}/index.html".format(post['stem']))
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -43,23 +42,7 @@ def write_post(post, content):
     path.write_text(rendered)
 
 
-def make_pygments_style_sheet():
-    formatter = pygments.formatters.HtmlFormatter(
-        style=witchhazel.WitchHazelStyle)
-    css = formatter.get_style_defs('pre')
-    pathlib.Path("./docs/static/pygments.css").write_text(css)
-
-
-def write_index(posts):
-    path = pathlib.Path("./docs/index.html")
-    template = jinja_env.get_template('index.html')
-    rendered = template.render(posts=posts)
-    path.write_text(rendered)
-
-
-def main():
-    make_pygments_style_sheet()
-
+def write_posts() -> list[dict]:
     posts = []
     sources = get_sources()
 
@@ -74,7 +57,25 @@ def main():
 
         posts.append(post)
 
+    return posts
+
+
+def write_pygments_style_sheet():
+    css = highlighting.get_style_css(witchhazel.WitchHazelStyle)
+    pathlib.Path("./docs/static/pygments.css").write_text(css)
+
+
+def write_index(posts: list[dict]):
     posts = sorted(posts, key=lambda post: post['date'], reverse=True)
+    path = pathlib.Path("./docs/index.html")
+    template = jinja_env.get_template('index.html')
+    rendered = template.render(posts=posts)
+    path.write_text(rendered)
+
+
+def main():
+    write_pygments_style_sheet()
+    posts = write_posts()
     write_index(posts)
 
 

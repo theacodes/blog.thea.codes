@@ -1,6 +1,6 @@
 ---
 title: A Year of Open-Source @ Google
-date: 2016-03-24T06:26:57.000Z
+date: 2016-03-24
 legacy_url: yes
 ---
 

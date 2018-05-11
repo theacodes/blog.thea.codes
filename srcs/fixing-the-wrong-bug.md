@@ -1,6 +1,6 @@
 ---
 title: Fixing the wrong bug to discover the right one
-date: 2014-09-14T22:09:51.000Z
+date: 2014-09-14
 legacy_url: yes
 ---
 

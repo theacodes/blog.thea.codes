@@ -1,6 +1,6 @@
 ---
 title: Github-Flavored Markdown Descriptions on PyPI
-date: 2018-04-02T18:15:38.000Z
+date: 2018-04-02
 legacy_url: yes
 ---
 

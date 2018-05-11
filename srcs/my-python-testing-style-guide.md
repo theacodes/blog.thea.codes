@@ -1,6 +1,6 @@
 ---
 title: My Python testing style guide
-date: 2017-07-15T06:08:04.000Z
+date: 2017-07-15
 legacy_url: yes
 ---
 

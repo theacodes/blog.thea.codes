@@ -1,6 +1,6 @@
 ---
 title: App Engine is (sometimes) the wrong hammer.
-date: 2014-09-25T23:17:23.000Z
+date: 2014-09-25
 legacy_url: yes
 ---
 

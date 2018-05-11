@@ -1,4 +1,4 @@
-readme_renderer
+cmarkgfm
 jinja2
 python-frontmatter
-python-dateutil
+pygments

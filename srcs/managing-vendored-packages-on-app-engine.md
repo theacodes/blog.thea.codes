@@ -1,6 +1,6 @@
 ---
 title: Managing vendored packages on App Engine
-date: 2014-09-02T21:38:31.000Z
+date: 2014-09-02
 legacy_url: yes
 ---
 
