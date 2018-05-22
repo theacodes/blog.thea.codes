@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>blog.thea.codes</title>
+  <description>Thea Flowers' Blog</description>
+  <link>{{root}}</link>
+  <atom:link href="{{root}}/feed.xml"
+    rel="self" type="application/rss+xml" />
+
+  {% for post in posts %}
+  <item>
+    <title>{{ post.title|e }}</title>
+    <link>{{root}}/{{ post.stem }}</link>
+    <guid>{{root}}/{{ post.stem }}</guid>
+    <pubDate>{{ post.date.strftime("%a, %d %b %Y 12:00:00 Z") }}</pubDate>
+  </item>
+  {% endfor %}
+
+</channel>
+</rss>

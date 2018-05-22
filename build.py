@@ -70,10 +70,19 @@ def write_index(posts: Sequence[frontmatter.Post]):
     path.write_text(rendered)
 
 
+def write_rss(posts: Sequence[frontmatter.Post]):
+    posts = sorted(posts, key=lambda post: post['date'], reverse=True)
+    path = pathlib.Path("./docs/feed.xml")
+    template = jinja_env.get_template('rss.xml')
+    rendered = template.render(posts=posts, root="https://blog.thea.codes")
+    path.write_text(rendered)
+
+
 def main():
     write_pygments_style_sheet()
     posts = write_posts()
     write_index(posts)
+    write_rss(posts)
 
 
 if __name__ == '__main__':
