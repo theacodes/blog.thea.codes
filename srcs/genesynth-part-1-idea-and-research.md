@@ -1,6 +1,6 @@
 ---
 title: "Genesynth part 1: idea and research"
-date: 2018-07-19
+date: 2018-06-19
 legacy_url: yes
 ---
 
