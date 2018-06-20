@@ -96,6 +96,12 @@ article aside a:hover  {
   color: #41b990;
 }
 
+article blockquote {
+  border-left: .1em solid #8768bb;
+  padding-left: 1em;
+  color: #999;
+}
+
 footer {
   margin-top: 2.2em;
   padding-top: 2em;
