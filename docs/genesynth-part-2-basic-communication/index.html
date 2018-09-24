@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Genesynth part 2: basic communication</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>September 23, 2018</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Genesynth part 2: basic communication</h1>
+  <content>
+    <blockquote>
+<p><em>Catch <a href="../genesynth-part-1-idea-and-research">part 1</a> if you missed it.</em></p>
+</blockquote>
+<p>Now that I had a basic idea of what I wanted to do with my Genesis-inspired synthesizer, I went about researching some parts.</p>
+<h2>Obtaining the chips</h2>
+<p>As mentioned in the <a href="genesynth-part-1-idea-and-research">previous post</a>, the Genesis used two sound chips: a <a href="https://en.wikipedia.org/wiki/Yamaha_YM2612">Yamaha YM2612</a> for FM synthesis and a <a href="https://en.wikipedia.org/wiki/Texas_Instruments_SN76489">Texas Instruments SN76489 PSG</a> for square waves.</p>
+<p>Neither of these chips are produced anymore, so really the only option for obtaining these easily is via Ebay. There's several sellers of these chips, which are presumably harvested from consoles, computers, and other digital junk. I was able to obtain them for around $3/each which is honestly really affordable. I bought several just in case one was bad or I managed to fry one (spoiler: I did).</p>
+<p>I've also heard <a href="https://twitter.com/glowascii/status/1008716401824022528">rumors of a vending machine in Japan where you can just buy these</a>. What an absolutely magical place.</p>
+<h2>Talking to the chips</h2>
+<p>Here's the hard part: actually communicating with these chips. This part is <em>hard</em> and in fact I still haven't quite gotten this right.</p>
+<p>The YM2612 can somewhat be treated as sort of a RAM chip. A very temperamental RAM chip. It basically has a large number of &quot;registers&quot; exposed as a memory map. These registers control everything from the notes being played to the FM parameters. You write data to these registers using an 8-bit bus by first writing the register address then writing the register value.</p>
+<p><img src="../static/ym2612-registers.png" alt="YM2612 Registers" /></p>
+<p>(You can read more about the memory map over at <a href="http://www.smspower.org/maxim/Documents/YM2612">Maxim's World of Stuff</a>)</p>
+<p>The timing here is really tricky. The YM2612 will actually see the write relatively quick. Take a look at the write timing diagram from the <a href="/files/YM3438_APL.pdf">manual</a>:</p>
+<p><img src="../static/ym2612-write-timing.png" alt="YM2612 Write Timing" /></p>
+<p>However, the chip will not finish <em>processing</em> the write for several internal cycles. The number of cycles actually depends on which register you changed. Some folks on forums have done a little research and determined that there is a safe minimum that will cover you so that's what I've tried to do so far.</p>
+<p>The code for writing to the YM2612 looks a little like this:</p>
+<pre><span class="kt">void</span> <span class="nf">set_reg</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">address</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">port</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Write the register address first.</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A1</span><span class="p">,</span> <span class="n">port</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A0</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="n">set_data_lines</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>
+  <span class="c1">// technically we should give *some* time between setting the bytes and</span>
+  <span class="c1">// pulling the pins, but it seems to work fine without that.</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="c1">// We shouldn&#39;t raise the WR and CS until at least YM_WRITE_WAIT have passed.</span>
+  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_WRITE_WAIT</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="c1">// We must wait for the chip to finish reading our data before loading in the</span>
+  <span class="c1">// next byte.</span>
+  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_DATA_WAIT</span><span class="p">);</span>
+
+  <span class="c1">// Same as above, but with A0 high to write the register data.</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A0</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="n">set_data_lines</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_WRITE_WAIT</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_DATA_WAIT</span><span class="p">);</span>
+<span class="p">}</span>
+</pre>
+<p>With a basic write command, I was ready to start experimenting with the hardware.</p>
+<h2>Proof of concept using Arduino</h2>
+<p>I decided to start with a microcontroller I had on hand and didn't mind if I ruined: an Arduino Uno. I wired up the data bus and control lines between the Ardiuno and YM2612 and setup the Ardiuno to output the 8Mhz clock needed by the YM2612 as well.</p>
+<p>I was able to get a simple <a href="http://www.smspower.org/maxim/Documents/YM2612#testprogram">test patch</a> working with a <em>lot</em> of trial and error with the timing, but I wasn't quite ready to go full-on with MIDI because there was just so much about the hardware interface I needed to figure out.</p>
+<p>I decided to try a really simple <a href="http://vgmrips.net/wiki/VGM_Specification">VGM</a> to playback on the Arduino to test the chip interface. Since the Uno has really limited memory and I didn't have any SD sheilds around, I wrote a really dumb Python script to convert a VGM into <a href="https://gist.github.com/theacodes/7e98e4d6e7337e451bf0213ea2086458">C code</a> so I could just compile it in - basically a static VGM player. This allowed me to get a very short, very simple VGM playing. (In retrospect - this was dumb, I should've just waited for a better microcontroller and did a real VGM player).</p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Why yes, this *IS* and Arduino playing the Sonic continue theme using the actual sound chip from a Sega Genesis. <a href="https://t.co/H5VhOVR3Np">pic.twitter.com/H5VhOVR3Np</a></p>&mdash; Magic &amp; Technology in a Kiss (@theavalkyrie) <a href="https://twitter.com/theavalkyrie/status/1004228922060386305?ref_src=twsrc%5Etfw">June 6, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>I consider this to be a pretty successful proof of concept. It was enough for me to continue researching and buy more hardware to make this happen.</p>
+<h2>Stepping up the hardware with Teensy</h2>
+<p>I decided to use a <a href="https://www.pjrc.com/store/teensy35.html">Teensy 3.5</a> for my microcontroller. I'd seen others use this chip to interact with old school sound chips and it's got several features that are <em>super</em> useful in this context: SD card, 5v tolerant, very fast, large program space, and an incredibly huge amount of I/O.</p>
+<p>I transferred my circuit over the the Teensy. After dealing with some more <a href="https://twitter.com/theavalkyrie/status/1004979142494859264">timing issues</a>, and fixing up the audio output a little, I managed to get a <a href="https://github.com/theacodes/genesynth/blob/master/vgm.cpp">VGM parser and player</a> working.</p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">PROGRESS!<br><br>My amp still has some weird low frequency noise that I can&#39;t figure out but it works! <a href="https://t.co/etBmsGoM2A">pic.twitter.com/etBmsGoM2A</a></p>&mdash; Magic &amp; Technology in a Kiss (@theavalkyrie) <a href="https://twitter.com/theavalkyrie/status/1005689259091623936?ref_src=twsrc%5Etfw">June 10, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<h2>Next time</h2>
+<p>In the next post, I'll cover creating a proper audio amplifier for the chip as well as getting the SN76489 hooked up. See you then. :)</p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>
