@@ -102,6 +102,14 @@ article blockquote {
   color: #999;
 }
 
+article img {
+  max-width: 100%;
+}
+
+article .twitter-tweet {
+  margin: 0 auto;
+}
+
 footer {
   margin-top: 2.2em;
   padding-top: 2em;
