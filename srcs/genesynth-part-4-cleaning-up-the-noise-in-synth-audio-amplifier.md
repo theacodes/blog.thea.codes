@@ -56,7 +56,7 @@ There's nothing special about the audio board, really. It just gets all of its p
 
 ## Results
 
-Other than a few hiccups with a bad capacitor on the motherboard, this worked out extremely well. The audio amplifier is dead silent when idle and provides crystal clear audio from the synthesizer chip. You can even distinctly hear the noise from the YM2612's 9-bit DAC. Take a listen to this clip:
+Other than a few hiccups with a bad capacitor on the motherboard, this worked out extremely well. The audio amplifier is dead silent when idle and provides crystal clear audio from the synthesizer chip. You can even distinctly hear the characteristic artifacts and distortion from the YM2612's 9-bit DAC. Take a listen to this clip:
 
 <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/524990358%3Fsecret_token%3Ds-vg1gD&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
