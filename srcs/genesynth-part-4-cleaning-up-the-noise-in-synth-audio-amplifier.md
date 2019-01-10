@@ -1,5 +1,5 @@
 ---
-title: "Genesynth oart 4: Cleaning up the noisy audio amplifier"
+title: "Genesynth part 4: Cleaning up the noisy audio amplifier"
 date: 2019-01-09
 legacy_url: yes
 ---
