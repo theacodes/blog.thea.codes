@@ -4,7 +4,7 @@
 <nav>
   <h1>My blog posts</h1>
   <dl class="posts-list">
-  {% for post in posts %}
+  {% for post in posts if not posts.get('hidden') %}
     <a href="/{{post.stem}}">
       <dt>{{post.title}}</dt>
       <dd>
