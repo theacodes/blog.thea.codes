@@ -103,7 +103,16 @@ article blockquote {
 }
 
 article img {
-  max-width: 100%;
+  width: 75%;
+  margin: 0 auto;
+  display: block;
+  padding: 2em 0;
+}
+
+article iframe {
+  margin: 2em auto;
+  display: block;
+  max-width: 75%;
 }
 
 article .twitter-tweet {
