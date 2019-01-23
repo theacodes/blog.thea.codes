@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Genesynth: A Sega Genesis-inspired synthesizer</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>January 22, 2019</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Genesynth: A Sega Genesis-inspired synthesizer</h1>
+  <content>
+    <p>My largest side project over the last year has been the <em>Genesynth</em> - A open-source hardware synthesizer inspired by the Sega Genesis / Mega Drive. It started with a <a href="../genesynth-part-1-idea-and-research">crazy idea</a> and amazingly ended up with a functional, incredible sounding synthesizer.</p>
+<p><img src="../static/genesynth-promo.jpg" alt="YM2612 Registers" /></p>
+<p>While I'm not <em>totally</em> done with it, it's close enough for me to really share it with the world. This post is here to introduce you to this synthesizer and how I built it. Feedback is always welcome, and I would especially love to know why technical details you'd like me to go into in future blog posts.</p>
+<h2>The inspiration</h2>
+<p>As noted in my first <a href="../genesynth-part-1-idea-and-research">build log</a> about the Genesynth, I grew up listening to Sega Genesis music and it left a permanent impression on me. The Genesis was one of the last console to feature a synthesizer chip instead of the samplers and CD playback that later consoles would adopt. It used an (at the time) relatively advanced FM synthesizer chip from Yamaha, the <a href="https://en.wikipedia.org/wiki/Yamaha_YM2612">YM2612</a>. The Genesis gave us some of the most iconic game soundtracks, and they were all brought to life using this chip's distinct voice:</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/_T7hdIh-gtw" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<p>So I set out to re-create this sound in a hardware synthesizer.</p>
+<h2>The modern-day recreation of Genesis sound</h2>
+<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/558684303%3Fsecret_token%3Ds-ywqmF&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+<p>The Genesynth uses the same YM2612 6 voice FM synthesis chip as the model one Sega Genesis. It uses a <a href="https://www.pjrc.com/store/teensy35.html">Teensy 3.5</a> to interface between the chip and MIDI-over-USB. It provides real-time control of all of the chip's parameters, patch loading, and various polyphony modes.</p>
+<p>It features a <a href="../genesynth-part-3-proper-audio">high-quality audio amplifier</a> that far exceeds the original Genesis version while retaining the same filter roll-off. This means that you can <em>hear</em> the chip's 9-bit DAC's distortion, or the so-called &quot;ladder effect&quot; quite clearly, like during the long sustain parts in this clip:</p>
+<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/524990358%3Fsecret_token%3Ds-vg1gD&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+<p>&amp; of course, because all of the parameters are exposed over MIDI you can build things like <a href="http://ctrlr.org/">Ctrlr</a> panels to control the parameters in real-time:</p>
+<p><img src="../static/genesynth-ctrlr-panel.png" alt="Ctrlr panel" /></p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Because I&#39;m super bored tonight here&#39;s some more synth noodling.<br><br>I&#39;ve got basically all of the parameters exposed to Ableton now. :)<br><br>The envelopes on this thing are actually quite usable once you get the hang of it. Some super fun sounds can happen with envelopes + unison. <a href="https://t.co/dKdxrvlUK2">pic.twitter.com/dKdxrvlUK2</a></p>&mdash; Thea Flowers 🌺 (@theavalkyrie) <a href="https://twitter.com/theavalkyrie/status/1086522285651947520?ref_src=twsrc%5Etfw">January 19, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<h2>Creating the Genesynth</h2>
+<p>Creating this project took weeks of research, months of iteration, and nearly a year of programming. This is the <em>first</em> synthesizer I've ever built, and my first <em>real</em> hardware project. I even learned how to make PCBs for this project! There were so many difficult areas and times that I felt like abandoning it, but every breakthrough meant I got to hear more cool sounds come out of these magic rocks and that kept me encouraged.</p>
+<p>My original version of the hardware was created on breadboards and had no MIDI functionality, just VGM playback:</p>
+<p><img src="../static/genesynth-breadboard.jpg" alt="First Genesynth" /></p>
+<p>It eventually moved to more permanent protoboards:</p>
+<p><img src="../static/genesynth-protoboard.jpg" alt="Second Genesynth" /></p>
+<p>And then finally, in order to have the <a href="../genesynth-part-4-cleaning-up-the-noise-in-synth-audio-amplifier">best possible audio quality</a>, I ended up creating custom PCBs:</p>
+<p><img src="../static/genesynth-pcbs.jpg" alt="Genesynth PCBs" /></p>
+<p>And just last week I finally placed everything into a laser-cut acrylic case:</p>
+<p><img src="../static/genesynth-case.jpg" alt="Genesynth in its case" /></p>
+<p>The software went through several iterations as well. As mentioned, it initially just had VGM playback - as there was a lot of prior art I could draw from there. Eventually, once I was able to verify my timing and hardware was functioning, I began implementing patch loading and MIDI functionality. Finally, I started coding a simple user interface for loading patches and displaying parameter states when being controlled over midi.</p>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">It now shows the FM algorithm used by the current patch!<br><br>(This was a lot of code to do. Basically manually drawing all these little graphs) <a href="https://t.co/Nj9GdJz9y3">https://t.co/Nj9GdJz9y3</a> <a href="https://t.co/0OnhmCOqrk">pic.twitter.com/0OnhmCOqrk</a></p>&mdash; Thea Flowers 🌺 (@theavalkyrie) <a href="https://twitter.com/theavalkyrie/status/1052809544479342592?ref_src=twsrc%5Etfw">October 18, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<h2>Creating your own</h2>
+<p>Genesynth is open-source hardware. Everything I put into creating this is available on my GitHub at <a href="https://github.com/theacodes/genesynth">https://github.com/theacodes/genesynth</a>. I would <em>love</em> to see other people build these and I would <em>love</em> feedback if you do.</p>
+<p>If you're more interested in just buying one, I wouldn't recommend offering me money to build an incomplete side project for you - I would recommend <a href="https://www.tindie.com/products/Kasser/dafm-synth-genesis-ym2612-ym3438/">the DAFM synthesizer</a> instead.</p>
+<h2>Read more</h2>
+<p>I've written other blog posts about the build process:</p>
+<ul>
+<li><a href="../genesynth-part-1-idea-and-research">Idea &amp; Research</a></li>
+<li><a href="../genesynth-part-2-basic-communication">Basic Communication</a></li>
+<li><a href="../genesynth-part-3-proper-audio">Proper Audio</a></li>
+<li><a href="../genesynth-part-4-cleaning-up-the-noise-in-synth-audio-amplifier">PCBs and Noise Elimination</a></li>
+</ul>
+<p>There's also a big <a href="https://twitter.com/i/moments/1016762308553371648">Twitter Moment</a> that collects all of my Tweets about this project.</p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>
