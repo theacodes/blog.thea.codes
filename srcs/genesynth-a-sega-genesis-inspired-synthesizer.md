@@ -4,32 +4,33 @@ date: 2019-01-22
 legacy_url: yes
 ---
 
-My largest side project over the last year has been the *Genesynth* - A open-source hardware synthesizer inspired by the Sega Genesis / Mega Drive. It started with a [crazy idea](../genesynth-part-1-idea-and-research) and amazingly ended up with a functional, incredible sounding synthesizer.
+My largest side project over the last year has been the *Genesynth* - an open-source hardware synthesizer inspired by the Sega Genesis / Mega Drive. It started with a [crazy idea](../genesynth-part-1-idea-and-research) and amazingly ended up with a functional, incredible sounding synthesizer.
 
 ![YM2612 Registers](../static/genesynth-promo.jpg)
 
-While I'm not *totally* done with it, it's close enough for me to really share it with the world. This post is here to introduce you to this synthesizer and how I built it. Feedback is always welcome, and I would especially love to know why technical details you'd like me to go into in future blog posts.
+While I'm not *totally* done with the project, it's close enough for me to really share it with the world. This post introduces you to this synthesizer and how I built it. Feedback is always welcome, and I would especially love to know which technical details you'd like me to go into in future blog posts.
+
 
 ## The inspiration
 
-As noted in my first [build log](../genesynth-part-1-idea-and-research) about the Genesynth, I grew up listening to Sega Genesis music and it left a permanent impression on me. The Genesis was one of the last console to feature a synthesizer chip instead of the samplers and CD playback that later consoles would adopt. It used an (at the time) relatively advanced FM synthesizer chip from Yamaha, the [YM2612](https://en.wikipedia.org/wiki/Yamaha_YM2612). The Genesis gave us some of the most iconic game soundtracks, and they were all brought to life using this chip's distinct voice:
+As noted in my first [build log](../genesynth-part-1-idea-and-research) about the Genesynth, I grew up listening to Sega Genesis music and it left a permanent impression on me. The Genesis was one of the last consoles to feature a synthesizer chip instead of the samplers and CD playback that later consoles would adopt. It used an (at the time) relatively advanced FM synthesizer chip from Yamaha, the [YM2612](https://en.wikipedia.org/wiki/Yamaha_YM2612). The Genesis gave us some of the most iconic game soundtracks, and they were all brought to life using this chip's distinct voice.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/_T7hdIh-gtw" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-So I set out to re-create this sound in a hardware synthesizer.
+For these reasons, I set out to re-create this sound in a hardware synthesizer.
 
 
 ## The modern-day recreation of Genesis sound
 
 <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/558684303%3Fsecret_token%3Ds-ywqmF&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
-The Genesynth uses the same YM2612 6 voice FM synthesis chip as the model one Sega Genesis. It uses a [Teensy 3.5](https://www.pjrc.com/store/teensy35.html) to interface between the chip and MIDI-over-USB. It provides real-time control of all of the chip's parameters, patch loading, and various polyphony modes.
+The Genesynth uses the same YM2612 6 voice FM synthesis chip as the one used for the Sega Genesis. A [Teensy 3.5](https://www.pjrc.com/store/teensy35.html) interfaces between the chip and MIDI-over-USB providing real-time control of all of the chip's parameters, patch loading, and various polyphony modes.
 
-It features a [high-quality audio amplifier](../genesynth-part-3-proper-audio) that far exceeds the original Genesis version while retaining the same filter roll-off. This means that you can *hear* the chip's 9-bit DAC's distortion, or the so-called "ladder effect" quite clearly, like during the long sustain parts in this clip:
+The synth features a [high-quality audio amplifier](../genesynth-part-3-proper-audio) that far exceeds the original Genesis version while retaining the same filter roll-off. This means that you can *hear* the chip's 9-bit DAC's distortion, or the so-called ["ladder effect"](http://alyjameslab.blogspot.com/2013/06/ym2612-ladder-effect-suite.html) quite clearly, such as during the long sustain parts in this clip:
 
 <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/524990358%3Fsecret_token%3Ds-vg1gD&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
-& of course, because all of the parameters are exposed over MIDI you can build things like [Ctrlr](http://ctrlr.org/) panels to control the parameters in real-time:
+Because all of the parameters are exposed over MIDI you can build things like [Ctrlr](http://ctrlr.org/) panels to control the parameters in real-time:
 
 ![Ctrlr panel](../static/genesynth-ctrlr-panel.png)
 
@@ -38,7 +39,7 @@ It features a [high-quality audio amplifier](../genesynth-part-3-proper-audio) t
 
 ## Creating the Genesynth
 
-Creating this project took weeks of research, months of iteration, and nearly a year of programming. This is the *first* synthesizer I've ever built, and my first *real* hardware project. I even learned how to make PCBs for this project! There were so many difficult areas and times that I felt like abandoning it, but every breakthrough meant I got to hear more cool sounds come out of these magic rocks and that kept me encouraged.
+Creating this project took weeks of research, months of iteration, and nearly a year of programming. This is the *first* synthesizer I've ever built, and my first *real* hardware project. I even learned how to make PCBs for this project! There were so many difficult areas and times that I felt like abandoning it but every breakthrough meant I got to hear more cool sounds come out of these magic rocks. This positive feedback loop kept me encouraged to continue the project.
 
 My original version of the hardware was created on breadboards and had no MIDI functionality, just VGM playback:
 
@@ -76,4 +77,15 @@ I've written other blog posts about the build process:
 * [Proper Audio](../genesynth-part-3-proper-audio)
 * [PCBs and Noise Elimination](../genesynth-part-4-cleaning-up-the-noise-in-synth-audio-amplifier)
 
-There's also a big [Twitter Moment](https://twitter.com/i/moments/1016762308553371648) that collects all of my Tweets about this project.
+There's also a big [Twitter Moment](https://twitter.com/i/moments/1016762308553371648) that collects all of my Tweets about this project. Finally, there's a [post on /r/synthdiy](https://www.reddit.com/r/synthdiy/comments/ahtl2r/yall_seemed_to_like_my_sega_genesis_inspired/).
+
+## Thanks
+
+I would like to specifically thank the follow people for their help and encouragement during this project:
+
+* [Gus Class](https://gusclass.com/) for reviewing this post and always being enthusiastic about this project.
+* [Aidan Lawrence](https://www.aidanlawrence.com/) who's previous work in this area was invaluable to me, but they also went out of their way to answer questions and provide me with translations of Japanese documentation.
+* The pseudonymous creators of the [Mega Amp](http://www.sega-16.com/forum/showthread.php?26568-Introducing-the-Mega-Amp-The-universal-Genesis-audio-circuit) mod for the Sega Genesis.
+* Maxim's World of Stuff has the most complete [documentation on the YM2612](http://www.smspower.org/maxim/Documents/YM2612) and none of this would've been possible without it.
+* Aly James' [FMDrive](http://www.alyjameslab.com/alyjameslabfmdrive.html) provided the basis for patch saving and loading.
+* The /r/synthdiy and /r/askelectronics communities on Reddit. Both were helpful and encouraging during this process.
