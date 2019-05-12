@@ -2,6 +2,7 @@
 title: Github-flavored Markdown descriptions on PyPI
 date: 2018-04-02
 legacy_url: yes
+description: The Python Package Index is now more approachable and beautiful.
 ---
 
 Last month Dustin Ingram happily proclaimed that [PyPI supports Markdown Descriptions](https://dustingram.com/articles/2018/03/16/markdown-descriptions-on-pypi). This took a lot of work - go check out his wonderful blog post on everything it took to get there.

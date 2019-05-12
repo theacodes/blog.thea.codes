@@ -2,6 +2,7 @@
 title: Writing a small static site generator
 date: 2018-05-11
 legacy_url: yes
+description: How I created a small markdown-based static site generator for my blog.
 ---
 
 There are like, a hundred different static site generators written in Python (and even more written in other languages).

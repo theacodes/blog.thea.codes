@@ -2,6 +2,7 @@
 title: My personal values
 date: 2019-05-12
 legacy_url: yes
+description: A list of values that I try to uphold.
 ---
 
 I wrote these down a few months ago as part of an exercise that I did with the leadership team at my job. I thought that it would be useful to publish these - both for keeping myself accountable and for letting others know what I value.

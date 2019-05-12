@@ -2,6 +2,30 @@
 
 {% block title %}{{post.title}}{% endblock %}
 
+{% block meta %}
+<meta property="og:title" content="{{post.title}} - Thea Flowers">
+
+{% if post.description %}
+<meta property="og:description" content="{{post.description}}">
+{% endif %}
+
+{% if post.preview_image %}
+<meta property="og:image" content="https://blog.thea.codes/static/{{post.preview_image}}">
+{% else %}
+<meta property="og:image" content="https://blog.thea.codes/static/me.png">
+{% endif %}
+
+{% if post.preview_image_alt %}
+<meta name="twitter:image:alt" content="{{post.preview_image_alt}}">
+{% else %}
+<meta name="twitter:image:alt" content="Avatar for Thea Flowers">
+{% endif %}
+
+<meta property="og:url" content="https://blog.thea.codes/{{post.stem}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theavalkyrie">
+{% endblock %}
+
 {% block content %}
 <article>
   <aside>

@@ -2,6 +2,9 @@
 title: "Genesynth: A Sega Genesis-inspired synthesizer"
 date: 2019-01-22
 legacy_url: yes
+description: An open-source, MIDI-controlled hardware synthesizer using the YM2612 chip.
+preview_image: genesynth-promo.jpg
+preview_image_alt: A picture of a hardware synthesizer
 ---
 
 My largest side project over the last year has been the *Genesynth* - an open-source hardware synthesizer inspired by the Sega Genesis / Mega Drive. It started with a [crazy idea](../genesynth-part-1-idea-and-research) and amazingly ended up with a functional, incredible sounding synthesizer.
