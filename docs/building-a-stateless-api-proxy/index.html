@@ -96,13 +96,13 @@ HTTP/1.1 <span class="m">200</span> OK
 </pre>
 <p>Notice that while the request path is the same (<code>/gists</code>) and the response is
 the same, the domains are different (<code>github-proxy.thea.codes</code> vs <code>api.github.com</code>) and the value in the <code>Authorization</code> header is different.</p>
-<p>This is the proxy at work. The proxy's job is to talk to GitHub on your behalf and functionally <em>behave</em> just like the GitHub API - <strong>but</strong> - and this is an important but - it does <strong>not</strong> take your normal GitHub API token in the <code>Authorization</code> header. It takes its <em>own</em> token and uses that to figure out who you are what you can do with the API. The proxy makes these decisions <em>before</em> talking to the GitHub API.</p>
+<p>This is the proxy at work. The proxy's job is to talk to GitHub on your behalf and functionally <em>behave</em> just like the GitHub API - <strong>but</strong> - and this is an important but - it does <strong>not</strong> take your normal GitHub API token in the <code>Authorization</code> header. It takes its <em>own</em> token and uses that to figure out who you are and what you can do with the API. The proxy makes these decisions <em>before</em> talking to the GitHub API.</p>
 <p>The <code>Authorization</code> header is where the ✨magic✨ happens.</p>
 <h2>Let's talk about tokens</h2>
 <p>So let's step back a second. A GitHub token is an opaque string that looks something like <code>7e096a6633471a2c967718d4b435f0ecdac5c426</code>. You can create one by following <a href="https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line">these instructions</a>. When you create a token you assign permissions to that token:</p>
 <p><img src="../static/github_token_scopes.gif" alt="GitHub Token Scopes" /></p>
-<p>Going back to our examples about wanting just read-only access to public and private Gists, you'll notice that GitHub just gives you a single &quot;Gists&quot; permission that grants read <strong>and write</strong> access. No good.</p>
-<p>So what we really want is a token that can <em>read</em> but not <em>write</em> gists. The proxy can issue its own token. It can keep track of the fact that the token is only allowed to <em>read</em> Gists and not write them. When it gets a request for the GitHub API it can check permissions before forwarding them. Something like:</p>
+<p>Going back to the example about wanting just read-only access to public and private Gists, you'll notice that GitHub just gives you a single &quot;Gists&quot; permission that grants read <strong>and write</strong> access. No good.</p>
+<p>So what I really want is a token that can <em>read</em> but not <em>write</em> gists. The proxy can issue its own token. It can keep track of the fact that the token is only allowed to <em>read</em> Gists and not write them. When it gets a request for the GitHub API it can check permissions before forwarding them. Something like (in pseudocode):</p>
 <pre><span class="n">token_permissions</span> <span class="o">=</span> <span class="n">get_token_permissions</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
 <span class="c1"># token_permissions = [&quot;read&quot;]</span>
 
@@ -111,15 +111,15 @@ the same, the domains are different (<code>github-proxy.thea.codes</code> vs <co
 <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">reject_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </pre>
-<h2>Creating and tracking of token for the proxy</h2>
-<p>Okay, so we know what we want our proxy to do:</p>
+<h2>Creating and tracking proxy tokens</h2>
+<p>Okay, so I know what I want the proxy to do:</p>
 <ol>
 <li>Pretend to be the GitHub API.</li>
 <li><strong>but</strong> accept its own custom tokens that limit permissions.</li>
 </ol>
-<p>The big questions now is how do we create our custom tokens and how do we keep track of what permissions they have?</p>
-<p>We could create a database and start storing stuff into it. You could just generate a random string for the API key and then store stuff like the <em>real</em> GitHub API token and the permissions in a row in the database. Something like:</p>
-<table>
+<p>Now the big questions are how do I create the custom tokens and how do I keep track of what permissions they have?</p>
+<p>Well, I could create a database and start storing stuff into it. I could just generate a random string for the API key and then store stuff like the <em>real</em> GitHub API token and the permissions in a row in the database. Something like:</p>
+<table class="table">
 <thead>
 <tr>
 <th>Primary Key (Proxy Token)</th>
@@ -131,102 +131,197 @@ the same, the domains are different (<code>github-proxy.thea.codes</code> vs <co
 <tr>
 <td>c967718d</td>
 <td>read</td>
-<td>7e096a6633471a2c967718d4b435f0ecdac5c426</td>
+<td>7e096a663...</td>
 </tr>
 <tr>
 <td>adf314bc</td>
 <td>read,write</td>
-<td>7e096a6633471a2c967718d4b435f0ecdac5c426</td>
+<td>7e096a663...</td>
 </tr></tbody></table>
 <p>But databases are pricey and can require a lot of work. They also add latency - each request to the proxy needs to hit the database to find out about the token.</p>
 <p>However, another interesting option is to use <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">public-key cryptography</a> to store all that information in <em>the token itself</em>.</p>
 <h2>Let's talk about black magic - Cryptography</h2>
-<p>So before we get into how to use public-key cryptography for our proxy, let's me tell about some of the basic and important concepts.</p>
-<p>From <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">wikipedia</a>:</p>
+<p>So before I get into how to use public-key cryptography for the proxy, let's talk about some of the basic and important concepts involved.</p>
+<p>From <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">Wikipedia</a>:</p>
 <blockquote>
 <p>Public-key cryptography is a cryptographic system that uses pairs of keys: public keys which may be disseminated widely, and private keys which are known only to the owner.</p>
 </blockquote>
-<p>Okay - so we have <strong>two</strong> keys - public and private.</p>
+<p>Okay - so I'll have <strong>two</strong> keys - public and private.</p>
 <blockquote>
 <p>In such a system, any person can encrypt a message using the receiver's public key, but that encrypted message can only be decrypted with the receiver's private key.</p>
 </blockquote>
-<p>Okay - interesting. So stuff encrypted with the public key (so called <em>ciphertext</em>) can be sent <em>in the clear</em> and only the holder of the private key can decrypt it.</p>
+<p>Okay - interesting. So stuff encrypted with the public key (so called <em>ciphertext</em>) can be sent <em>in the clear</em> and only the holder of the private key can decrypt it. So if I encrypt something with my public key then I'm the only one that can decrypt it.</p>
 <blockquote>
 <p>Authentication is also possible. A sender can combine a message with a private key to create a short digital signature on the message. Anyone with the corresponding public key can combine a message, a putative digital signature on it, and the known public key to verify whether the signature was valid, i.e. made by the owner of the corresponding private key.</p>
 </blockquote>
-<p>Okay - so this is super interesting. We could write a note and sign it and verify that no one messed with.</p>
-<p>We have all the spells we need to cast to make our tokens. Let's talk about the right way to cast them.</p>
+<p>Okay - so this is super interesting. I could write a note and sign it and verify that no one messed with it.</p>
+<p>I have all the spells I need to cast to make the proxy tokens. Let's talk about the right way to cast them.</p>
 <h2>The format of a stateless token</h2>
-<p>Okay, so before we apply the cryptography spell we need to figure out the content of the token. The token basically needs to say &quot;this token can do these things with this github account&quot;. Just like our database option, the token therefore needs this information <em>at minimum</em>:</p>
+<p>Okay, so before I apply the cryptography spells I need to figure out the content of the token. The token basically needs to say &quot;this token can do these things with this github account&quot;. Just like the database option, the token therefore needs this information <em>at minimum</em>:</p>
 <ol>
 <li>The set of permissions.</li>
 <li>The github token to use once permissions are validated.</li>
 </ol>
-<p>So we could imagine writing a simple text document that looks like this:</p>
+<p>So I could imagine writing a simple text document that looks like this:</p>
 <pre>real token: 7e096a6633471a2c967718d4b435f0ecdac5c426
 permissions: read
 </pre>
-<p>But let's make it machine readable and use JSON:</p>
+<p>But I want it to be machine readable so I'll use JSON:</p>
 <pre><span class="p">{</span>
     <span class="nt">&quot;real_token&quot;</span><span class="p">:</span> <span class="s2">&quot;7e096a6633471a2c967718d4b435f0ecdac5c426&quot;</span><span class="p">,</span>
     <span class="nt">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </pre>
-<p>Perfect. To make it easier to send over HTTP, we can base64 encode the whole thing - but we'll keep it as plaintext for the moment.</p>
 <h2>Securing the real key</h2>
-<p>Cool. Of course we can't just hand this token as-is to the thing that's talking to our proxy. The real token is right there in <em>plaintext</em>. They could just use that and bypass the proxy! What we need to do is encrypt it so that only the proxy can read it.</p>
+<p>Cool. Of course I can't just hand this token as-is to the thing that's talking to the proxy. The real token is right there in <em>plaintext</em>. The app or whatever could just pluck the real token out of the proxy token and bypass the proxy! What I need to do is protect it so that only the proxy can read it.</p>
 <p>Let's cast the first spell. ✨</p>
 <p>Remember what Wikipedia taught us about public-key cryptography:</p>
 <blockquote>
 <p>In such a system, any person can encrypt a message using the receiver's public key, but that encrypted message can only be decrypted with the receiver's private key.</p>
 </blockquote>
 <p>Perfect!</p>
-<p>In preparation, we'll need a public/private key pair. You can make one with <a href="https://www.openssl.org/">openssl</a>:</p>
+<p>To prepare for this spell (and subsequent ones), I'll need a public/private key pair. You can make one with <a href="https://www.openssl.org/">openssl</a>:</p>
 <pre>$ openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
-$ openssl req -batch -subj /C<span class="o">=</span>US/CN<span class="o">=</span>github-proxy.thea.codes -new -x509 -key private.pem -out public.cert -days <span class="m">1825</span>
+$ openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 </pre>
 <blockquote>
 <p>You can read more about generating RSA pairs <a href="https://en.wikibooks.org/wiki/Cryptography/Generate_a_keypair_using_OpenSSL">here</a>.</p>
 </blockquote>
-<p>Okay. Now that we have a private and public key for the proxy we can secure our real token. We'll do this by encrypting the real token with the <strong>public key</strong>. This means only the <strong>private key</strong> can decrypt it. Since the proxy keeps the private key, well, private, only the proxy itself can decrypt the real API token.</p>
+<p>Okay. Now that I have a private and public key for the proxy I can secure the real token. To do this, I'll encrypted the real token with the <strong>public key</strong>. This means only my <strong>private key</strong> can decrypt it. Since the proxy keeps the private key, well, private, only the proxy itself can decrypt the real API token.</p>
 <p>Here's what encrypting the key looks like with OpenSSL on the command-line:</p>
-<pre>$ <span class="nb">echo</span> <span class="s2">&quot;REAL_TOKEN&quot;</span> <span class="p">|</span> openssl rsautl -encrypt -inkey public.pem -pubin <span class="p">|</span> base64
+<pre>$ <span class="nv">REAL_TOKEN</span><span class="o">=</span><span class="s2">&quot;7e096a6633471a2c967718d4b435f0ecdac5c426&quot;</span>
+$ <span class="nv">ENCRYPTED_TOKEN</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">REAL_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">|</span> openssl rsautl -encrypt -inkey public.pem -pubin <span class="p">|</span> base64<span class="k">)</span>
+$ <span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">ENCRYPTED_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span>
 aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA<span class="o">==</span>
 </pre>
+<p>Or with Python using the <a href="https://cryptography.io">cryptography</a> library:</p>
+<pre><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat</span> <span class="k">import</span> <span class="n">backends</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">serialization</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="k">import</span> <span class="n">padding</span>
+
+<span class="n">backend</span> <span class="o">=</span> <span class="n">backends</span><span class="o">.</span><span class="n">default_backend</span><span class="p">()</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">()</span>
+
+<span class="n">public_key_bytes</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;public.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+<span class="n">public_key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_public_key</span><span class="p">(</span>
+    <span class="n">public_key_bytes</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
+<span class="p">)</span>
+
+<span class="n">real_token</span> <span class="o">=</span> <span class="s2">&quot;7e096a6633471a2c967718d4b435f0ecdac5c426&quot;</span>
+<span class="n">encrypted_token_bytes</span> <span class="o">=</span> <span class="n">public_key</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span>
+    <span class="n">real_token</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">padding</span><span class="p">)</span>
+<span class="n">encrypted_token</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">encrypted_token_bytes</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">encrypted_token</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+
+<span class="c1"># aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==</span>
+</pre>
 <blockquote>
-<p>The output of openssl is binary data, so we pipe it into base64 so that it's more easy to deal with.</p>
+<p>The output of encryption is binary data so base64 encoding is used to turn it into something easier to deal with.</p>
 </blockquote>
-<p>Okay. So we have an encrypted real token. We can update our proxy token to include that instead of the plaintext real token.</p>
+<p>Okay. So I now have an encrypted real token. Now I can update the proxy token to include that instead of the plaintext real token.</p>
 <pre><span class="p">{</span>
     <span class="nt">&quot;enc_real_token&quot;</span><span class="p">:</span> <span class="s2">&quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;</span><span class="p">,</span>
     <span class="nt">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </pre>
-<p>When our proxy gets the proxy token it can use its <strong>private</strong> key to decrypt the token. Here's an example using the command-line:</p>
-<pre>$ <span class="nb">echo</span> <span class="s2">&quot;ENCODED_TOKEN&quot;</span> <span class="p">|</span> base64 -D <span class="p">|</span> openssl rsautl -decrypt -inkey private.pem
-REAL_TOKEN
+<p>When the proxy gets the proxy token it can use the <strong>private</strong> key to decrypt the token. Here's an example using the command-line:</p>
+<pre>$ <span class="nv">REAL_TOKEN</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">ENCRYPTED_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">|</span> base64 -D <span class="p">|</span> openssl rsautl -decrypt -inkey private.pem<span class="k">)</span>
+$ <span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">REAL_TOKEN</span><span class="si">}</span><span class="s2">&quot;&quot;</span>
+<span class="s2">7e096a6633471a2c967718d4b435f0ecdac5c426</span>
+</pre>
+<p>Or with Python:</p>
+<pre><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat</span> <span class="k">import</span> <span class="n">backends</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">serialization</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="k">import</span> <span class="n">padding</span>
+
+<span class="n">backend</span> <span class="o">=</span> <span class="n">backends</span><span class="o">.</span><span class="n">default_backend</span><span class="p">()</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">()</span>
+
+<span class="n">private_key_bytes</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;private.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+<span class="n">private_key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_private_key</span><span class="p">(</span>
+    <span class="n">private_key_bytes</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
+<span class="p">)</span>
+
+<span class="n">encrypted_token</span> <span class="o">=</span> <span class="s2">&quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;</span>
+<span class="n">encrypted_token_bytes</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">encrypted_token</span><span class="p">)</span>
+<span class="n">real_token</span> <span class="o">=</span> <span class="n">private_key</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span>
+    <span class="n">encrypted_token_bytes</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">real_token</span><span class="p">)</span>
+
+
+<span class="c1"># 7e096a6633471a2c967718d4b435f0ecdac5c426</span>
 </pre>
 <blockquote>
-<p>Once again we're using base64 here - but in reverse to decode the encoded token before passing its binary data to openssl.</p>
+<p>Once again I'm using base64 here - but in reverse to decode the encoded token before passing its binary data to openssl.</p>
 </blockquote>
-<p>Great. Okay - so at this point we have the ability to create a proxy token that holds the real API token but makes it inaccessible to anyone but the proxy. However, there's a problem. The permissions are part of the token, too! Someone could just edit our token and add new permissions. Yikes!</p>
+<p>Great. Okay - so at this point I have the ability to create a proxy token that holds the real API token but makes it inaccessible to anyone but the proxy. I'm almost ready. However, there's a problem. The permissions are part of the token, too! Someone could just edit my proxy token and add new permissions. Yikes!</p>
 <h2>Preventing tampering</h2>
 <p>Let's once again remember what our wise teacher, Wikipedia, told us about public-key cryptography:</p>
 <blockquote>
 <p>A sender can combine a message with a private key to create a short digital signature on the message. Anyone with the corresponding public key can combine a message, a putative digital signature on it, and the known public key to verify whether the signature was valid, i.e. made by the owner of the corresponding private key.</p>
 </blockquote>
-<p>So we could <em>sign</em> the proxy token with our <strong>private key</strong> and if anyone messed with the contents then the signature would be invalid. This is perfect.</p>
-<p>Let's take our token and send it through OpenSSL to get a signature for it.</p>
-<p>It's easier to do this on the command-line if the thing you're trying to sign is in a file. So I just saved the token above as <code>unsigned.json</code>.</p>
-<pre>openssl dgst -sha256 -sign keys/private.pem unsigned.json <span class="p">|</span> base64
+<p>So I could <em>sign</em> the proxy token with my <strong>private key</strong> and if anyone messed with the contents then the signature would be invalid. This is perfect.</p>
+<p>So for the next spell I'm going to take the token and send it through OpenSSL to get a signature for it.</p>
+<p>Here's what getting the signature looks like with bash:</p>
+<pre>$ <span class="nv">TOKEN_SIGNATURE</span><span class="o">=</span><span class="k">$(</span>openssl dgst -sha256 -sign private.pem proxy-token.json <span class="p">|</span> base64<span class="k">)</span>
+$ <span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">TOKEN_SIGNATURE</span><span class="si">}</span><span class="s2">&quot;</span>
 Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzdatGpc2Ks4sOmccZhqyUTqmNPADRQVfldawn/GymxviLLbwxHf3hML3KtP/tpEMC2zuygGmnnddbYsTBHy9/TkZFouUSH33CJbVcy4X7S1wtdTiaB7Wsp4ukcd486QXoDWngWKwpu77+uSU9aGAGNvRm2+pqiAih2UxV12FpsJrIQo2y7nMPaNd8CE1ClTt7bsIHp96qHoIE4azWvyuEPy4SfBUHcZS6XiQ/ogYs2iSYryiWdB8OxZdR4YB2QWRQXyNicZw<span class="o">==</span>
 </pre>
-<p>So the base64 data it spits out is the signature. So now we can send <em>both</em> our proxy token and its signature to our proxy and our proxy can ensure that it's the one that generated the token. Something like this would work:</p>
-<pre>$ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;Authorization: token PROXY-TOKEN sig PROXY-SIGNATURE&quot;</span>
+<blockquote>
+<p>It's easier to do this on the command-line if the thing you're trying to sign is in a file. So I just saved the token above as <code>proxy-token.json</code>.</p>
+</blockquote>
+<p>And with Python:</p>
+<pre><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat</span> <span class="k">import</span> <span class="n">backends</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">hashes</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">serialization</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="k">import</span> <span class="n">padding</span>
+
+<span class="n">backend</span> <span class="o">=</span> <span class="n">backends</span><span class="o">.</span><span class="n">default_backend</span><span class="p">()</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">()</span>
+
+<span class="n">private_key_bytes</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;private.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+<span class="n">private_key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_private_key</span><span class="p">(</span>
+    <span class="n">private_key_bytes</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
+<span class="p">)</span>
+
+<span class="n">proxy_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">{</span>
+<span class="s2">    &quot;enc_real_token&quot;: &quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;,</span>
+<span class="s2">    &quot;permissions&quot;: [&quot;read&quot;]</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">signature_bytes</span> <span class="o">=</span> <span class="n">private_key</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span>
+    <span class="n">proxy_token</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+    <span class="n">padding</span><span class="p">,</span>
+    <span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">())</span>
+<span class="n">signature</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">signature_bytes</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">signature</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+
+<span class="c1"># Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzdatGpc2Ks4sOmccZhqyUTqmNPADRQVfldawn/GymxviLLbwxHf3hML3KtP/tpEMC2zuygGmnnddbYsTBHy9/TkZFouUSH33CJbVcy4X7S1wtdTiaB7Wsp4ukcd486QXoDWngWKwpu77+uSU9aGAGNvRm2+pqiAih2UxV12FpsJrIQo2y7nMPaNd8CE1ClTt7bsIHp96qHoIE4azWvyuEPy4SfBUHcZS6XiQ/ogYs2iSYryiWdB8OxZdR4YB2QWRQXyNicZw==</span>
+</pre>
+<p>Alright, now I've got a signature. I can send <em>both</em> the the proxy token and its signature to the proxy and the proxy can ensure that the token hasn't been tampered with.</p>
+<p>In terms of what it looks like to actually send it, I could do something like this:</p>
+<pre>$ <span class="nv">PROXY_TOKEN</span><span class="o">=</span><span class="k">$(</span>cat proxy-token.json <span class="p">|</span> base64<span class="k">)</span>
+$ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;X-Proxy-Token: </span><span class="si">${</span><span class="nv">PROXY_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span> <span class="s2">&quot;X-Proxy-Token-Signature: </span><span class="si">${</span><span class="nv">TOKEN_SIGNATURE</span><span class="si">}</span><span class="s2">&quot;</span>
 </pre>
 <p>But it turns out there's already a well-defined standard for this - <a href="https://jwt.io/">JSON Web Tokens</a>!</p>
 <h2>JWTs for proxy tokens</h2>
-<p>JWT can sound scary but we're basically already doing 90% of it at this point. A JWT is just a way of encapsulating some data so that it can be verified. It's made of three parts: a <em>header</em>, a <em>payload</em>, and a <em>signature</em>. We've already got the <em>payload</em> and most of <em>signature</em> part down. We just need to put it all in the right format. Luckily we don't have to do all this ourselves, we can use a library like <a href="https://pyjwt.readthedocs.io/en/latest/usage.html#encoding-decoding-tokens-with-rs256-rsa">PyJWT</a>:</p>
+<p>JWT can sound scary but I'm basically already doing 90% of it at this point. A JWT is just a way of encapsulating some data so that it can be verified. It's made of three parts: a <em>header</em>, a <em>payload</em>, and a <em>signature</em>. I've already got the <em>payload</em> and most of <em>signature</em> part down. I just need to put it all in the right format. Luckily I don't have to do all this myself, I can use a library like <a href="https://pyjwt.readthedocs.io/en/latest/usage.html#encoding-decoding-tokens-with-rs256-rsa">PyJWT</a>:</p>
 <pre><span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">jwt</span>
 
@@ -240,10 +335,10 @@ Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzd
 
 <span class="nb">print</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 </pre>
-<p>You should get something like this:</p>
+<p>That script will produce a JWT like this:</p>
 <pre><code>eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJlbmNfcmVhbF90b2tlbiI6ImFSNVBHck9Oa0w4Z0NueW1WdS9KcGJHRnI2THlTbWtmUDVYd1RkalNxdk03clBLS2g4a0JZMENWNEtQR3ExQXhmNzdBaW5OR3JOcndHcTg1VlJrSzk2djd2WkhCRlIyM3FEMXhWZmxtK0Jrc0ZBZUZtYWtnTWIwWG9xRkxWdEVRRUo2cjhJdzhmOEQwZEluU0o3YWwzWklMbnRzbFZJblRObUtCd1lvNXBKZWJxNDFUTGQ3SFBVVnNEeHc2S2JVTGwvVEdlT0E3OUJXOUUzRHpXWDYwbGluSGIwVVRFK1NGdUhQREp4TVhVTDhZWEJhdi8rOE9yUm1IM240Q0pJRW1qaFFkNEdvWjJwVXRqZnpNQ1hHSWlrcFozcWxkMi9LV2F6b2g2bWdoeHo1Uk5SYktjR2hKU1dBejQrSkh1MDcxMlVFV21rN3FlUzluOThWdlU4bFFLQT09IiwicGVybWlzc2lvbnMiOlsicmVhZCJdfQ.GAxcONwT7M4Gvk_OGEuQKHqMlRDGOxDixkEMlC-tYlDIJEjkDkW_YLY4oBiKEtGwmn97wdvXsnds9eheFt3SO4oOPfkYYHbJRQxRZnhhDRgY_CkX9_uYjeaLB-ttNoiSTYYMGaCcxP8VsNc06jS5S7-1RXGJ30gK_gwwhSNHexn5tppAFDDzoD4g-0vWXBx3i1mLanyFQvY1iMGV0JYg1Y48M6Bx8wClYeGGq6lXy6h7H-NgisJDl8pr-C_hOu_mmsLhgM2fEiDKa_2JE9ToWtv2v9inZ4YbiAmJJd-6TIv1jeLJinzVjxgEMesiDBVm1l0pSZ7R2c5tgOxkrvGE4g
 </code></pre>
-<p>You can drop that into the debugger at <a href="https://jwt.io">jwt.io</a> to see your token's content. This example one looks like this:</p>
+<p>If you want, you can drop that into the debugger at <a href="https://jwt.io">jwt.io</a> to see the token's content. The example one looks like this:</p>
 <pre><span class="nx">header</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s2">&quot;typ&quot;</span><span class="o">:</span> <span class="s2">&quot;JWT&quot;</span><span class="p">,</span>
   <span class="s2">&quot;alg&quot;</span><span class="o">:</span> <span class="s2">&quot;RS256&quot;</span>
@@ -256,8 +351,8 @@ Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzd
   <span class="p">]</span>
 <span class="p">}</span>
 </pre>
-<p>Which is <em>exactly</em> what we put in. :)</p>
-<p>This is <strong>really cool</strong>. We now have a token that:</p>
+<p>Which is <em>exactly</em> what I put in. :)</p>
+<p>This is <strong>really cool</strong>. I now have a token that:</p>
 <ol>
 <li>Contains the real API token, but only the proxy can read it.</li>
 <li>Contains the permissions, but they can't be tampered with.</li>
@@ -265,6 +360,12 @@ Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzd
 <li>Can even be introspected by users of the proxy to see what permissions it has.</li>
 </ol>
 <p>Seems pretty magical to me! ✨</p>
+<h2>Tying it all together</h2>
+<p>TODO</p>
+<h2>Gotchas</h2>
+<p>Okay, cryptography isn't <em>actual</em> magic, but it is just as <strong>dangerous</strong>. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully that a real token.</p>
+<p>Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see <a href="">Certificate authority</a><a href="https://en.wikipedia.org/wiki/Certificate_authority">https://en.wikipedia.org/wiki/Certificate_authority</a>).</p>
+<h2>Read more</h2>
 
   </content>
 </article>

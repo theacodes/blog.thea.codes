@@ -22,11 +22,17 @@ def parse_source(source: pathlib.Path) -> frontmatter.Post:
     return post
 
 
+def fixup_styles(content: str) -> str:
+    content = content.replace('<table>', '<table class="table">')
+    return content
+
+
 def render_markdown(content: str) -> str:
     content = cmarkgfm.markdown_to_html_with_extensions(
         content,
         extensions=['table', 'autolink', 'strikethrough'])
     content = highlighting.highlight(content)
+    content = fixup_styles(content)
     return content
 
 
