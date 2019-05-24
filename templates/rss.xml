@@ -7,7 +7,7 @@
   <atom:link href="{{root}}/feed.xml"
     rel="self" type="application/rss+xml" />
 
-  {% for post in posts %}
+  {% for post in posts if not post.get('hidden') %}
   <item>
     <title>{{ post.title|e }}</title>
     <link>{{root}}/{{ post.stem }}</link>
