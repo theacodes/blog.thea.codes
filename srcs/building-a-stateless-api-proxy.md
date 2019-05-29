@@ -3,10 +3,7 @@ title: Building a stateless API proxy
 date: 2019-05-23
 legacy_url: yes
 description: How to make an access-limiting proxy for any API
-hidden: true
 ---
-
-> WHOA. THIS POST IS A WORK IN PROGRESS. PLEASE DON'T SHARE YET.
 
 Web APIs are lots of fun. However, things can get tricky when it comes to granting *other* applications access to your data on a specific service.
 
@@ -362,6 +359,7 @@ $ http GET https://github-proxy.thea.codes/gists "X-Proxy-Token: ${PROXY_TOKEN}"
 
 But it turns out there's already a well-defined standard for this - [JSON Web Tokens](https://jwt.io/)!
 
+
 ## JWTs for proxy tokens
 
 JWT can sound scary but I'm basically already doing 90% of it at this point. A JWT is just a way of encapsulating some data so that it can be verified. It's made of three parts: a *header*, a *payload*, and a *signature*. I've already got the *payload* and most of *signature* part down. I just need to put it all in the right format. Luckily I don't have to do all this myself, I can use a library like [PyJWT](https://pyjwt.readthedocs.io/en/latest/usage.html#encoding-decoding-tokens-with-rs256-rsa):
@@ -370,13 +368,13 @@ JWT can sound scary but I'm basically already doing 90% of it at this point. A J
 import pathlib
 import jwt
 
-private_key = pathlib.Path("keys/private.pem").read_text()
+private_key = pathlib.Path("private.pem").read_text()
 payload = {
     "enc_real_token": "aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==",
     "permissions": ["read"]
 }
 
-token = jwt.encode(payload, private_key, algorithm='RS256')
+token = jwt.encode(payload, private_key, algorithm="RS256")
 
 print(token.decode("utf-8"))
 ```
@@ -405,9 +403,65 @@ payload = {
 
 Which is *exactly* what I put in. :)
 
+
 ## Verifying the token
 
+Okay - I have my proxy token and its signature all wrapped up in a warm, gentle JWT. I'm sending that JWT to the proxy. But, how do I verify the JWT on the proxy side?
+
+Remember from before:
+
+> Anyone with the corresponding public key can combine a message, a putative digital signature on it, and the known public key to verify whether the signature was valid, i.e. made by the owner of the corresponding private key.
+
+Cool, so this is our final spell. We'll take the signature, the token, and the public key and verify that the signature is correct.
+
 ![Illustration of how to verify the token signature](../static/proxy-12.png)
+
+We're going to do some hand-waving here because JWT lets us do that. It implements this magic for us. So we can use `jwt.decode`.
+
+```python
+import pathlib
+import jwt
+
+public_key = pathlib.Path("public.pem").read_text()
+
+# The proxy would get this value from the actual request. It's hardcoded
+# here for example purposes.
+unverified_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJlbmNfcmVhbF90b2tlbiI6ImFSNVBHck9Oa0w4Z0NueW1WdS9KcGJHRnI2THlTbWtmUDVYd1RkalNxdk03clBLS2g4a0JZMENWNEtQR3ExQXhmNzdBaW5OR3JOcndHcTg1VlJrSzk2djd2WkhCRlIyM3FEMXhWZmxtK0Jrc0ZBZUZtYWtnTWIwWG9xRkxWdEVRRUo2cjhJdzhmOEQwZEluU0o3YWwzWklMbnRzbFZJblRObUtCd1lvNXBKZWJxNDFUTGQ3SFBVVnNEeHc2S2JVTGwvVEdlT0E3OUJXOUUzRHpXWDYwbGluSGIwVVRFK1NGdUhQREp4TVhVTDhZWEJhdi8rOE9yUm1IM240Q0pJRW1qaFFkNEdvWjJwVXRqZnpNQ1hHSWlrcFozcWxkMi9LV2F6b2g2bWdoeHo1Uk5SYktjR2hKU1dBejQrSkh1MDcxMlVFV21rN3FlUzluOThWdlU4bFFLQT09IiwicGVybWlzc2lvbnMiOlsicmVhZCJdfQ.GAxcONwT7M4Gvk_OGEuQKHqMlRDGOxDixkEMlC-tYlDIJEjkDkW_YLY4oBiKEtGwmn97wdvXsnds9eheFt3SO4oOPfkYYHbJRQxRZnhhDRgY_CkX9_uYjeaLB-ttNoiSTYYMGaCcxP8VsNc06jS5S7-1RXGJ30gK_gwwhSNHexn5tppAFDDzoD4g-0vWXBx3i1mLanyFQvY1iMGV0JYg1Y48M6Bx8wClYeGGq6lXy6h7H-NgisJDl8pr-C_hOu_mmsLhgM2fEiDKa_2JE9ToWtv2v9inZ4YbiAmJJd-6TIv1jeLJinzVjxgEMesiDBVm1l0pSZ7R2c5tgOxkrvGE4g"
+
+try:
+    token = jwt.decode(unverified_token, public_key, algorithms='RS256')
+except jwt.exceptions.InvalidSignatureError:
+    print("Invalid signature!")
+    raise
+
+print(token)
+permissions = token["permissions"]
+real_token = decrypt_token(token["enc_real_token"])
+```
+
+## Proxying requests
+
+Once the token is verified, the proxy can grab the permissions and decode the real token (using the code from the section on securing the real token). Then the proxy can then check the permissions of the request. For example, this token only allows `read` so we should reject anything other than `GET` requests
+
+```python
+if "write" not in token["permissions"]:
+    if request.method == "GET":
+        return proxy_request(request, real_token)
+    else:
+        return reject_request(request)
+```
+
+But these permissions can of course be as flexible as you want since you're in control of the proxy. You can define all sorts of custom ACLs. At Google, we use a combination of regular expressions and HTTP methods such as:
+
+```
+[
+    "GET /gists/.*",
+    "POST /orgs/googleapis/repos/(.+?)/pulls/(.+?)/comments"
+]
+```
+
+Once permissions are verified then the request can be proxied over to GitHub using the real API token. But, if the app is trying to do something it's not allowed to do then the request can be rejected.
+
 
 ## Tying it all together
 
@@ -420,12 +474,24 @@ This is **really cool**. I now have a token that:
 
 Seems pretty magical to me! ✨
 
+There's actually a full implementation of this idea over at https://github.com/theacodes/magic-github-proxy. It's a little under documented, but with this post you should hopefully be well equipped to understand how it works.
+
+
 ## Gotchas
 
 Okay, cryptography isn't *actual* magic, but it is just as **dangerous**. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully that a real token.
 
-Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see [Certificate authority]()https://en.wikipedia.org/wiki/Certificate_authority).
+Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see [Certificate authority](https://en.wikipedia.org/wiki/Certificate_authority).
+
+Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app.
+
 
 ## Read more
 
+This post is based on a *ton* of research and prior art. You can take a look at some of these articles and resources to learn more about how I came up with this idea.
+
+* https://ssd.eff.org/en/module/deep-dive-end-end-encryption-how-do-public-key-encryption-systems-work
+* https://jwt.io
+* https://pyjwt.readthedocs.io/en/latest/index.html
+* https://tools.ietf.org/html/rfc7523
 

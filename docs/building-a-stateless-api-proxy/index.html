@@ -53,10 +53,7 @@
   </aside>
   <h1>Building a stateless API proxy</h1>
   <content>
-    <blockquote>
-<p>WHOA. THIS POST IS A WORK IN PROGRESS. PLEASE DON'T SHARE YET.</p>
-</blockquote>
-<p>Web APIs are lots of fun. However, things can get tricky when it comes to granting <em>other</em> applications access to your data on a specific service.</p>
+    <p>Web APIs are lots of fun. However, things can get tricky when it comes to granting <em>other</em> applications access to your data on a specific service.</p>
 <p>I ran into this trickiness with the GitHub API. In Google Cloud we have client libraries for about 40 products across 8 programming languages. In order to manage and release these things, we need bots. An army of bots. These bots need access to do things on our repositories.</p>
 <p>We want some of these bots to only be able to write comments on things. We want others to be able to create commits, but only on certain branches. We need others to be able to create releases, but nothing else, and so on. This is where things get interesting.</p>
 <p>It turns out GitHub's API has extremely coarse access control on API tokens. For example, imagine if you wanted to write an editor plug-in to turn your <a href="https://gist.github.com/">Gists</a> into easily-accessible snippets in your editor. People would have to grant your plug-in <em>write</em> access even though it only really needs <em>read</em> access. There's a big <a href="https://github.com/dear-github/dear-github/issues/113">Dear GitHub post</a> on the subject, but this is not uncommon - many APIs have permissions systems that don't quite always fit the needs of users.</p>
@@ -337,13 +334,13 @@ $ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;X-Proxy-
 <pre><span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">jwt</span>
 
-<span class="n">private_key</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;keys/private.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+<span class="n">private_key</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;private.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
 <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;enc_real_token&quot;</span><span class="p">:</span> <span class="s2">&quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;</span><span class="p">,</span>
     <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 
-<span class="n">token</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">private_key</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+<span class="n">token</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">private_key</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;RS256&quot;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 </pre>
@@ -365,7 +362,48 @@ $ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;X-Proxy-
 </pre>
 <p>Which is <em>exactly</em> what I put in. :)</p>
 <h2>Verifying the token</h2>
+<p>Okay - I have my proxy token and its signature all wrapped up in a warm, gentle JWT. I'm sending that JWT to the proxy. But, how do I verify the JWT on the proxy side?</p>
+<p>Remember from before:</p>
+<blockquote>
+<p>Anyone with the corresponding public key can combine a message, a putative digital signature on it, and the known public key to verify whether the signature was valid, i.e. made by the owner of the corresponding private key.</p>
+</blockquote>
+<p>Cool, so this is our final spell. We'll take the signature, the token, and the public key and verify that the signature is correct.</p>
 <p><img src="../static/proxy-12.png" alt="Illustration of how to verify the token signature" /></p>
+<p>We're going to do some hand-waving here because JWT lets us do that. It implements this magic for us. So we can use <code>jwt.decode</code>.</p>
+<pre><span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">jwt</span>
+
+<span class="n">public_key</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;public.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+<span class="c1"># The proxy would get this value from the actual request. It&#39;s hardcoded</span>
+<span class="c1"># here for example purposes.</span>
+<span class="n">unverified_token</span> <span class="o">=</span> <span class="s2">&quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJlbmNfcmVhbF90b2tlbiI6ImFSNVBHck9Oa0w4Z0NueW1WdS9KcGJHRnI2THlTbWtmUDVYd1RkalNxdk03clBLS2g4a0JZMENWNEtQR3ExQXhmNzdBaW5OR3JOcndHcTg1VlJrSzk2djd2WkhCRlIyM3FEMXhWZmxtK0Jrc0ZBZUZtYWtnTWIwWG9xRkxWdEVRRUo2cjhJdzhmOEQwZEluU0o3YWwzWklMbnRzbFZJblRObUtCd1lvNXBKZWJxNDFUTGQ3SFBVVnNEeHc2S2JVTGwvVEdlT0E3OUJXOUUzRHpXWDYwbGluSGIwVVRFK1NGdUhQREp4TVhVTDhZWEJhdi8rOE9yUm1IM240Q0pJRW1qaFFkNEdvWjJwVXRqZnpNQ1hHSWlrcFozcWxkMi9LV2F6b2g2bWdoeHo1Uk5SYktjR2hKU1dBejQrSkh1MDcxMlVFV21rN3FlUzluOThWdlU4bFFLQT09IiwicGVybWlzc2lvbnMiOlsicmVhZCJdfQ.GAxcONwT7M4Gvk_OGEuQKHqMlRDGOxDixkEMlC-tYlDIJEjkDkW_YLY4oBiKEtGwmn97wdvXsnds9eheFt3SO4oOPfkYYHbJRQxRZnhhDRgY_CkX9_uYjeaLB-ttNoiSTYYMGaCcxP8VsNc06jS5S7-1RXGJ30gK_gwwhSNHexn5tppAFDDzoD4g-0vWXBx3i1mLanyFQvY1iMGV0JYg1Y48M6Bx8wClYeGGq6lXy6h7H-NgisJDl8pr-C_hOu_mmsLhgM2fEiDKa_2JE9ToWtv2v9inZ4YbiAmJJd-6TIv1jeLJinzVjxgEMesiDBVm1l0pSZ7R2c5tgOxkrvGE4g&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">unverified_token</span><span class="p">,</span> <span class="n">public_key</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">jwt</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidSignatureError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid signature!&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+<span class="n">permissions</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="s2">&quot;permissions&quot;</span><span class="p">]</span>
+<span class="n">real_token</span> <span class="o">=</span> <span class="n">decrypt_token</span><span class="p">(</span><span class="n">token</span><span class="p">[</span><span class="s2">&quot;enc_real_token&quot;</span><span class="p">])</span>
+</pre>
+<h2>Proxying requests</h2>
+<p>Once the token is verified, the proxy can grab the permissions and decode the real token (using the code from the section on securing the real token). Then the proxy can then check the permissions of the request. For example, this token only allows <code>read</code> so we should reject anything other than <code>GET</code> requests</p>
+<pre><span class="k">if</span> <span class="s2">&quot;write&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">token</span><span class="p">[</span><span class="s2">&quot;permissions&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">proxy_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">real_token</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">reject_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</pre>
+<p>But these permissions can of course be as flexible as you want since you're in control of the proxy. You can define all sorts of custom ACLs. At Google, we use a combination of regular expressions and HTTP methods such as:</p>
+<pre><code>[
+    &quot;GET /gists/.*&quot;,
+    &quot;POST /orgs/googleapis/repos/(.+?)/pulls/(.+?)/comments&quot;
+]
+</code></pre>
+<p>Once permissions are verified then the request can be proxied over to GitHub using the real API token. But, if the app is trying to do something it's not allowed to do then the request can be rejected.</p>
 <h2>Tying it all together</h2>
 <p>This is <strong>really cool</strong>. I now have a token that:</p>
 <ol>
@@ -375,10 +413,19 @@ $ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;X-Proxy-
 <li>Can even be introspected by users of the proxy to see what permissions it has.</li>
 </ol>
 <p>Seems pretty magical to me! ✨</p>
+<p>There's actually a full implementation of this idea over at <a href="https://github.com/theacodes/magic-github-proxy">https://github.com/theacodes/magic-github-proxy</a>. It's a little under documented, but with this post you should hopefully be well equipped to understand how it works.</p>
 <h2>Gotchas</h2>
 <p>Okay, cryptography isn't <em>actual</em> magic, but it is just as <strong>dangerous</strong>. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully that a real token.</p>
-<p>Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see <a href="">Certificate authority</a><a href="https://en.wikipedia.org/wiki/Certificate_authority">https://en.wikipedia.org/wiki/Certificate_authority</a>).</p>
+<p>Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see <a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate authority</a>.</p>
+<p>Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app.</p>
 <h2>Read more</h2>
+<p>This post is based on a <em>ton</em> of research and prior art. You can take a look at some of these articles and resources to learn more about how I came up with this idea.</p>
+<ul>
+<li><a href="https://ssd.eff.org/en/module/deep-dive-end-end-encryption-how-do-public-key-encryption-systems-work">https://ssd.eff.org/en/module/deep-dive-end-end-encryption-how-do-public-key-encryption-systems-work</a></li>
+<li><a href="https://jwt.io">https://jwt.io</a></li>
+<li><a href="https://pyjwt.readthedocs.io/en/latest/index.html">https://pyjwt.readthedocs.io/en/latest/index.html</a></li>
+<li><a href="https://tools.ietf.org/html/rfc7523">https://tools.ietf.org/html/rfc7523</a></li>
+</ul>
 
   </content>
 </article>
