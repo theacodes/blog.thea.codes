@@ -27,6 +27,8 @@ Okay but first - what even is a proxy?
 
 Well, a proxy is something that sits between you (or your application) and the thing you're trying to talk to. In this case, an API proxy sits between some program you're writing and the upstream API the application is accessing.
 
+![Small illustration of a proxy](../static/proxy-1.png)
+
 Basically, instead of you (or your application) talking directly to GitHub like this:
 
 > examples are using [httpie](https://httpie.org)
@@ -77,7 +79,11 @@ So let's step back a second. A GitHub token is an opaque string that looks somet
 
 Going back to the example about wanting just read-only access to public and private Gists, you'll notice that GitHub just gives you a single "Gists" permission that grants read **and write** access. No good.
 
-So what I really want is a token that can *read* but not *write* gists. The proxy can issue its own token. It can keep track of the fact that the token is only allowed to *read* Gists and not write them. When it gets a request for the GitHub API it can check permissions before forwarding them. Something like (in pseudocode):
+So what I really want is a token that can *read* but not *write* gists. The proxy can issue its own token. It can keep track of the fact that the token is only allowed to *read* Gists and not write them. When it gets a request for the GitHub API it can check permissions before forwarding the request and the real token to GitHub.
+
+![Illustration the proxy taking a proxy token and then giving a real token to the GitHub API](../static/proxy-2.png)
+
+This logic might look something like (in pseudocode):
 
 ```python
 token_permissions = get_token_permissions(request.token)
@@ -121,13 +127,19 @@ From [Wikipedia](https://en.wikipedia.org/wiki/Public-key_cryptography):
 
 Okay - so I'll have **two** keys - public and private.
 
+![Illustration of public and private keys](../static/proxy-3.png)
+
 > In such a system, any person can encrypt a message using the receiver's public key, but that encrypted message can only be decrypted with the receiver's private key.
 
 Okay - interesting. So stuff encrypted with the public key (so called *ciphertext*) can be sent *in the clear* and only the holder of the private key can decrypt it. So if I encrypt something with my public key then I'm the only one that can decrypt it.
 
+![Illustration of using a public key to encrypt and a private key to decrypt](../static/proxy-4.png)
+
 > Authentication is also possible. A sender can combine a message with a private key to create a short digital signature on the message. Anyone with the corresponding public key can combine a message, a putative digital signature on it, and the known public key to verify whether the signature was valid, i.e. made by the owner of the corresponding private key.
 
 Okay - so this is super interesting. I could write a note and sign it and verify that no one messed with it.
+
+![Illustration of using a private key to sign and a public key to verify](../static/proxy-5.png)
 
 I have all the spells I need to cast to make the proxy tokens. Let's talk about the right way to cast them.
 
@@ -159,6 +171,8 @@ But I want it to be machine readable so I'll use JSON:
 
 Cool. Of course I can't just hand this token as-is to the thing that's talking to the proxy. The real token is right there in *plaintext*. The app or whatever could just pluck the real token out of the proxy token and bypass the proxy! What I need to do is protect it so that only the proxy can read it.
 
+![Illustration of our exposed real token](../static/proxy-7.png)
+
 Let's cast the first spell. ✨
 
 Remember what Wikipedia taught us about public-key cryptography:
@@ -166,6 +180,8 @@ Remember what Wikipedia taught us about public-key cryptography:
 > In such a system, any person can encrypt a message using the receiver's public key, but that encrypted message can only be decrypted with the receiver's private key.
 
 Perfect!
+
+![Illustration of using the public key to encrypt our API token](../static/proxy-8.png)
 
 To prepare for this spell (and subsequent ones), I'll need a public/private key pair. You can make one with [openssl](https://www.openssl.org/):
 
@@ -226,7 +242,11 @@ Okay. So I now have an encrypted real token. Now I can update the proxy token to
 }
 ```
 
-When the proxy gets the proxy token it can use the **private** key to decrypt the token. Here's an example using the command-line:
+When the proxy gets the proxy token it can use the **private** key to decrypt the token.
+
+![Illustration of using the private key to decrypt our API token](../static/proxy-9.png)
+
+Here's an example using the command-line:
 
 ```bash
 $ REAL_TOKEN=$(echo "${ENCRYPTED_TOKEN}" | base64 -D | openssl rsautl -decrypt -inkey private.pem)
@@ -276,6 +296,8 @@ Let's once again remember what our wise teacher, Wikipedia, told us about public
 > A sender can combine a message with a private key to create a short digital signature on the message. Anyone with the corresponding public key can combine a message, a putative digital signature on it, and the known public key to verify whether the signature was valid, i.e. made by the owner of the corresponding private key.
 
 So I could *sign* the proxy token with my **private key** and if anyone messed with the contents then the signature would be invalid. This is perfect.
+
+![Illustration of using the private key to sign the token](../static/proxy-10.png)
 
 So for the next spell I'm going to take the token and send it through OpenSSL to get a signature for it.
 
@@ -329,6 +351,8 @@ print(signature.decode("utf-8"))
 
 Alright, now I've got a signature. I can send *both* the the proxy token and its signature to the proxy and the proxy can ensure that the token hasn't been tampered with.
 
+![Illustration of sending the proxy token and signature together](../static/proxy-11.png)
+
 In terms of what it looks like to actually send it, I could do something like this:
 
 ```bash
@@ -381,6 +405,12 @@ payload = {
 
 Which is *exactly* what I put in. :)
 
+## Verifying the token
+
+![Illustration of how to verify the token signature](../static/proxy-12.png)
+
+## Tying it all together
+
 This is **really cool**. I now have a token that:
 
 1. Contains the real API token, but only the proxy can read it.
@@ -389,10 +419,6 @@ This is **really cool**. I now have a token that:
 4. Can even be introspected by users of the proxy to see what permissions it has.
 
 Seems pretty magical to me! ✨
-
-## Tying it all together
-
-TODO
 
 ## Gotchas
 
