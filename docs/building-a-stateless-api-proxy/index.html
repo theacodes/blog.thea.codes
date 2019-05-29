@@ -415,7 +415,7 @@ $ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;X-Proxy-
 <p>Seems pretty magical to me! ✨</p>
 <p>There's actually a full implementation of this idea over at <a href="https://github.com/theacodes/magic-github-proxy">https://github.com/theacodes/magic-github-proxy</a>. It's a little under documented, but with this post you should hopefully be well equipped to understand how it works.</p>
 <h2>Gotchas</h2>
-<p>Okay, cryptography isn't <em>actual</em> magic, but it is just as <strong>dangerous</strong>. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully that a real token.</p>
+<p>Okay, cryptography isn't <em>actual</em> magic, but it is just as <strong>dangerous</strong>. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully than a real token.</p>
 <p>Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see <a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate authority</a>.</p>
 <p>Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app.</p>
 <h2>Read more</h2>
