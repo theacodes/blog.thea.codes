@@ -481,7 +481,7 @@ There's actually a full implementation of this idea over at https://github.com/t
 
 Okay, cryptography isn't *actual* magic, but it is just as **dangerous**. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully than a real token.
 
-Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or having managing private/public key pairs (see [Certificate authority](https://en.wikipedia.org/wiki/Certificate_authority).
+Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or by managing multiple private/public key pairs (see [Certificate authority](https://en.wikipedia.org/wiki/Certificate_authority).
 
 Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app.
 
