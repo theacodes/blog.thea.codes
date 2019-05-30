@@ -158,7 +158,8 @@ the same, the domains are different (<code>github-proxy.thea.codes</code> vs <co
 </blockquote>
 <p>Okay - so this is super interesting. I could write a note and sign it and verify that no one messed with it.</p>
 <p><img src="../static/proxy-5.png" alt="Illustration of using a private key to sign and a public key to verify" /></p>
-<p>I have all the spells I need to cast to make the proxy tokens. Let's talk about the right way to cast them.</p>
+<p>You might wonder why I'm choosing to use asymmetric cryptography here instead of symmetric cryptography. While this approach is more complex, it <em>does</em> allow for the users of the proxy to inspect their tokens. We can add additional information such as issue time, expiration, and more. This turned out to be really useful in practice.</p>
+<p>Alright, I have all the spells I need to cast to make the proxy tokens. Let's talk about the right way to cast them.</p>
 <h2>The format of a stateless token</h2>
 <p>Okay, so before I apply the cryptography spells I need to figure out the content of the token. The token basically needs to say &quot;this token can do these things with this github account&quot;. Just like the database option, the token therefore needs this information <em>at minimum</em>:</p>
 <ol>
@@ -190,7 +191,7 @@ permissions: read
 $ openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 </pre>
 <blockquote>
-<p>You can read more about generating RSA pairs <a href="https://en.wikibooks.org/wiki/Cryptography/Generate_a_keypair_using_OpenSSL">here</a>.</p>
+<p><strong>Note</strong>: Past this point, the OpenSSL commands are only for illustrative purposes. OpenSSL's command-line interface is fraught with danger at best. Also, you can read more about generating RSA pairs <a href="https://en.wikibooks.org/wiki/Cryptography/Generate_a_keypair_using_OpenSSL">here</a>.</p>
 </blockquote>
 <p>Okay. Now that I have a private and public key for the proxy I can secure the real token. To do this, I'll encrypted the real token with the <strong>public key</strong>. This means only my <strong>private key</strong> can decrypt it. Since the proxy keeps the private key, well, private, only the proxy itself can decrypt the real API token.</p>
 <p>Here's what encrypting the key looks like with OpenSSL on the command-line:</p>
@@ -203,11 +204,18 @@ aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85
 <pre><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">cryptography.hazmat</span> <span class="k">import</span> <span class="n">backends</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">hashes</span>
 <span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">serialization</span>
 <span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="k">import</span> <span class="n">padding</span>
 
 <span class="n">backend</span> <span class="o">=</span> <span class="n">backends</span><span class="o">.</span><span class="n">default_backend</span><span class="p">()</span>
-<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">()</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">OAEP</span><span class="p">(</span>
+    <span class="n">mgf</span><span class="o">=</span><span class="n">padding</span><span class="o">.</span><span class="n">MGF1</span><span class="p">(</span>
+        <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">()</span>
+    <span class="p">),</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">(),</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 
 <span class="n">public_key_bytes</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;public.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
 <span class="n">public_key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_public_key</span><span class="p">(</span>
@@ -244,11 +252,18 @@ $ <span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${
 <pre><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">cryptography.hazmat</span> <span class="k">import</span> <span class="n">backends</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">hashes</span>
 <span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="k">import</span> <span class="n">serialization</span>
 <span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="k">import</span> <span class="n">padding</span>
 
 <span class="n">backend</span> <span class="o">=</span> <span class="n">backends</span><span class="o">.</span><span class="n">default_backend</span><span class="p">()</span>
-<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">()</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">OAEP</span><span class="p">(</span>
+    <span class="n">mgf</span><span class="o">=</span><span class="n">padding</span><span class="o">.</span><span class="n">MGF1</span><span class="p">(</span>
+        <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">()</span>
+    <span class="p">),</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">(),</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 
 <span class="n">private_key_bytes</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;private.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
 <span class="n">private_key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_private_key</span><span class="p">(</span>
@@ -257,13 +272,12 @@ $ <span class="nb">echo</span> <span class="s2">&quot;</span><span class="si">${
     <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
 <span class="p">)</span>
 
-<span class="n">encrypted_token</span> <span class="o">=</span> <span class="s2">&quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;</span>
+<span class="n">encrypted_token</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>  <span class="c1"># replace with your encrypted token.</span>
 <span class="n">encrypted_token_bytes</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">encrypted_token</span><span class="p">)</span>
 <span class="n">real_token</span> <span class="o">=</span> <span class="n">private_key</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span>
     <span class="n">encrypted_token_bytes</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">real_token</span><span class="p">)</span>
-
 
 <span class="c1"># 7e096a6633471a2c967718d4b435f0ecdac5c426</span>
 </pre>
@@ -296,7 +310,10 @@ Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzd
 <span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="k">import</span> <span class="n">padding</span>
 
 <span class="n">backend</span> <span class="o">=</span> <span class="n">backends</span><span class="o">.</span><span class="n">default_backend</span><span class="p">()</span>
-<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">()</span>
+<span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span><span class="o">.</span><span class="n">PSS</span><span class="p">(</span>
+    <span class="n">mgf</span><span class="o">=</span><span class="n">padding</span><span class="o">.</span><span class="n">MGF1</span><span class="p">(</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">()),</span>
+    <span class="n">salt_length</span><span class="o">=</span><span class="n">padding</span><span class="o">.</span><span class="n">PSS</span><span class="o">.</span><span class="n">MAX_LENGTH</span>
+<span class="p">)</span>
 
 <span class="n">private_key_bytes</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;private.pem&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
 <span class="n">private_key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_private_key</span><span class="p">(</span>
@@ -305,9 +322,10 @@ Tq5G2ZRfxy9+TiVcHU5+RY48CW43UyEDuc2RUtDpUZa16oae0zYXDplwnprqgbZfISs2EC7yCONdFfzd
     <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
 <span class="p">)</span>
 
+<span class="c1"># replace enc_real_token with your encrypted token.</span>
 <span class="n">proxy_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">{</span>
-<span class="s2">    &quot;enc_real_token&quot;: &quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;,</span>
+<span class="s2">    &quot;enc_real_token&quot;: &quot;...&quot;,</span>
 <span class="s2">    &quot;permissions&quot;: [&quot;read&quot;]</span>
 <span class="s2">}</span>
 <span class="s2">&quot;&quot;&quot;</span>
@@ -417,7 +435,7 @@ $ http GET https://github-proxy.thea.codes/gists <span class="s2">&quot;X-Proxy-
 <h2>Gotchas</h2>
 <p>Okay, cryptography isn't <em>actual</em> magic, but it is just as <strong>dangerous</strong>. You should always do security in depth. You should always consult a security engineer. Just because these tokens are more limited in consequence doesn't mean they should be treated any less carefully than a real token.</p>
 <p>Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or by managing multiple private/public key pairs (see <a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate authority</a>).</p>
-<p>Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app.</p>
+<p>Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app. You can also use more sophisticated algorithms such as <a href="https://en.wikipedia.org/wiki/Elliptic-curve_cryptography">Elliptic-curve cryptography</a> for better CPU and space efficiency. There's lots of places to go from here!</p>
 <h2>Read more</h2>
 <p>This post is based on a <em>ton</em> of research and prior art. You can take a look at some of these articles and resources to learn more about how I came up with this idea.</p>
 <ul>

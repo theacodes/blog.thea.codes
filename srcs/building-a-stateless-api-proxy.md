@@ -138,7 +138,9 @@ Okay - so this is super interesting. I could write a note and sign it and verify
 
 ![Illustration of using a private key to sign and a public key to verify](../static/proxy-5.png)
 
-I have all the spells I need to cast to make the proxy tokens. Let's talk about the right way to cast them.
+You might wonder why I'm choosing to use asymmetric cryptography here instead of symmetric cryptography. While this approach is more complex, it *does* allow for the users of the proxy to inspect their tokens. We can add additional information such as issue time, expiration, and more. This turned out to be really useful in practice.
+
+Alright, I have all the spells I need to cast to make the proxy tokens. Let's talk about the right way to cast them.
 
 
 ## The format of a stateless token
@@ -187,7 +189,7 @@ $ openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
 $ openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 ```
 
-> You can read more about generating RSA pairs [here](https://en.wikibooks.org/wiki/Cryptography/Generate_a_keypair_using_OpenSSL).
+> **Note**: Past this point, the OpenSSL commands are only for illustrative purposes. OpenSSL's command-line interface is fraught with danger at best. Also, you can read more about generating RSA pairs [here](https://en.wikibooks.org/wiki/Cryptography/Generate_a_keypair_using_OpenSSL).
 
 Okay. Now that I have a private and public key for the proxy I can secure the real token. To do this, I'll encrypted the real token with the **public key**. This means only my **private key** can decrypt it. Since the proxy keeps the private key, well, private, only the proxy itself can decrypt the real API token.
 
@@ -206,11 +208,18 @@ Or with Python using the [cryptography](https://cryptography.io) library:
 import base64
 import pathlib
 from cryptography.hazmat import backends
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
 backend = backends.default_backend()
-padding = padding.PKCS1v15()
+padding = padding.OAEP(
+    mgf=padding.MGF1(
+        algorithm=hashes.SHA256()
+    ),
+    algorithm=hashes.SHA256(),
+    label=None
+)
 
 public_key_bytes = pathlib.Path("public.pem").read_bytes()
 public_key = serialization.load_pem_public_key(
@@ -257,11 +266,18 @@ Or with Python:
 import base64
 import pathlib
 from cryptography.hazmat import backends
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
 backend = backends.default_backend()
-padding = padding.PKCS1v15()
+padding = padding.OAEP(
+    mgf=padding.MGF1(
+        algorithm=hashes.SHA256()
+    ),
+    algorithm=hashes.SHA256(),
+    label=None
+)
 
 private_key_bytes = pathlib.Path("private.pem").read_bytes()
 private_key = serialization.load_pem_private_key(
@@ -270,13 +286,12 @@ private_key = serialization.load_pem_private_key(
     backend=backend
 )
 
-encrypted_token = "aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA=="
+encrypted_token = "..."  # replace with your encrypted token.
 encrypted_token_bytes = base64.b64decode(encrypted_token)
 real_token = private_key.decrypt(
     encrypted_token_bytes, padding).decode("utf-8")
 
 print(real_token)
-
 
 # 7e096a6633471a2c967718d4b435f0ecdac5c426
 ```
@@ -319,7 +334,10 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
 backend = backends.default_backend()
-padding = padding.PKCS1v15()
+padding = padding.PSS(
+    mgf=padding.MGF1(hashes.SHA256()),
+    salt_length=padding.PSS.MAX_LENGTH
+)
 
 private_key_bytes = pathlib.Path("private.pem").read_bytes()
 private_key = serialization.load_pem_private_key(
@@ -328,9 +346,10 @@ private_key = serialization.load_pem_private_key(
     backend=backend
 )
 
+# replace enc_real_token with your encrypted token.
 proxy_token = """
 {
-    "enc_real_token": "aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==",
+    "enc_real_token": "...",
     "permissions": ["read"]
 }
 """
@@ -483,7 +502,7 @@ Okay, cryptography isn't *actual* magic, but it is just as **dangerous**. You sh
 
 Another big drawback to this approach is that it's basically impossible to revoke a proxy token without some more thinking. There's a few ways you could think of doing it such as revoking the real token (which invalidates all proxy tokens made from that real token), revoking the proxy's private key (invalidates every token), or by managing multiple private/public key pairs (see [Certificate authority](https://en.wikipedia.org/wiki/Certificate_authority)).
 
-Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app.
+Of course, there's a lot I left out. JWTs can actually contain lots of useful claims, such as an expiration time, that can be used by both the proxy and the app. You can also use more sophisticated algorithms such as [Elliptic-curve cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) for better CPU and space efficiency. There's lots of places to go from here!
 
 
 ## Read more
