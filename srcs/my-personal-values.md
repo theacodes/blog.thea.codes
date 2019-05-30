@@ -11,7 +11,7 @@ I am human, and I definitely fall short, but these are the values and ideals I s
 
 ### Humility
 
-Make *space*, not *noise*. Remember that all things are imperfect, especially people, especially ideas, especially me, and especially my ideas. When possible, let go and let others take over. Listen to and consider other ideas, regardless of where they originate. Be open to learning and growing.
+Make *space*, not *noise*. Remember that all things are inperfect, especially people, especially ideas, especially me, and especially my ideas. When possible, let go and let others take over. Listen to and consider other ideas, regardless of where they originate. Be open to learning and growing.
 
 ### Sincerity
 
