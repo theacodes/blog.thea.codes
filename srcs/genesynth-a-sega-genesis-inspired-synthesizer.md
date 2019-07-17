@@ -25,11 +25,13 @@ For these reasons, I set out to re-create this sound in a hardware synthesizer.
 
 ## The modern-day recreation of Genesis sound
 
-<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/558684303%3Fsecret_token%3Ds-ywqmF&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/646940496&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
 The Genesynth uses the same YM2612 6 voice FM synthesis chip as the one used for the Sega Genesis. A [Teensy 3.5](https://www.pjrc.com/store/teensy35.html) interfaces between the chip and MIDI-over-USB providing real-time control of all of the chip's parameters, patch loading, and various polyphony modes.
 
-The synth features a [high-quality audio amplifier](../genesynth-part-3-proper-audio) that far exceeds the original Genesis version while retaining the same filter roll-off. This means that you can *hear* the chip's 9-bit DAC's distortion, or the so-called ["ladder effect"](http://alyjameslab.blogspot.com/2013/06/ym2612-ladder-effect-suite.html) quite clearly, such as during the long sustain parts in this clip:
+The synth features a [high-quality audio amplifier](../genesynth-part-3-proper-audio) that far exceeds the original Genesis version while retaining the same filter roll-off. This means that you can *hear* the chip's 9-bit DAC's distortion, or the so-called ["ladder effect"](http://alyjameslab.blogspot.com/2013/06/ym2612-ladder-effect-suite.html) quite clearly, such as during the long sustain parts in these clips:
+
+<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/558684303%3Fsecret_token%3Ds-ywqmF&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
 <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/524990358%3Fsecret_token%3Ds-vg1gD&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
