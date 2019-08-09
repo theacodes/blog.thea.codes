@@ -25,6 +25,8 @@ For these reasons, I set out to re-create this sound in a hardware synthesizer.
 
 ## The modern-day recreation of Genesis sound
 
+<iframe width="100%" height="600" src="https://www.youtube-nocookie.com/embed/vb1WasXNGOw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/646940496&color=%23433b38&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
 The Genesynth uses the same YM2612 6 voice FM synthesis chip as the one used for the Sega Genesis. A [Teensy 3.5](https://www.pjrc.com/store/teensy35.html) interfaces between the chip and MIDI-over-USB providing real-time control of all of the chip's parameters, patch loading, and various polyphony modes.
