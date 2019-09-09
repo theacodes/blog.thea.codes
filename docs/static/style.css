@@ -60,6 +60,10 @@ h1 {
   color: #8768bb;
 }
 
+h1 .rss {
+  font-size: 50%;
+}
+
 h2, h3, h4, h5, h6 {
   color: #7e57c2;
   margin-top: 1em;
