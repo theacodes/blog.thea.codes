@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Lessons learned from building a custom CircuitPython board</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+
+  
+<meta property="og:title" content="Lessons learned from building a custom CircuitPython board - Thea Flowers">
+
+
+
+
+<meta property="og:image" content="https://blog.thea.codes/static/me.png">
+
+
+
+<meta name="twitter:image:alt" content="Avatar for Thea Flowers">
+
+
+<meta property="og:url" content="https://blog.thea.codes/lessons-learned-from-building-a-circuitpython-board">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theavalkyrie">
+
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>October 06, 2019</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Lessons learned from building a custom CircuitPython board</h1>
+  <content>
+    <p>I've spent the last few months designing a project that runs CircuitPython. Unlike many projects, this project does not use an off-the-shelf CircuitPython development board like Adafruit's <a href="https://www.adafruit.com/product/3857">Feather M4 Express</a> or <a href="https://www.adafruit.com/product/3800">IstyBitsy M4 Express</a>. Instead, I wanted this project to be a single circuit board that contains all of the functional parts of the project - the CPU and its necessary hardware (which would usually be on the development board) as well as the peripherals (things that would generally be on Featherwings or shields). This makes the board smaller, more tightly integrated, and eventually easier to produce in larger quantities.</p>
+<p>However, creating a custom CircuitPython board isn't a trivial process. There were quite a few things I ran into that have become lessons for me in the future. This post collects some of those lessons as a reference to myself as well as hopefully a helpful resource for others that are trying to do something like this. It isn't intended to be a complete guide on how to do this - there's already a couple of those out there. It's intended to be a supplementary list of things to look out for.</p>
+<h2>About my project</h2>
+<p>For context the project I'm building that led to all of this is a <a href="https://en.wikipedia.org/wiki/Eurorack">Eurorack synthesizer module</a>. Modular synthesizers have lots of separate &quot;modules&quot; that perform specialized functions. You connect these modules together using <a href="https://en.wikipedia.org/wiki/Patch_cable">patch cables</a> and they use voltage signals to talk to one another. My project is used to convert <a href="https://en.wikipedia.org/wiki/MIDI">MIDI</a> messages into voltages to control various parts of the synthesizer. The project has several components - the CPU for processing MIDI data, a DAC for converting digital values to analog voltage, <a href="https://www.electronics-tutorials.ws/opamp/opamp_1.html">op amps</a> to scale the output of the DAC to voltages that adhere to Eurorack standards, and a logic level shifter to convert for a handful of digital outputs. It also has some distinct power requirements - Eurorack gives the module +12, -12, and ground. The board has a set of power regulators to get the correct voltages to various components.</p>
+<p>Here's a picture of the finished board with various sections highlighted:</p>
+<p><img src="../static/2019-10-06/sol-annotated.jpg" alt="" /></p>
+<p>Note that this project is still not quite done, but I'm far enough along to share some parts of it here. :)</p>
+<h2>Start from an existing board design</h2>
+<p>The absolute best thing that you can do to set yourself up for success is work from an existing CircuitPython board's design. In my case, I based the design off the <a href="https://www.adafruit.com/product/3857">Adafruit Feather M4 Express</a> and the <a href="https://www.sparkfun.com/products/14713">Sparkfun Thing Plus</a>. The schematics for both of these boards are readily available (<a href="https://learn.adafruit.com/adafruit-feather-m4-express-atsamd51/downloads">Feather</a>, <a href="https://cdn.sparkfun.com/assets/8/2/1/d/f/SAMD51_Thing_Plus_v10.pdf">Thing</a>). Both boards use the <a href="https://www.microchip.com/wwwproducts/en/ATSAMD51J19A">Atmel SAMD51 CPU</a>, a very capable CPU for CircuitPython. Many development boards will contain all of the essentials to run the CPU and little else. You can start your board by reconstructing the schematic for an existing board and making modifications as needed.</p>
+<p>There are <em>lots</em> of benefits from working from an existing board. A lot of the guesswork will have already been done for you. You'll be able to use the reference board to test your peripherals (more on that later). You'll have a much easier time porting CircuitPython and the bootloader as well (more on that later, too).</p>
+<p>In my case, there were several things present on the reference boards that I didn't need. Since this board would be powered by the Eurorack connector, I didn't need the battery charging circuit and switching logic. I swapped all of that out for a simple <a href="https://www.st.com/en/power-management/ld1117.html">LD1117</a>-based 3.3v linear regulator that converts the +12v from the Eurorack connector to 3.3v for the CPU. I also didn't bother with the tiny red LED that's usually wired to <code>board.D13</code>. Also keep in mind that you don't need to put in all of the connections for the digital and analog pins that are broken out on the development board. Since everything will be integrated you can make those connections directly to your peripherals. It might be useful to break a few spare ones out for debugging or future expansion (like adding a <a href="https://learn.adafruit.com/introducing-adafruit-stemma-qt">STEMMA connector</a>).</p>
+<h2>Read the CPU datasheet. Over and over.</h2>
+<p>The Feather uses a <a href="https://www.microchip.com/wwwproducts/en/ATSAMD51J19A">ATSAMD51J19A</a>. I decided to actually use the ATSAMD51<strong>20</strong>A, which is the same chip with slightly more memory. They have the same <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/60001507E.pdf">datasheet</a>. It's extremely important to review the datasheet <strong>several</strong> times. I mean, you don't have to review the whole thing (it's a couple of thousand pages) but there is this very important section titled &quot;Schematic Checklist&quot;. The datasheet for most CPUs will have a similar section. When designing your own board you should go through that section several times to ensure you've given the little chip the best possible chance of working as expected.</p>
+<p>One thing that was important for my design is that CPU has several modes for its power supply. The Feather has the hardware needed to use a feature called &quot;switching power mode&quot; that helps with efficiency (useful for battery powered board) but my project doesn't need that and I could reduce the part count by using &quot;linear mode only&quot;. I had to thoroughly review this part of the datasheet to properly design the power supply section.</p>
+<p>Triple check the CPU datasheet to make sure you don't miss anything. I actually somehow managed to forget to apply 3.3v to <code>VDDIO</code> in my first board revision so I didn't even power the CPU! It was an easy enough thing to <a href="https://www.techopedia.com/definition/17992/blue-wire">bodge</a>, but still.</p>
+<h2>Proof of concept peripherals</h2>
+<p>As mentioned earlier, one of the benefits of working with an existing board as your reference is that it gives you a chance to build a proof of concept with the peripherals that you plan to use.</p>
+<p>In my case, I wanted to build some proof of concepts for the power supply section and the DAC that I'd be using. So I took a Feather M4 Express and got to work. You can use breadboards and through-hole components if you want, but in my case the DAC I wanted to use was surface mount only.</p>
+<p>So I created a small breakout board for the DAC:</p>
+<p><img src="../static/2019-10-06/dac-breakout.jpg" alt="" /></p>
+<p>This let me hook the DAC up to the Feather and write a little Python library to control it without having to get too heavily invested in my board. As an added bonus, I also got a nice DAC breakout board for future prototyping <em>and</em> now had the schematics for the DAC section ready to integrate into the final project.</p>
+<p>I also did the same with the power supply section. I built a small breakout board that took the Eurorack power connection and used linear regulators to provide +5v and +3.3v:</p>
+<p><img src="../static/2019-10-06/power-breakout.jpg" alt="" /></p>
+<p>This was a little tricker than the DAC as you have to do some special stuff to let the Feather be externally powered (<a href="https://learn.adafruit.com/adafruit-feather-m4-express-atsamd51/power-management#alternative-power-options-5-14">more details here</a>). But it was worth it to prove out the tricky power supply section.</p>
+<p>Doing these kinds of prototype/proof of concept builds with your peripherals is a great way to inch closer to your final project while providing yourself with a wealth of useful components for future projects. In the end, designing the final schematic for my project was a lot easier as I was able to combine the schematics from these breakouts and the modified Feather schematic.</p>
+<h2>Check before selecting a flash chip</h2>
+<p>Most projects will likely want to use an external flash memory chip to store the project code as the CPU has relatively limited storage. Before you go and just order any old QSPI flash chip it's useful to take a look at the ones that CircuitPython already has configuration for. I used <a href="https://github.com/adafruit/circuitpython/blob/master/supervisor/shared/external_flash/devices.h">this file</a> as a reference when selecting my QSPI flash chip. Thankfully most of these chips have the exact same pinout so it's easy to switch if you need to, but in my experience it saves a lot of headache if you just get one that CircuitPython already knows about to start with.</p>
+<h2>Double, double check your parts before ordering</h2>
+<p>I made the mistake of ordering the <a href="https://en.wikipedia.org/wiki/Quad_Flat_No-leads_package">QFN</a> version of the CPU during my first order. QFN parts have no external pins and are basically impossible to solder by hand. I had intended to order the <a href="https://en.wikipedia.org/wiki/Quad_Flat_Package">QFP</a> version. You'll also notice that lots of mass produced professional development boards will use extremely tiny surface mount passive components. While you'll most certainly want to use surface mount passives for the CPU, you don't need to torture yourself with itty bitty parts. I used 1210-sized components that were more than reasonably sized for hand soldering without being too large and cumbersome to deal with. Just make sure to double check when ordering you parts that you get the right package and size before ordering stuff. I actually managed to order an <em>extremely</em> tiny crystal for my project but it turns out I had the right footprint for it, so, it very luckily worked out.</p>
+<h2>Include a programming header</h2>
+<p>It isn't always obvious but lots of professional development boards do not include programming headers so you won't see them in the schematic. Sometimes they include them in non-obvious ways such as with <a href="https://en.wikipedia.org/wiki/Pogo_pin">Pogo pins</a>. You'll want to make sure to include some sort of programming header on your custom board. I suggest using the <a href="http://infocenter.arm.com/help/topic/com.arm.doc.faqs/attached/13634/cortex_debug_connectors.pdf">10-pin Cortex Debug (SWD) header</a>. Sparkfun has it in their <a href="https://github.com/sparkfun/SparkFun-KiCad-Libraries">footprint libraries</a> as <code>2X5-PTH-1.27MM</code> and the pin headers are <a href="https://www.mouser.com/ProductDetail/855-M50-3500542">Mouser Part Number #855-M50-3500542</a>. There is also a super nice <a href="https://www.adafruit.com/product/752">surface mount version</a>.</p>
+<p>Of course, to actually program the board you'll need some sort of programmer to plug into the programming header. I use a J-Link. There's an <a href="https://www.adafruit.com/product/3571">educational</a> and <a href="https://www.adafruit.com/product/2209">commercial</a> version available from Adafruit.</p>
+<h2>Only populate what you need at first</h2>
+<p>While creating this board I was also learning how to use surface mount parts and learning to do <a href="https://www.sparkfun.com/tutorials/59">hot plate reflow soldering</a>. On my first revision I actually populated the entire board and it didn't work. I had <em>no</em> idea how to go about figuring out what was wrong. Thankfully a friend of mine helped me by removing parts one by one until the board stopped shorting out (thanks, Scott!). It turned out to be an incorrectly installed Neopixel that was causing the short. However, it would have been a lot easier (and cheaper) to just put the minimal amount of parts on the board to see if things are working.</p>
+<p>For the second revision I populated the 3.3v regulator (and its passives), the SAMD51 (and its passives), and the programming header and verified that they worked before continuing to populate the rest. I still used the hot plate to reflow solder the QFP SAMD51 and spare myself the pain of hand soldering that. I then hand-soldered the rest of the components on one by one - verifying their operation as I went. This was <em>much</em> more cost and time effective even if it were just a bit tedious.</p>
+<h2>Bootloader - you actually need it!</h2>
+<p>I had incorrectly assumed that I could just flash my CircuitPython build to the board using the J-Link and it would work. It turns out I was completely wrong - you <em>do</em> need a bootloader to run CircuitPython (it's probably possible to build without needing one but I haven't found instructions for that). If you flash it to your board and read back your board's memory you'll notice that there's a big blank chunk of memory at the beginning of the address space. CircuitPython leaves that around for the bootloader!</p>
+<p>You'll need to clone the <a href="https://github.com/adafruit/uf2-samdx1">UF2 Bootloader repository</a> and configure it for your board. If your board is functionally the same as your reference board you can likely just build the bootloader for your reference board and flash it to your chip. Otherwise, copy your reference board's folder under <code>./boards</code> and modify whatever you need. In my case I just had to update the chip variant.</p>
+<h2>Building CircuitPython</h2>
+<p>Finally we get to building CircuitPython. Again, working from an existing board helps here. You can copy the reference board's configuration and modify to your needs. There's a <a href="https://learn.adafruit.com/how-to-add-a-new-board-to-circuitpython/customizing-the-board-files">in-depth guide</a> for that.</p>
+<p>Once it's built - flash it to the device using the programmer or bootloader and you're ready to go!</p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>

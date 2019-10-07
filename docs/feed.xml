@@ -9,6 +9,13 @@
 
   
   <item>
+    <title>Lessons learned from building a custom CircuitPython board</title>
+    <link>https://blog.thea.codes/lessons-learned-from-building-a-circuitpython-board</link>
+    <guid>https://blog.thea.codes/lessons-learned-from-building-a-circuitpython-board</guid>
+    <pubDate>Sun, 06 Oct 2019 12:00:00 Z</pubDate>
+  </item>
+  
+  <item>
     <title>Building a stateless API proxy</title>
     <link>https://blog.thea.codes/building-a-stateless-api-proxy</link>
     <guid>https://blog.thea.codes/building-a-stateless-api-proxy</guid>
