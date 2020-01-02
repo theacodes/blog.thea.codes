@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Thoughts on #CircuitPython2020</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+
+  
+<meta property="og:title" content="Thoughts on #CircuitPython2020 - Thea Flowers">
+
+
+<meta property="og:description" content="Things I'd like to see from CircuitPython.">
+
+
+
+<meta property="og:image" content="https://blog.thea.codes/static/me.png">
+
+
+
+<meta name="twitter:image:alt" content="Avatar for Thea Flowers">
+
+
+<meta property="og:url" content="https://blog.thea.codes/thoughts-on-circuitpython-2020">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theavalkyrie">
+
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>January 02, 2020</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Thoughts on #CircuitPython2020</h1>
+  <content>
+    <p>Since I switched over to the <a href="https://flutter.dev">Flutter</a> team at Google in 2019, I've shifted my programming outside of work to focus on CircuitPython rather than Python. In the last half of 2019, I started creating CircuitPython libraries (like <a href="https://github.com/theacodes/Winterbloom_VoltageIO">VoltageIO</a> and <a href="https://github.com/theacodes/Winterbloom_SmolMIDI">SmolMIDI</a>), contributing to CircuitPython itself, and even creating my <a href="../lessons-learned-from-building-a-circuitpython-board">own board</a>.</p>
+<p>Adafruit has <a href="https://blog.adafruit.com/2020/01/01/what-do-you-want-from-circuitpython-in-2020-circuitpython2020-circuitpython/">asked the community</a> where we'd like to see CircuitPython go in 2020. Here's (some of) my thoughts on the subject.</p>
+<h2>Projects I'd like to build</h2>
+<p>My main goal for 2020 is to finish and start selling my first CircuitPython-based product, Winterbloom Sol. It's a module for the <a href="">Eurorack</a> modular synthesizer format that handles translation from USB MIDI to control voltage and gate. It's unique compared to similar products in that it's easily customizable and re-programmable thanks to CircuitPython. It's my plan to have these ready to ship in March.</p>
+<p><img src="../static/sol.jpeg" alt="" /></p>
+<p>Beyond that I hope to start designing two more Eurorack modules using CircuitPython as the brain. I would also like to start designing a standalone synthesizer using CircuitPython - perhaps, even, a follow-up to the <a href="../genesynth-a-sega-genesis-inspired-synthesizer">Genesynth</a>.</p>
+<h2>Things I think could be easier</h2>
+<p>Debugging. While pulling up the serial console and grabbing a traceback or interacting with the REPL is second nature to me since I've been programming most of my life, it's not the most straightforward things for newcomers. Mu helps a lot here, but it requires you to install something. <a href="https://wicg.github.io/webusb/">WebUSB</a>, <a href="https://github.com/WICG/serial/wiki">WebSerial</a>, or even <a href="https://en.wikipedia.org/wiki/Bluetooth_Low_Energy">BLE</a> could be used to help users debug their code without installing <em>anything</em> on their device, and do so from machines where installing stuff isn't feasible (like Chromebooks).</p>
+<p>I would love for an easier route to writing C extensions that doesn't involve a custom build of CircuitPython. As I start building more and more synthesizers with CircuitPython, my need to write C modules specific to that synth grows, and I don't necessarily want to have to fork CircuitPython or commit that board-specific code upstream.</p>
+<p>Installing updates and packages. I have lots of thoughts about this and they're covered below.</p>
+<h2>Core CPython libraries to add</h2>
+<p>Making an optimized <a href="https://docs.python.org/3/library/colorsys.html"><code>colorsys</code></a> available would be excellent. Lots of people do projects with shiny LEDs and being able to translate between color systems easily and quickly is super important.</p>
+<p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass">Dataclasses</a> would be excellent, especially if they have typing support.</p>
+<p>f-string support would be lovely.</p>
+<h2>Additional microcontroller platforms</h2>
+<p>I would love to see support for the <a href="https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/i.mx-rt-series:IMX-RT-SERIES">i.MX RT</a> line which is used in the <a href="https://www.pjrc.com/store/teensy40.html">Teensy 4.0</a>. They are ridiculously fast and have lots of RAM. It seems <a href="https://www.hackster.io/news/the-i-mx-rt-family-makes-for-some-feature-filled-feathers-1210a63f8ef7">Arturo is already working on this</a>. :)</p>
+<h2>Library improvements - package management</h2>
+<p>CircuitPython's package management story right now is extremely basic- both from a library publishers and consumer standpoint. The workflow for publishers is to publish a <code>.py</code> file (for single file modules) or a <code>.zip</code> (for packages) an optionally compile to <code>.mpy</code> using <code>mpy-cross</code>. For consumers, it's a strategy of downloading this file/zip manually and placing it in <code>CIRCUITPY/lib</code>. It's difficult to know what can be upgraded and how to go find the latest version. It's hard for tutorials and samples to be reproducible.</p>
+<p>Having spent <em>so much</em> time working in the Python packaging ecosystem I think that CircuitPython is uniquely positioned to present a new answer to the question of how to manage packages. I <strong>do not</strong> think that CircuitPython should adopt pip, conda or any other purely command-line focused package management solution. I think that as a community we should work to build something that can serve our use case better - something that's easy to use for someone who has never even heard of a command line.</p>
+<p>I have so many thoughts on this. I would really love to find the time to seriously work on a comprehensive packaging experience for CircuitPython. I've written up some thoughts privately, if you're really interested and enthusiastic about this, please feel free to contact me.</p>
+<h2>Documentation improvements</h2>
+<p>My biggest personal frustration with CircuitPython documentation is that it's often hard for me to find links to the API reference docs on readthedocs. I'd love to see the guides link into readthedocs when they mention modules and classes.</p>
+<h2>In closing</h2>
+<p>I love CircuitPython. The community that we've built around Python-on-hardware is absolutely amazing and it's been one of the most rewarding interactions I've had with any technical community in my life. I really, really want to see this community continue to grow and become a significant part of the Python ecosystem - right alongside web development, data science, and system administration.</p>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>
