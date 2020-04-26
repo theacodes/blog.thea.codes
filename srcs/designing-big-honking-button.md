@@ -23,11 +23,11 @@ For Big Honking Button, I started with two very similar boards: The [Adafruit Tr
 - It's fast enough to run CircuitPython
 - It has enough ram to load and playback samples
 - It's very cheap ($3-4 at quantity)
-- It has pretty minimal support circuity needed
+- It has pretty minimal support circuitry needed
 - It can run without a crystal which reduces the part count and cost
 - It supports external flash
 
-All of these make it good candidates for the Big Honking Button. I wanted Big Honking Button to be affordable and customizable, so picking a cheap micro that can run CircuitPython and needs minimal external circuity is a big win all around.
+All of these make it good a candidate for the Big Honking Button. I wanted Big Honking Button to be affordable and customizable, so picking a cheap micro that can run CircuitPython and needs minimal external circuitry is a big win all around.
 
 These boards also gave me obvious selections for a few other components - most notably the 3.3v regulator and flash chip. We'll get to that later.
 
@@ -56,12 +56,12 @@ This is the schematic section for the flash chip:
 
 ![Flash schematic](../static/honk-sch-2.png)
 
-This is about as standard as it comes. The flash is wired to the microcontroller via SPI. Faster/bigger chips can benefit from a quad SPI configuration, but it's really not needed here. R12 acts the the necessary pull-up resistor on `FLASH_CS` and is specified in the datasheet.
+This is about as standard as it comes. The flash is wired to the microcontroller via SPI. Faster/bigger chips can benefit from a quad SPI configuration, but it's really not needed here. R12 acts as the necessary pull-up resistor on `FLASH_CS` and is specified in the datasheet.
 
 
 ## Power
 
-Power in the Eurorack world is pretty interesting. A Eurorack power supply you typically provides +12v, -12v, and ground connections. Because the microcontroller works at 3.3v and some of the peripherals operate at 5v (more on that later), the voltage needs to be stepped down.
+Power in the Eurorack world is pretty interesting. A Eurorack power supply typically provides +12v, -12v, and ground connections. Because the microcontroller works at 3.3v and some of the peripherals operate at 5v (more on that later), the voltage needs to be stepped down.
 
 Some more sophisticated and power-hungry modules will use switching DC-DC converters for this, but since Big Honking Button is a relatively simple module with very low power needs (the final revision draws just 25mA from the +12v line) I went with simple linear regulators.
 
@@ -78,7 +78,7 @@ The second regulator is a [Diodes Incorporated AP2112K-3.3](https://www.diodes.c
 
 ## Gate in
 
-The gate in circuity fills two roles:
+The gate in circuitry fills two roles:
 
 - It translates the logic level from Eurorack gate levels (5v to 10v) to a level that's suitable for the microcontroller (3.3v)
 - Sets the input impedance for the inputs. In the Eurorack world, it's good to have this relatively high. From what I can tell, most manufacturers use 100k as the input impedance.
@@ -94,7 +94,7 @@ This uses a common NPN transistor, the [2N3904](https://en.wikipedia.org/wiki/2N
 
 ## Gate out
 
-The gate out circuity fills two roles:
+The gate out circuitry fills two roles:
 
 - It translates the logic level from the microcontroller's 3.3v to 5v to fit with Eurorack standards.
 - It sets the output impedance. In the Eurorack world, it's good to have this around ~1kΩ.
@@ -103,7 +103,7 @@ Here's the schematic:
 
 ![Gate out schematic](../static/honk-sch-5.png)
 
-This uses a [74AHCT1G125 single bus driver](https://www.diodes.com/assets/Datasheets/74AHCT1G125.pdf). These chips are great for shifting logic levels and providing a buffered output and are extremely cheap. I could've used a transistor, but I would likely need to add additional circuity to buffer the output and ensure the 1kΩ output impedance. R11 sets the output impedance.
+This uses a [74AHCT1G125 single bus driver](https://www.diodes.com/assets/Datasheets/74AHCT1G125.pdf). These chips are great for shifting logic levels and providing a buffered output and are extremely cheap. I could've used a transistor, but I would likely need to add additional circuitry to buffer the output and ensure the 1kΩ output impedance. R11 sets the output impedance.
 
 
 ## Audio out
@@ -142,7 +142,7 @@ This is a little complicated so stay with me here. I'll take this one section at
 
 Starting from the left there is a -10v reference. This is created using an [LM4040-10v](http://www.ti.com/lit/ds/symlink/lm4040-n.pdf?ts=1587848930840) zener diode. R1 provides the required current for the zener diode to work. It provides about 1mA which is well within the zener diode's operating range of 100uA to 15mA. This -10v reference is important as it serves as one of the two inputs into our summing amplifier. More on that in a second.
 
-Next is the two inputs to the summing mixer. R5 sets the input impedance to 100kΩ - exactly what we need for Eurorack. The rest of the resistors in the amp are based on that value. R6 sets the gain for the -10v reference. R7 is the feedback resistor that sets the overall gain for the amplifier, and C15 forms a active low pass filter to prevent ringing just like in the audio out section.
+Next is the two inputs to the summing mixer. R5 sets the input impedance to 100kΩ - exactly what we need for Eurorack. The rest of the resistors in the amp are based on that value. R6 sets the gain for the -10v reference. R7 is the feedback resistor that sets the overall gain for the amplifier, and C15 forms an active low pass filter to prevent ringing just like in the audio out section.
 
 This circuit accomplishes scaling and offsetting by way of the value of R6 - the gain for the -10v reference. Applying the [inverting amplifier transfer function](https://masteringelectronicsdesign.com/how-to-derive-the-inverting-amplifier-transfer-function/) `-(Vin * Rf / Rin) = Vout` we get `-(-10v * 82kΩ / 510kΩ) = 1.608v`. This means whatever input is coming into CV in is added to `1.608v`.
 

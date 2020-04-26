@@ -64,11 +64,11 @@
 <li>It's fast enough to run CircuitPython</li>
 <li>It has enough ram to load and playback samples</li>
 <li>It's very cheap ($3-4 at quantity)</li>
-<li>It has pretty minimal support circuity needed</li>
+<li>It has pretty minimal support circuitry needed</li>
 <li>It can run without a crystal which reduces the part count and cost</li>
 <li>It supports external flash</li>
 </ul>
-<p>All of these make it good candidates for the Big Honking Button. I wanted Big Honking Button to be affordable and customizable, so picking a cheap micro that can run CircuitPython and needs minimal external circuity is a big win all around.</p>
+<p>All of these make it good a candidate for the Big Honking Button. I wanted Big Honking Button to be affordable and customizable, so picking a cheap micro that can run CircuitPython and needs minimal external circuitry is a big win all around.</p>
 <p>These boards also gave me obvious selections for a few other components - most notably the 3.3v regulator and flash chip. We'll get to that later.</p>
 <h2>Designing the microcontroller section</h2>
 <p>As mentioned, the SAM D21 is actually pretty easy to work with. It mostly requires a few bypass capacitors. Here's the schematic:</p>
@@ -86,9 +86,9 @@
 <p>Thankfully, most flash chips have the same pinouts. This is good to know if you ever need to swap them out due to limited availability or if you want to upgrade to a chip with more capacity.</p>
 <p>This is the schematic section for the flash chip:</p>
 <p><img src="../static/honk-sch-2.png" alt="Flash schematic" /></p>
-<p>This is about as standard as it comes. The flash is wired to the microcontroller via SPI. Faster/bigger chips can benefit from a quad SPI configuration, but it's really not needed here. R12 acts the the necessary pull-up resistor on <code>FLASH_CS</code> and is specified in the datasheet.</p>
+<p>This is about as standard as it comes. The flash is wired to the microcontroller via SPI. Faster/bigger chips can benefit from a quad SPI configuration, but it's really not needed here. R12 acts as the necessary pull-up resistor on <code>FLASH_CS</code> and is specified in the datasheet.</p>
 <h2>Power</h2>
-<p>Power in the Eurorack world is pretty interesting. A Eurorack power supply you typically provides +12v, -12v, and ground connections. Because the microcontroller works at 3.3v and some of the peripherals operate at 5v (more on that later), the voltage needs to be stepped down.</p>
+<p>Power in the Eurorack world is pretty interesting. A Eurorack power supply typically provides +12v, -12v, and ground connections. Because the microcontroller works at 3.3v and some of the peripherals operate at 5v (more on that later), the voltage needs to be stepped down.</p>
 <p>Some more sophisticated and power-hungry modules will use switching DC-DC converters for this, but since Big Honking Button is a relatively simple module with very low power needs (the final revision draws just 25mA from the +12v line) I went with simple linear regulators.</p>
 <p>Here's the schematic for the power section:</p>
 <p><img src="../static/honk-sch-3.png" alt="Power schematic" /></p>
@@ -96,7 +96,7 @@
 <p>Now, the regulators. The first regulator is a very run-of-the-mill <a href="http://www.ti.com/lit/ds/symlink/lm340.pdf">LM7805</a> 5v linear regulator. It steps +12v down to +5v. This part is honestly the most &quot;careless&quot; choice in the design - I picked it solely because it's simple, I'm familiar with it, and it's cheap. There are certainly better parts that could've been used. For example, the <a href="http://www.ti.com/lit/ds/symlink/lm2936.pdf?ts=1587801149731">LM2936</a> provides enough current capacity (50mA) and has a much lower quiescent current. However, since Eurorack is generally not battery powered I am not quite as concerned with shaving off mAs. One benefit of the LM7805 is that it requires very simple ceramic capacitors for stable operation. C3, C5, and C17 fill that role.</p>
 <p>The second regulator is a <a href="https://www.diodes.com/assets/Datasheets/AP2112.pdf">Diodes Incorporated AP2112K-3.3</a>. It steps down +5v to +3.3v. This regulator was actually chosen because it's very commonly used in Adafruit boards and I didn't have a good reason to go against their suggestion. It has pretty good accuracy (±1.5%) and great load (0.2%/A) and line (0.02%/V) regulation. Since it's downstream from the 5v regulator, it also benefits from the line conditioning done by that regulator. This is all more than good enough for the digital circuits that use it. Like the LM7805, it requires only simple ceramic input and output capacitors and C2, C6, and C8 fill that role.</p>
 <h2>Gate in</h2>
-<p>The gate in circuity fills two roles:</p>
+<p>The gate in circuitry fills two roles:</p>
 <ul>
 <li>It translates the logic level from Eurorack gate levels (5v to 10v) to a level that's suitable for the microcontroller (3.3v)</li>
 <li>Sets the input impedance for the inputs. In the Eurorack world, it's good to have this relatively high. From what I can tell, most manufacturers use 100k as the input impedance.</li>
@@ -106,14 +106,14 @@
 <div class="image-caption"><a href="http://tinyurl.com/y784r762" target="_blank">Simulation</a></div>
 <p>This uses a common NPN transistor, the <a href="https://en.wikipedia.org/wiki/2N3904">2N3904</a>, to perform logic level conversion. R8 sets the input impedance to 100kΩ. R9 serves as the load resistor for the transistor as well as a pull-up for the microcontroller pin. When the gate in voltage is less than ~0.7v, the transistor switches off and the pull-up gives the microcontroller 3.3v - logic high. When the gate in voltage is greater than ~0.7v, the transistor switches on and creates a lower resistance path to ground so the microcontroller sees 0v - logic low. Note that this arrangement is inverting - gate in high is logic low, and gate in low is logic high.</p>
 <h2>Gate out</h2>
-<p>The gate out circuity fills two roles:</p>
+<p>The gate out circuitry fills two roles:</p>
 <ul>
 <li>It translates the logic level from the microcontroller's 3.3v to 5v to fit with Eurorack standards.</li>
 <li>It sets the output impedance. In the Eurorack world, it's good to have this around ~1kΩ.</li>
 </ul>
 <p>Here's the schematic:</p>
 <p><img src="../static/honk-sch-5.png" alt="Gate out schematic" /></p>
-<p>This uses a <a href="https://www.diodes.com/assets/Datasheets/74AHCT1G125.pdf">74AHCT1G125 single bus driver</a>. These chips are great for shifting logic levels and providing a buffered output and are extremely cheap. I could've used a transistor, but I would likely need to add additional circuity to buffer the output and ensure the 1kΩ output impedance. R11 sets the output impedance.</p>
+<p>This uses a <a href="https://www.diodes.com/assets/Datasheets/74AHCT1G125.pdf">74AHCT1G125 single bus driver</a>. These chips are great for shifting logic levels and providing a buffered output and are extremely cheap. I could've used a transistor, but I would likely need to add additional circuitry to buffer the output and ensure the 1kΩ output impedance. R11 sets the output impedance.</p>
 <h2>Audio out</h2>
 <p>The SAM D21 has a single 10-bit DAC. This DAC outputs 0v to 3.3v, so I needed to do a few things to it to make it suitable for Eurorack:</p>
 <ul>
@@ -134,7 +134,7 @@
 <div class="image-caption"><a href="http://tinyurl.com/y8yrsekr" target="_blank">Simulation</a></div>
 <p>This is a little complicated so stay with me here. I'll take this one section at a time and introduce the components and their roles and then discuss how it all fits together.</p>
 <p>Starting from the left there is a -10v reference. This is created using an <a href="http://www.ti.com/lit/ds/symlink/lm4040-n.pdf?ts=1587848930840">LM4040-10v</a> zener diode. R1 provides the required current for the zener diode to work. It provides about 1mA which is well within the zener diode's operating range of 100uA to 15mA. This -10v reference is important as it serves as one of the two inputs into our summing amplifier. More on that in a second.</p>
-<p>Next is the two inputs to the summing mixer. R5 sets the input impedance to 100kΩ - exactly what we need for Eurorack. The rest of the resistors in the amp are based on that value. R6 sets the gain for the -10v reference. R7 is the feedback resistor that sets the overall gain for the amplifier, and C15 forms a active low pass filter to prevent ringing just like in the audio out section.</p>
+<p>Next is the two inputs to the summing mixer. R5 sets the input impedance to 100kΩ - exactly what we need for Eurorack. The rest of the resistors in the amp are based on that value. R6 sets the gain for the -10v reference. R7 is the feedback resistor that sets the overall gain for the amplifier, and C15 forms an active low pass filter to prevent ringing just like in the audio out section.</p>
 <p>This circuit accomplishes scaling and offsetting by way of the value of R6 - the gain for the -10v reference. Applying the <a href="https://masteringelectronicsdesign.com/how-to-derive-the-inverting-amplifier-transfer-function/">inverting amplifier transfer function</a> <code>-(Vin * Rf / Rin) = Vout</code> we get <code>-(-10v * 82kΩ / 510kΩ) = 1.608v</code>. This means whatever input is coming into CV in is added to <code>1.608v</code>.</p>
 <p>That fixed voltage plus the CV in ends up in the range of 0v to 3.3v for the input range of -2v to +2v. Applying the same transfer function for the minimum and maximum input voltage and summing them with the fixed voltage from the regulator shows this:</p>
 <ul>
