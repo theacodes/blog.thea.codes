@@ -173,3 +173,10 @@ footer {
     margin-top: 1em;
   }
 }
+
+.image-caption {
+  display: block;
+  text-align: center;
+  margin-top: -2em;
+  margin-bottom: 3em;
+}
