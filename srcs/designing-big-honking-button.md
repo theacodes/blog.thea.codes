@@ -5,11 +5,21 @@ legacy_url: yes
 description: A deep dive into the hardware that's inside my silly sampler.
 ---
 
-[Winterbloom's](https://winterbloom) [Big Honking Button](https://winterbloom.com/store/winterbloom-big-honking-button) has quickly become my best seller. It's a relatively simple and silly Eurorack module that can also be used as a basic sampler. This post will explore the hardware design of Big Honking Button and discuss the different circuit designs and component selections. It should hopefully be pretty approachable even to electronics newcomers. Also, as a disclaimer: I am not an electrical engineer. I still consider myself a hobbyist, and I'm certain I made some mistakes in this design and I might not be completely correct in my analysis and descriptions here. If you notice an error, please feel free to reach out to me and let me know! I'll be happy for the opportunity to learn more.
+[Winterbloom's](https://winterbloom.com) [Big Honking Button](https://winterbloom.com/store/winterbloom-big-honking-button) has quickly become my best seller. It's a relatively simple and silly [Eurorack](https://en.wikipedia.org/wiki/Eurorack) module that can also be used as a basic sampler. This post will explore the hardware design of Big Honking Button and discuss the different circuit designs and component selections. It should hopefully be pretty approachable even to electronics newcomers. Also, as a disclaimer: I am not an electrical engineer. I still consider myself a hobbyist, and I'm certain I made some mistakes in this design and I might not be completely correct in my analysis and descriptions here. If you notice an error, please feel free to reach out to me and let me know! I'll be happy for the opportunity to learn more.
 
 ![Big Honking Button](../static/honk.png)
 
+<div class="image-caption"><a href="https://winterbloom.com/store/winterbloom-big-honking-button" target="_blank">Store</a></div>
+
 Also, all of Big Honking Button's hardware design and firmware are open source. You can find the source files on [GitHub](https://github.com/theacodes/Winterbloom-Big-Honking-Button).
+
+## Eurorack?
+
+If you aren't familiar with Eurorack, no worries! Eurorack is a modular synthesizer format- basically, instead of having one big synthesizer you have a bunch of smaller modules and you route signals between them to control how the synthesizer works, and therefore how the synthesizer sounds. Big Honking Button is one of these modules - specifically, Big Honking Button makes sounds that can be manipulated and transformed by other modules.
+
+![Euorack synthesizer](https://upload.wikimedia.org/wikipedia/commons/e/e2/Eurorack_Modular_Synthesizer.jpg)
+
+<div class="image-caption"><a href="https://commons.wikimedia.org/wiki/File:Eurorack_Modular_Synthesizer.jpg" target="_blank">Paul Anthony / CC BY-SA</a></div>
 
 
 ## A starting point
@@ -21,7 +31,7 @@ All of my projects generally start by selecting a development board (like the [A
 For Big Honking Button, I started with two very similar boards: The [Adafruit Trinket M0](https://www.adafruit.com/product/3500) and the [Adafruit Feather M0 Express](https://www.adafruit.com/product/3403). Both of these boards use the [Microchip/Atmel SAM D21](http://ww1.microchip.com/downloads/en/devicedoc/40001884a.pdf) microcontrollers. This chip has a few good things for this project:
 
 - It's fast enough to run CircuitPython
-- It has enough ram to load and playback samples
+- It has enough RAM to load and playback samples
 - It's very cheap ($3-4 at quantity)
 - It has pretty minimal support circuitry needed
 - It can run without a crystal which reduces the part count and cost
@@ -153,7 +163,7 @@ That fixed voltage plus the CV in ends up in the range of 0v to 3.3v for the inp
 
 Which fits nicely inside of the 0v to 3.3v range needed by the microcontroller.
 
-There's one final piece of the puzzle - how does the avoid over/undervoltage? Since Eurorack signals can go from -10v to +10v, it is entirely possible for someone to plug something outside of the -2v to +2v valid range. This is accomplished by using an op amp with the power supply limited to 0v to 3.3v. In this case, I'm using the [MCP6001](https://www.microchip.com/wwwproducts/en/MCP6001). The MCP6001 is a great choice because it's low power (so doesn't mind running off of just 3.3v) and is rail-to-rail (so it has no issues getting its output close to the 0v and 3.3v power rails). The inverting summing mixer arrangement combined with the op amp's supply limiting the output voltage effectively limits the voltage seen by the microcontroller.
+There's one final piece of the puzzle - how does this avoid over/under voltage? Since Eurorack signals can go from -10v to +10v, it is entirely possible for someone to plug something outside of the -2v to +2v valid range. This is accomplished by using an op amp with the power supply limited to 0v to 3.3v. In this case, I'm using the [MCP6001](https://www.microchip.com/wwwproducts/en/MCP6001). The MCP6001 is a great choice because it's low power (so doesn't mind running off of just 3.3v) and is rail-to-rail (so it has no issues getting its output close to the 0v and 3.3v power rails). The inverting summing mixer arrangement combined with the op amp's supply limiting the output voltage effectively limits the voltage seen by the microcontroller.
 
 Selecting appropriate resistor values for a given range is a little complex. You can derive them analytically, but I wrote a [small Python script](https://gist.github.com/theacodes/cd03c1a7f1cf436da57549f4c036f362) to run through the standard resistor values and output a set of candidates for any given range.
 
