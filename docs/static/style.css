@@ -6,7 +6,7 @@
 a,
 a:focus,
 a:hover {
-  color: #63c8f6;
+  color: #e25e6a;
 }
 
 .hidden {
@@ -40,10 +40,15 @@ nav time {
   font-size: 80%;
 }
 
+nav dt {
+  margin-top: 1.2rem;
+}
+
 nav dl a,
 nav dl a:focus {
   color: #41b990;
   text-decoration: none;
+  font-size: 120%;
 }
 
 nav dl a:hover {
@@ -57,7 +62,7 @@ nav dt {
 /* Post page */
 
 h1 {
-  color: #8768bb;
+  color: #265483;
 }
 
 h1 .rss {
@@ -65,7 +70,7 @@ h1 .rss {
 }
 
 h2, h3, h4, h5, h6 {
-  color: #7e57c2;
+  color: #265483;
   margin-top: 1em;
 }
 
@@ -132,6 +137,7 @@ footer {
 
 .img-me-container {
   padding-right: 0px;
+  margin-top: -10px;
 }
 
 .disclaimer {
