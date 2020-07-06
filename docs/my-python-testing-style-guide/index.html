@@ -160,7 +160,7 @@
 <p>Mock is extremely powerful, but if you find yourself bending over backwards to get a mock to behave how you expect, consider creating a stub. A <strong>stub</strong> has a few canned responses or behavior useful for unit tests and a <strong>fake</strong> has essentially a working implementation but takes shortcuts that wouldn't happen with a real collaborator (like an in-memory database).</p>
 <p>Here's a simple stub that implements an abstract class for the purposes of testing:</p>
 <pre><span class="k">class</span> <span class="nc">CredentialsStub</span><span class="p">(</span><span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">credentials</span><span class="o">.</span><span class="n">Credentials</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s1">&#39;token&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s1">&#39;token&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CredentialsStub</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
 
@@ -175,7 +175,7 @@
 </pre>
 <p>Here's a simple fake of an in-memory Memcache client:</p>
 <pre><span class="k">class</span> <span class="nc">MemcacheFake</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>

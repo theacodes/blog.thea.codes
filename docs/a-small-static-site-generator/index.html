@@ -74,7 +74,7 @@ desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wa
 of our source files. I decided to store all of sources under <code>./src</code>. We can
 use <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a> to collect them all:</p>
 <pre><span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Iterator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
 
 
 <span class="k">def</span> <span class="nf">get_sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]:</span>
@@ -132,7 +132,7 @@ this to extract the frontmatter and the the raw content:</p>
 </pre>
 <p>Notice that I store the rendered HTML in <code>./docs</code>. This is because I configured GitHub Pages to publish content from the <a href="https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch">doc directory</a>.</p>
 <p>Now that we can render a single post, we can loop through all of the posts using the <code>get_sources</code> function we created above:</p>
-<pre><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Sequence</span>
+<pre><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 
 <span class="k">def</span> <span class="nf">write_posts</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">]:</span>

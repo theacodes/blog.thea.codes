@@ -9,7 +9,7 @@ import nox
 
 def start_server():
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory="docs")
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", 8000), handler)
+    server = http.server.HTTPServer(("127.0.0.1", 8000), handler)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
@@ -22,7 +22,7 @@ def build(session):
     session.install("-r", "requirements.txt")
 
     if sys.stderr.isatty():
-        start_server()
+        #start_server()
         while True:
             session.run("python", "build.py")
             time.sleep(15)
