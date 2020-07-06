@@ -60,7 +60,7 @@
 <p>This method should also work with the SAM D51 and other chips in the SAM family with the <em>TCC</em> peripheral.</p>
 <h2>How PWM works on the SAM D21</h2>
 <p>In order to pull this off I first needed to understand at the hardware level how PWMs are generated. Arduino &amp; friends <em>really</em> abstract this because there are several different ways to accomplish a PWM output and the peripheral that does this, the TCC, is extremely complex. The reason this is such a complex peripheral is that it's not just for generating PWMs - it can be used to control complex motor drivers and such!</p>
-<p>Luckily, Shawm Hymel has a great blog post on <a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/">creating PWM outputs using registers</a>. This was my starting point for making this happen.</p>
+<p>Luckily, Shawn Hymel has a great blog post on <a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/">creating PWM outputs using registers</a>. This was my starting point for making this happen.</p>
 <p>Getting a TCC to create a PWM output comes down to these steps:</p>
 <ol>
 <li>Enable the bus clock to the TCC.</li>
