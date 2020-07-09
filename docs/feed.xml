@@ -9,6 +9,13 @@
 
   
   <item>
+    <title>Reading analog values with the SAMD21&#39;s ADC</title>
+    <link>https://blog.thea.codes/reading-analog-values-with-the-samd-adc</link>
+    <guid>https://blog.thea.codes/reading-analog-values-with-the-samd-adc</guid>
+    <pubDate>Mon, 08 Jun 2020 12:00:00 Z</pubDate>
+  </item>
+  
+  <item>
     <title>Phase-shifted PWM on SAMD21</title>
     <link>https://blog.thea.codes/phase-shifted-pwm-on-samd</link>
     <guid>https://blog.thea.codes/phase-shifted-pwm-on-samd</guid>

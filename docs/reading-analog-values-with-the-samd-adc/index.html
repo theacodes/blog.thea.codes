@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Thea Flowers - Reading analog values with the SAMD21's ADC</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+
+  
+<meta property="og:title" content="Reading analog values with the SAMD21's ADC - Thea Flowers">
+
+
+<meta property="og:description" content="A low-level, register-based approach to using the SAMD21 ADC">
+
+
+
+<meta property="og:image" content="https://blog.thea.codes/static/me.png">
+
+
+
+<meta name="twitter:image:alt" content="Avatar for Thea Flowers">
+
+
+<meta property="og:url" content="https://blog.thea.codes/reading-analog-values-with-the-samd-adc">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theavalkyrie">
+
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside>
+    <time>June 08, 2020</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Reading analog values with the SAMD21's ADC</h1>
+  <content>
+    <p>I've been diving deeper and deeper into the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18">SAM D21's</a> hardware over the last few weeks. I've been trying to grasp as much as I can at the hardware level so that I can take advantage of some of the more advanced features that higher-level environments like <a href="https://www.arduino.cc/">Arduino</a> and <a href="https://circuitpython.org">CircuitPython</a> can obscure behind the friendly <code>analogRead</code> function. This means working at things at the hardware register level.</p>
+<p>Today I started working with the SAM D21's <a href="https://en.wikipedia.org/wiki/Analog-to-digital_converter">Analog to Digital Converter</a> (ADC). This peripheral lets you measure analog voltage on one of the microcontroller's pins and is super useful for my synthesizer projects. This post walks through setting up the ADC and reading a value. It's also pretty likely that this information applies to other controllers in the SAM family, such as the SAM D51.</p>
+<h2>How the ADC works</h2>
+<p>The ADC is one of the SAM D21's more straightforward peripherals so thankfully the setup isn't too complex and boils down to these steps:</p>
+<ol>
+<li>Enable the bus clock to the ADC.</li>
+<li>Wire up a peripheral clock to the ADC.</li>
+<li>Load the ADC's calibration values.</li>
+<li>Configure the measurement parameters.</li>
+<li>Configure the pin for the ADC function.</li>
+<li>Start the ADC and trigger a measurement.</li>
+</ol>
+<p>It's also important to note that The SAM D21 has one single ADC but it has multiple channels. This means that while you can only measure one pin (channel) at a time, you can swap between the channels to measure the voltage on multiple pins. This post will only show using one pin but it should give you enough to go on if you want to read multiple pins.</p>
+<h2>Configuring the ADC</h2>
+<p>Okay, to start you'll need to enable the bus clock. This lets the microcontroller talk to the ADC peripheral - nothing works without this! If you're using Arduino or something like that it's likely that this is already done for you - but it won't hurt to do it again.</p>
+<pre><span class="cm">/* Enable the APB clock for the ADC. */</span>
+<span class="n">PM</span><span class="o">-&gt;</span><span class="n">APBCMASK</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PM_APBCMASK_ADC</span><span class="p">;</span>
+</pre>
+<p>Next you'll need to wire up a peripheral clock. In this case, I have <code>GCLK1</code> setup as an 8Mhz clock and I'm going to use that for the ADC. Depending on your setup you might want to use a different clock. Finally, if you're on Arduino it's already set up a bunch of clocks for you. Either way, you'll need to attach <em>some</em> clock to the ADC. Here's the code:</p>
+<pre><span class="cm">/* Enable GCLK1 for the ADC */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">CLKCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">GCLK_CLKCTRL_CLKEN</span> <span class="o">|</span>
+                    <span class="n">GCLK_CLKCTRL_GEN_GCLK1</span> <span class="o">|</span>
+                    <span class="n">GCLK_CLKCTRL_ID_ADC</span><span class="p">;</span>
+
+<span class="cm">/* Wait for bus synchronization. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>Alright! Now that the ADC has a clock you can actually talk to it. First things first - you need to load the calibration. This is important because without it you won't get the full accuracy of the ADC. There's some very vague information about this in the datasheet but I was able to find some code that demonstrates how to use this in a random application note. The calibration is done at the factory and is stored in the chip's NVM. This code loads the calibration from the NVM and puts it into the ADC's <code>CALIB</code> register:</p>
+<pre><span class="kt">uint32_t</span> <span class="n">bias</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span> <span class="n">ADC_FUSES_BIASCAL_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">ADC_FUSES_BIASCAL_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">ADC_FUSES_BIASCAL_Pos</span><span class="p">;</span>
+<span class="kt">uint32_t</span> <span class="n">linearity</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span> <span class="n">ADC_FUSES_LINEARITY_0_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">ADC_FUSES_LINEARITY_0_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">ADC_FUSES_LINEARITY_0_Pos</span><span class="p">;</span>
+<span class="n">linearity</span> <span class="o">|=</span> <span class="p">((</span><span class="o">*</span><span class="p">((</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span> <span class="n">ADC_FUSES_LINEARITY_1_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">ADC_FUSES_LINEARITY_1_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">ADC_FUSES_LINEARITY_1_Pos</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">;</span>
+
+<span class="cm">/* Wait for bus synchronization. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">ADC</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="cm">/* Write the calibration data. */</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">CALIB</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_CALIB_BIAS_CAL</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span> <span class="o">|</span> <span class="n">ADC_CALIB_LINEARITY_CAL</span><span class="p">(</span><span class="n">linearity</span><span class="p">);</span>
+</pre>
+<p>Cool, with the calibration loaded now you can set up the measurement parameters. This will vary based on your use case, but this shows how to do the absolute simplest measurement. This measurement is 12-bits, uses the internal voltage reference, and captures only one sample. Here's the code:</p>
+<pre><span class="cm">/* Wait for bus synchronization. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">ADC</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="cm">/* Use the internal VCC reference. This is 1/2 of what&#39;s on VCCA.</span>
+<span class="cm">   since VCCA is typically 3.3v, this is 1.65v.</span>
+<span class="cm">*/</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">REFCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_REFCTRL_REFSEL_INTVCC1</span><span class="p">;</span>
+
+<span class="cm">/* Only capture one sample. The ADC can actually capture and average multiple</span>
+<span class="cm">   samples for better accuracy, but there&#39;s no need to do that for this</span>
+<span class="cm">   example.</span>
+<span class="cm">*/</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">AVGCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_AVGCTRL_SAMPLENUM_1</span><span class="p">;</span>
+
+<span class="cm">/* Set the clock prescaler to 4, which is the fastest the ADC can run.</span>
+<span class="cm">   Set the resolution to 12bit.</span>
+<span class="cm">*/</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_CTRLB_PRESCALER_DIV4</span> <span class="o">|</span>
+                 <span class="n">ADC_CTRLB_RESSEL_12BIT</span><span class="p">;</span>
+
+<span class="cm">/* Configure the input parameters.</span>
+
+<span class="cm">   - GAIN_DIV2 means that the input voltage is halved. This is important</span>
+<span class="cm">     because the voltage reference is 1/2 of VCCA. So if you want to</span>
+<span class="cm">     measure 0-3.3v, you need to halve the input as well.</span>
+
+<span class="cm">   - MUXNEG_GND means that the ADC should compare the input value to GND.</span>
+
+<span class="cm">   - MUXPOST_PIN3 means that the ADC should read from AIN3, or PB09.</span>
+<span class="cm">     This is A2 on the Feather M0 board.</span>
+<span class="cm">*/</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">INPUTCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_INPUTCTRL_GAIN_DIV2</span> <span class="o">|</span>
+                     <span class="n">ADC_INPUTCTRL_MUXNEG_GND</span> <span class="o">|</span>
+                     <span class="n">ADC_INPUTCTRL_MUXPOS_PIN3</span><span class="p">;</span>
+</pre>
+<p>Okay, one last task before you can start taking measurements: you have to configure the input pin for the ADC. The code above specified that you want to use <code>AIN3</code>/<code>PB09</code> as the input pin so you'll need to configure that for input. By the way, you can find a complete list of analog input pins in section 33.8.8 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">SAM D21 datasheet</a>. Here's the code for that:</p>
+<pre><span class="cm">/* Set PB09 as an input pin. */</span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">DIRCLR</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PB09</span><span class="p">;</span>
+
+<span class="cm">/* Enable the peripheral multiplexer for PB09. */</span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">PINCFG</span><span class="p">[</span><span class="mi">9</span><span class="p">].</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PORT_PINCFG_PMUXEN</span><span class="p">;</span>
+
+<span class="cm">/* Set PB09 to function B which is analog input. */</span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">PMUX</span><span class="p">[</span><span class="mi">4</span><span class="p">].</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PMUX_PMUXO_B</span><span class="p">;</span>
+</pre>
+<p>Alright - configuration complete! Last but not least, you need to enable the ADC:</p>
+<pre><span class="cm">/* Wait for bus synchronization. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">ADC</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="cm">/* Enable the ADC. */</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</pre>
+<h2>Measuring and reading values</h2>
+<p>Okay, so you've configured the ADC and you're ready to measure stuff. You can do that by triggering the ADC and waiting for a result to be ready. Here's how you do it:</p>
+<pre><span class="cm">/* Wait for bus synchronization. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">ADC</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="cm">/* Start the ADC using a software trigger. */</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">SWTRIG</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">START</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the result ready flag to be set. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">ADC</span><span class="o">-&gt;</span><span class="n">INTFLAG</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">RESRDY</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="cm">/* Clear the flag. */</span>
+<span class="n">ADC</span><span class="o">-&gt;</span><span class="n">INTFLAG</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_INTFLAG_RESRDY</span><span class="p">;</span>
+
+<span class="cm">/* Read the value. */</span>
+<span class="kt">uint32_t</span> <span class="n">result</span> <span class="o">=</span> <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">RESULT</span><span class="p">.</span><span class="n">reg</span><span class="p">;</span>
+</pre>
+<p>That's it! You can do that over and over again to continue reading from the ADC. Something <strong>super important to note</strong>: you <strong>must</strong> throw away the first reading from the ADC because the first reading won't be accurate at all. This is just how the hardware works and it's called out specifically in the datasheet.</p>
+<h2>Wrapping up</h2>
+<p>I hope this post is helpful for someone - either someone wanting to learn more about register-level microcontroller programming or someone looking to get the SAM D21 ADC working for their project. I'll be writing a follow up post on some more advanced features of the ADC soon - stay tuned!</p>
+<p>Here's some resources about the SAM D21 ADC that I used when researching this topic and writing this post, they may be useful as further reading:</p>
+<ul>
+<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">SAM D21 Datasheet</a></li>
+<li><a href="https://github.com/adafruit/circuitpython/blob/main/ports/atmel-samd/common-hal/analogio/AnalogIn.c">CircuitPython's AnalogIn source code</a></li>
+<li><a href="https://github.com/adafruit/samd-peripherals/blob/master/samd/samd21/adc.c">Adafruit's samd-peripheral's ADC source code</a></li>
+<li><a href="https://github.com/arduino/ArduinoCore-samd/blob/master/cores/arduino/wiring_analog.c">Arduino's SAMD21 core analog source code</a></li>
+<li><a href="https://github.com/Molorius/ATSAMD21-ADC">ATSAMD21-ADC library</a></li>
+</ul>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Thea Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>

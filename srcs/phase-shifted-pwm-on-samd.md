@@ -30,6 +30,8 @@ Getting a TCC to create a PWM output comes down to these steps:
 5. Configure the output pin and wire it up to the TCC.
 6. Start the TCC.
 
+## Configuring the TCCs
+
 Since I want to output *two* waveforms, I need to configure two TCCs at once.
 
 Here's the code for enabling the bus clock - if you're on Arduino, it's likely that the Arduino libraries have already done this. If you're on ASF4 or something like that, you'll definitely need to do this.
@@ -99,7 +101,7 @@ I wanted the duty cycle to just be 50%, so I set the `CC[n]` register to half of
 
 ```c
 /* n for CC[n] is determined by n = x % 4 where x is from WO[x]
-   WO[x] comes from the pin multiplexer - we'll get to that in a second.
+   WO[x] comes from the peripheral multiplexer - we'll get to that in a second.
 */
  TCC0->CC[2].reg = period / 2;
  while (TCC0->SYNCBUSY.bit.CC2) {};
@@ -125,7 +127,7 @@ Next is more complicated and requires some consulting with the datasheet. You ha
 
 
 ```c
-/* Enable the port multiplexer for the pins. */
+/* Enable the peripheral multiplexer for the pins. */
 PORT->Group[0].PINCFG[18].reg |= PORT_PINCFG_PMUXEN;
 PORT->Group[0].PINCFG[7].reg |= PORT_PINCFG_PMUXEN;
 
