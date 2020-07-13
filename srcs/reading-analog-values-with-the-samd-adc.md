@@ -1,6 +1,6 @@
 ---
 title: "Reading analog values with the SAMD21's ADC"
-date: 2020-06-08
+date: 2020-07-08
 legacy_url: yes
 description: A low-level, register-based approach to using the SAMD21 ADC
 ---
@@ -76,7 +76,8 @@ ADC->REFCTRL.reg = ADC_REFCTRL_REFSEL_INTVCC1;
 */
 ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_1;
 
-/* Set the clock prescaler to 4, which is the fastest the ADC can run.
+/* Set the clock prescaler to 512, which will run the ADC at
+   8 Mhz / 512 = 31.25 kHz.
    Set the resolution to 12bit.
 */
 ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV4 |

@@ -25,6 +25,6 @@ def build(session):
         #start_server()
         while True:
             session.run("python", "build.py")
-            time.sleep(15)
+            time.sleep(5)
     else:
         session.run("python", "build.py")

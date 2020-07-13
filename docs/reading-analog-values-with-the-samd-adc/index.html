@@ -48,7 +48,7 @@
     
 <article>
   <aside>
-    <time>June 08, 2020</time>
+    <time>July 08, 2020</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>Reading analog values with the SAMD21's ADC</h1>
@@ -106,7 +106,8 @@
 <span class="cm">*/</span>
 <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">AVGCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_AVGCTRL_SAMPLENUM_1</span><span class="p">;</span>
 
-<span class="cm">/* Set the clock prescaler to 4, which is the fastest the ADC can run.</span>
+<span class="cm">/* Set the clock prescaler to 512, which will run the ADC at</span>
+<span class="cm">   8 Mhz / 512 = 31.25 kHz.</span>
 <span class="cm">   Set the resolution to 12bit.</span>
 <span class="cm">*/</span>
 <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_CTRLB_PRESCALER_DIV4</span> <span class="o">|</span>
