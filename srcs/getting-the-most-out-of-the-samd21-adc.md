@@ -172,9 +172,9 @@ Here's the code for changing the sample time. You should do this before enabling
 ADC->SAMPCTRL.reg = ADC_SAMPCTRL_SAMPLEN(1);
 ```
 
-You'll run into input impedance a lot. For example, if you have a potentiometer configured as a [voltage divider](https://learn.sparkfun.com/tutorials/voltage-dividers/all#applications) to provide a simple knob input for your project then the ADC's max input impedance must be greater than the whole potentiometer's resistance.
+You'll run into input impedance a lot. For example, if you have a potentiometer configured as a [voltage divider](https://learn.sparkfun.com/tutorials/voltage-dividers/all#applications) to provide a simple knob input for your project then the ADC's max input impedance must be greater than the whole potentiometer's resistance divided by four.
 
-This illustrates why: when the potentiometer is close to the end the current must travel through nearly the entire resistance of the potentiometer before reaching the ADC input:
+This illustrates why: when the potentiometer is close to the end, to the ADC it "looks like" a very low-value resistor to one end in parallel to the rest of the  potentiometer to the other end. When two very different resistors are in parallel, the overall resistance is close to the smaller value. The impedance is largest at the midpoint: Here both halves are half of the potentiometer's value and the overall impedance is going to be half of that because both are in parallel.
 
 ![Circuit with potentiometer](../static/adc_pot.svg)
 
