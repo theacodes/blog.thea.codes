@@ -8,7 +8,7 @@
   <meta name="author" content="Thea Flowers">
   <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
 
-  <title>Thea Flowers - Writing a small static site generator</title>
+  <title>Stargirl (Thea) Flowers - Writing a small static site generator</title>
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
@@ -47,8 +47,8 @@
 
     
 <article>
-  <aside>
-    <time>May 11, 2018</time>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on May 11, 2018</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>Writing a small static site generator</h1>
@@ -59,7 +59,7 @@ desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wa
 <h2>Rendering content</h2>
 <p>Every static site generator needs to take some source format (like Markdown or ReStructuredText) and turn it into HTML. Since I was moving from Ghost I decided to stick with Markdown.</p>
 <p>Since I recently integrated <a href="https://github.github.com/gfm/">Github-flavored Markdown</a> rendering into <a href="https://github.com/pypa/warehouse">Warehouse</a>, I decided to use the underlying library I made for that - <a href="https://pypi.org/project/cmarkgfm">cmarkgfm</a>. Rendering Markdown to HTML with <code>cmarkgfm</code> looks something like this:</p>
-<pre><span class="kn">import</span> <span class="nn">cmarkgfm</span>
+<pre class="lang-python3"><span class="kn">import</span> <span class="nn">cmarkgfm</span>
 
 
 <span class="k">def</span> <span class="nf">render_markdown</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -73,7 +73,7 @@ desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wa
 <p>Okay, we have a way to render Markdown but we also need a way to collect all
 of our source files. I decided to store all of sources under <code>./src</code>. We can
 use <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a> to collect them all:</p>
-<pre><span class="kn">import</span> <span class="nn">pathlib</span>
+<pre class="lang-python3"><span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
 
 
@@ -83,7 +83,7 @@ use <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code
 <h2>Frontmatter</h2>
 <p>Many static site generators have a concept of <em>frontmatter</em>- a way to set metadata and such for each source file. I wanted to support frontmatter that
 let me to set a date and title for each post. It looks like this:</p>
-<pre>---
+<pre class="lang-markdown">---
 title: Post time
 date: 2018-05-11
 ---
@@ -92,7 +92,7 @@ date: 2018-05-11
 </pre>
 <p>There's a really nice and simple existing library for frontmatter called <a href="https://pypi.org/project/python-frontmatter/">python-frontmatter</a>. I can use
 this to extract the frontmatter and the the raw content:</p>
-<pre><span class="kn">import</span> <span class="nn">frontmatter</span>
+<pre class="lang-python3"><span class="kn">import</span> <span class="nn">frontmatter</span>
 
 
 <span class="k">def</span> <span class="nf">parse_source</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">:</span>
@@ -103,7 +103,7 @@ this to extract the frontmatter and the the raw content:</p>
 <h2>Rendering the posts</h2>
 <p>Now that we have the post content and frontmatter, we can render them. I decided to use <a href="https://pypi.org/project/jinja2">jinja2</a> to place the <code>cmarkgfm</code>-rendered post Markdown and frontmatter into a simple HTML template.</p>
 <p>Here's the template:</p>
-<pre><span class="cp">&lt;!doctype html&gt;</span>
+<pre class="lang-html"><span class="cp">&lt;!doctype html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{post.title}}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
@@ -116,7 +116,7 @@ this to extract the frontmatter and the the raw content:</p>
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </pre>
 <p>And here's the Python code to render it:</p>
-<pre><span class="kn">import</span> <span class="nn">jinja2</span>
+<pre class="lang-python3"><span class="kn">import</span> <span class="nn">jinja2</span>
 
 <span class="n">jinja_env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>
     <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="s1">&#39;templates&#39;</span><span class="p">),</span>
@@ -132,7 +132,7 @@ this to extract the frontmatter and the the raw content:</p>
 </pre>
 <p>Notice that I store the rendered HTML in <code>./docs</code>. This is because I configured GitHub Pages to publish content from the <a href="https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch">doc directory</a>.</p>
 <p>Now that we can render a single post, we can loop through all of the posts using the <code>get_sources</code> function we created above:</p>
-<pre><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<pre class="lang-python3"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 
 <span class="k">def</span> <span class="nf">write_posts</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">]:</span>
@@ -155,7 +155,7 @@ this to extract the frontmatter and the the raw content:</p>
 <h2>Writing the index</h2>
 <p>We can now render posts but we should also render a top-level <code>index.html</code> that lists all of the posts. We can do this with another jinja2 template and the list of posts returned from <code>write_posts</code>.</p>
 <p>Here's the template:</p>
-<pre><span class="cp">&lt;!doctype html&gt;</span>
+<pre class="lang-html"><span class="cp">&lt;!doctype html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
   <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>My blog posts<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
@@ -170,7 +170,7 @@ this to extract the frontmatter and the the raw content:</p>
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </pre>
 <p>And here's the Python code to render it:</p>
-<pre><span class="k">def</span> <span class="nf">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">]):</span>
+<pre class="lang-python3"><span class="k">def</span> <span class="nf">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">Post</span><span class="p">]):</span>
     <span class="c1"># Sort the posts from newest to oldest.</span>
     <span class="n">posts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">posts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">post</span><span class="p">:</span> <span class="n">post</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./docs/index.html&quot;</span><span class="p">)</span>
@@ -180,7 +180,7 @@ this to extract the frontmatter and the the raw content:</p>
 </pre>
 <h2>Finishing up</h2>
 <p>All that's left now is to just wire this all up using a <code>main</code> function.</p>
-<pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<pre class="lang-python3"><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">posts</span> <span class="o">=</span> <span class="n">write_posts</span><span class="p">()</span>
     <span class="n">write_index</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span>
 
@@ -201,16 +201,16 @@ this to extract the frontmatter and the the raw content:</p>
           <img class="img-me img-fluid" src="/static/me.png">
         </div>
         <div class="col-md info">
-          <span class="name">Thea Flowers</span><br>
+          <span class="name">Stargirl Flowers</span><br>
           <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
           · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
           · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
           <br>
-          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+          <span class="location"><i class="fas fa-map-marker"></i> Atlanta, Georgia</span>
         </div>
         <div class="col-md">
           <p class="disclaimer">
-            &copy; 2018<br>
+            &copy; 2018 &mdash; 2020<br>
             All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
             All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
           </p>
@@ -220,7 +220,6 @@ this to extract the frontmatter and the the raw content:</p>
   </div>
 
   <!-- webfonts & icons-->
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
   <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
 
   <!-- Google Analytics (that's right, I'm tracking you) -->

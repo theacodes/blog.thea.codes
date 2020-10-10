@@ -8,7 +8,7 @@
   <meta name="author" content="Thea Flowers">
   <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
 
-  <title>Thea Flowers - Fixing the wrong bug to discover the right one</title>
+  <title>Stargirl (Thea) Flowers - Fixing the wrong bug to discover the right one</title>
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
@@ -45,8 +45,8 @@
 
     
 <article>
-  <aside>
-    <time>September 14, 2014</time>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on September 14, 2014</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>Fixing the wrong bug to discover the right one</h1>
@@ -54,7 +54,7 @@
     <p>Recently I was pulled in to help troubleshoot a issue with an application. The bug report stated that users were not able to load the home page. The application is an intranet that contains a couple hundred pages and a small amount of other content.</p>
 <p>Luckily, we were easily able to reproduce the issue. We tried loading up the home page and we eventually hit <a href="https://developers.google.com/appengine/articles/deadlineexceedederrors">App Engine's 60 second deadline</a> resulting in a 500 error.</p>
 <p>Digging into the logic for the home page we found a likely culprit. The application displays a different home page based on which group the current user is in. This bit of logic determines which page to display:</p>
-<pre><span class="k">def</span> <span class="nf">find_home_page_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+<pre class="lang-python3"><span class="k">def</span> <span class="nf">find_home_page_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
         <span class="n">query</span> <span class="o">=</span> <span class="n">Page</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
         <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Page</span><span class="o">.</span><span class="n">home_page_for_groups</span> <span class="o">==</span> <span class="n">group</span><span class="p">)</span>
@@ -64,7 +64,7 @@
 </pre>
 <p>It's relatively straightforward but it's easy to guess what might be eating all of our time. We're making a synchronous RPC call (<code>query.get()</code>) for every group the user is in. This had been working fine up to this point but we assumed some RPC latency was dragging the application down.</p>
 <p>Because of my assumption, my first instinct was to go ahead and optimize this. Since there's only about 6 or so pages that operate as the home page for any group it makes sense to grab all those ahead of time and cache them.</p>
-<pre><span class="nd">@caching</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="s1">&#39;home-pages&#39;</span><span class="p">)</span>
+<pre class="lang-python3"><span class="nd">@caching</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="s1">&#39;home-pages&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_home_pages</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Page</span><span class="o">.</span><span class="n">query</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Page</span><span class="o">.</span><span class="n">is_a_home_page</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 
@@ -78,7 +78,7 @@
 </pre>
 <p>This optimization turned out to be fantastic. We reduced the response time from over 60s to 100-300ms dependening on cache. At this point we thought we were heroes and that we'd fixed the issue, however, just as I was ready to call it a day my colleague said &quot;Wait- I'm getting the wrong home page. Did we mess up something?&quot;</p>
 <p>We tried with a couple of other users. We tried without caching. No matter what we did, users were going to the wrong home page and not the one their group membership said they should go to. At this point we think we're crazy- until we added some logging:</p>
-<pre><span class="k">def</span> <span class="nf">find_home_page_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+<pre class="lang-python3"><span class="k">def</span> <span class="nf">find_home_page_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
     <span class="n">pages</span> <span class="o">=</span> <span class="n">get_home_pages</span><span class="p">()</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
@@ -89,12 +89,12 @@
 <p>It's at this point that we see something is very wrong. According to the Google Admin Console our test user is in two groups, but, according to the logging statement our user is in about 100 groups. This doesn't add up. Why does our application believe the user is in these groups?</p>
 <p>We tried with other users and it turns out our application seems to think that every user is a member of every group in the domain. &quot;Ah ha&quot;, we thought, &quot;we probably somehow messed up and we're making the API call to the Google directory incorrectly&quot;. We assumed we'd left out the parameter to filter the returned groups by the user.</p>
 <p>But much to our dismay, our client call seemed correct:</p>
-<pre><span class="n">groups</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">userKey</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+<pre class="lang-python3"><span class="n">groups</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">userKey</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </pre>
 <p>We then verified the call and parameters in the documentation and the <a href="https://developers.google.com/apis-explorer/#p/">APIs Explorer</a> and it appeared we were doing things the right way and that Google hadn't changed anything. However, our test with the API Explorer revealed something strange: no matter which email we passed in it returned the same results. For some reason, the API was ignoring the parameter and returning all groups.</p>
 <p>We reported the issue to Google and they had it resolved within a few hours.</p>
 <p>At this point we realize our original bug wasn't quite what we thought. It was not the system being fundamentally broken but rather the system failing under certain circumstances. If we look back at our original code:</p>
-<pre><span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+<pre class="lang-python3"><span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">Page</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Page</span><span class="o">.</span><span class="n">home_page_for_groups</span> <span class="o">==</span> <span class="n">group</span><span class="p">)</span>
     <span class="n">page</span> <span class="o">=</span> <span class="n">query</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -114,16 +114,16 @@
           <img class="img-me img-fluid" src="/static/me.png">
         </div>
         <div class="col-md info">
-          <span class="name">Thea Flowers</span><br>
+          <span class="name">Stargirl Flowers</span><br>
           <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
           · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
           · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
           <br>
-          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+          <span class="location"><i class="fas fa-map-marker"></i> Atlanta, Georgia</span>
         </div>
         <div class="col-md">
           <p class="disclaimer">
-            &copy; 2018<br>
+            &copy; 2018 &mdash; 2020<br>
             All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
             All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
           </p>
@@ -133,7 +133,6 @@
   </div>
 
   <!-- webfonts & icons-->
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
   <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
 
   <!-- Google Analytics (that's right, I'm tracking you) -->

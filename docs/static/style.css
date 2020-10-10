@@ -2,15 +2,29 @@
  * Globals
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
+
 /* Links */
 a,
 a:focus,
 a:hover {
   color: #e25e6a;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #41b990;
 }
 
 .hidden {
   display: none;
+}
+
+.container {
+  max-width: 80ch;
+  font-size: 130%;
 }
 
 /*
@@ -21,7 +35,7 @@ html,
 body {
   height: 100%;
   background: #fff;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Nunito', sans-serif;
 }
 body {
   color: #333;
@@ -52,7 +66,7 @@ nav dl a:focus {
 }
 
 nav dl a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 nav dt {
@@ -69,20 +83,48 @@ h1 .rss {
   font-size: 50%;
 }
 
-h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6 {
   color: #265483;
-  margin-top: 1em;
+  margin-top: 1.2em;
+  margin-bottom: 1em;
+  font-weight: 700;
+  font-size: 160%;
 }
 
 code {
   font-size: 100%;
   color: #c35b7d;
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 pre {
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   padding: 20px;
+  margin: 2em 0 !important;
+}
+
+pre.lang-c::before, pre.lang-python::before, pre.lang-python3::before, pre.lang-bash::before, pre.lang-json::before, pre.lang-text::before {
+  display: block;
+  float: right;
+  color: #1bc5e0;
+  font-size: 75%;
+  user-select: none;
+}
+
+pre.lang-c::before {
+  content: "C";
+}
+pre.lang-python::before, pre.lang-python3::before {
+  content: "Python";
+}
+pre.lang-bash::before {
+  content: "sh";
+}
+pre.lang-json::before {
+  content: "json";
+}
+pre.lang-text::before {
+  content: "plaintext";
 }
 
 article {
@@ -98,6 +140,9 @@ article time {
   color: #607d8b;
 }
 
+article aside.timestamp {
+  text-align: right;
+}
 
 article aside a,
 article aside a:focus,
@@ -108,11 +153,12 @@ article aside a:hover  {
 article blockquote {
   border-left: .1em solid #8768bb;
   padding-left: 1em;
-  color: #999;
+  color: #545b62;
+  margin: 2em 0;
 }
 
 article img {
-  width: 75%;
+  width: 90%;
   margin: 0 auto;
   display: block;
   padding: 2em 0;
@@ -121,7 +167,7 @@ article img {
 article iframe {
   margin: 2em auto;
   display: block;
-  max-width: 75%;
+  max-width: 90%;
 }
 
 article .twitter-tweet {
@@ -147,7 +193,8 @@ footer {
 }
 
 .info {
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 75%;
 }
 
 .info a,
@@ -185,4 +232,30 @@ footer {
   text-align: center;
   margin-top: -2em;
   margin-bottom: 3em;
+}
+
+/* Forms. */
+
+.pure-form input[readonly] {
+  background-color: #e7fbf0;
+  font-weight: bold;
+  color: black;
+  border: none;
+  box-shadow: none;
+}
+.pure-form {
+  width: 90%;
+  max-width: 500px;
+  margin: 2em auto;
+}
+.pure-form input, .pure-form select {
+  width: 100%;
+}
+.pure-form .pure-form-message {
+  color: #003b69;
+  text-align: right;
+}
+#form-warning {
+  color: red;
+  font-weight: bold;
 }

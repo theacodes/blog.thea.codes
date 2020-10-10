@@ -28,8 +28,8 @@
 
 {% block content %}
 <article>
-  <aside>
-    <time>{{post['date'].strftime('%B %d, %Y')}}</time>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on {{post['date'].strftime('%B %d, %Y')}}</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>{{post.title}}</h1>

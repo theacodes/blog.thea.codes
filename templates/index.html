@@ -2,7 +2,7 @@
 
 {% block content %}
 <nav>
-  <h1>Blogs posts by Thea Flowers <a class="rss" href="/feed.xml" target="_blank" title="RSS feed"><i class="fas fa-rss"></i></a></h1>
+  <h1>Blogs posts by Stargirl Flowers <a class="rss" href="/feed.xml" target="_blank" title="RSS feed"><i class="fas fa-rss"></i></a></h1>
   <dl class="posts-list">
   {% for post in posts if not post.get('hidden') %}
     <a href="/{{post.stem}}">

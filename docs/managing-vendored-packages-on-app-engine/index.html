@@ -8,7 +8,7 @@
   <meta name="author" content="Thea Flowers">
   <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
 
-  <title>Thea Flowers - Managing vendored packages on App Engine</title>
+  <title>Stargirl (Thea) Flowers - Managing vendored packages on App Engine</title>
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
@@ -45,8 +45,8 @@
 
     
 <article>
-  <aside>
-    <time>September 02, 2014</time>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on September 02, 2014</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>Managing vendored packages on App Engine</h1>
@@ -93,7 +93,7 @@ google-api-python-client==1.2
 <h3>Using Packages</h3>
 <p>We've got the packages vendored into our application but how do we actually use them? If you were brave enough to try <code>import requests</code> at this point you would've been greeted with an <code>ImportError</code>. With App Engine we need to do a bit of path manipulation to make things work correctly.</p>
 <p>To setup our path manipulation we have to create (or modify) the <code>appengine_config.py</code> file in our application's root directory. The filename is important and it must also live in the same directory as your <code>app.yaml</code>.</p>
-<pre><span class="sd">&quot;&quot;&quot;</span>
+<pre class="lang-python3"><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">`appengine_config.py` gets loaded every time a new instance is started.</span>
 
 <span class="sd">Use this file to configure app engine modules as defined here:</span>
@@ -153,16 +153,16 @@ google-api-python-client==1.2
           <img class="img-me img-fluid" src="/static/me.png">
         </div>
         <div class="col-md info">
-          <span class="name">Thea Flowers</span><br>
+          <span class="name">Stargirl Flowers</span><br>
           <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
           · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
           · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
           <br>
-          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+          <span class="location"><i class="fas fa-map-marker"></i> Atlanta, Georgia</span>
         </div>
         <div class="col-md">
           <p class="disclaimer">
-            &copy; 2018<br>
+            &copy; 2018 &mdash; 2020<br>
             All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
             All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
           </p>
@@ -172,7 +172,6 @@ google-api-python-client==1.2
   </div>
 
   <!-- webfonts & icons-->
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
   <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
 
   <!-- Google Analytics (that's right, I'm tracking you) -->

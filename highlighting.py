@@ -43,7 +43,7 @@ def highlight(content: str) -> str:
 
         highlighted = pygments.highlight(code, lexer, formatter)
 
-        return '<pre>{}</pre>'.format(highlighted)
+        return '<pre class="lang-{}">{}</pre>'.format(lang, highlighted)
 
     result = code_expr.sub(replacer, content)
 

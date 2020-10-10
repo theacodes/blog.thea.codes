@@ -6,30 +6,6 @@ description: A look into tuing the configuration of the SAM D21 Analog to Digita
 ---
 
 <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/forms-min.css" />
-<style type="text/css">
-.pure-form input[readonly] {
-    background-color: #e7fbf0;
-    font-weight: bold;
-    color: black;
-    border: none;
-    box-shadow: none;
-}
-.pure-form {
-    width: 50%;
-    margin: 2em auto;
-}
-.pure-form input, .pure-form select {
-    width: 100%;
-}
-.pure-form .pure-form-message {
-    color: #003b69;
-    text-align: right;
-}
-#clock-warning {
-    color: red;
-    font-weight: bold;
-}
-</style>
 
 
 In my [previous blog post](../reading-analog-values-with-the-samd-adc), I walked through how to do a basic analog read using the SAM D21's Analog to Digital converter (ADC). While this simple setup can work for a lot of cases, it's not uncommon to want to get better performance or accuracy out of the ADC.
@@ -106,7 +82,7 @@ There's several configuration options for the SAM D21 ADC. Some of them impact s
             <span class="pure-form-message"><code>ADC->CTRLB.CORREN</code></span><label for="adc_clock">ADC clock</label>
             <input name="adc_clock" type="text" value="" readonly></input>
             <span class="pure-form-message">kHz</span>
-            <span class="pure-form-message" id="clock-warning">Clock speed is over the maximum of 2,100kHz!</span>
+            <span class="pure-form-message" id="clock-warning" class="form-warning">Clock speed is over the maximum of 2,100kHz!</span>
             <label for="sample_time">Sample time</label>
             <input name="sample_time" type="text" value="" readonly></input>
             <span class="pure-form-message">microseconds</span>

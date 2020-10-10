@@ -8,7 +8,7 @@
   <meta name="author" content="Thea Flowers">
   <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
 
-  <title>Thea Flowers - Getting the most out of the SAM D21's ADC</title>
+  <title>Stargirl (Thea) Flowers - Getting the most out of the SAM D21's ADC</title>
 
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
@@ -47,37 +47,13 @@
 
     
 <article>
-  <aside>
-    <time>July 18, 2020</time>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on July 18, 2020</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>Getting the most out of the SAM D21's ADC</h1>
   <content>
     <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/forms-min.css" />
-<style type="text/css">
-.pure-form input[readonly] {
-    background-color: #e7fbf0;
-    font-weight: bold;
-    color: black;
-    border: none;
-    box-shadow: none;
-}
-.pure-form {
-    width: 50%;
-    margin: 2em auto;
-}
-.pure-form input, .pure-form select {
-    width: 100%;
-}
-.pure-form .pure-form-message {
-    color: #003b69;
-    text-align: right;
-}
-#clock-warning {
-    color: red;
-    font-weight: bold;
-}
-</style>
 <p>In my <a href="../reading-analog-values-with-the-samd-adc">previous blog post</a>, I walked through how to do a basic analog read using the SAM D21's Analog to Digital converter (ADC). While this simple setup can work for a lot of cases, it's not uncommon to want to get better performance or accuracy out of the ADC.</p>
 <p>This post explores the various configuration options for the ADC and how it impacts speed and accuracy. Since the SAM D family has similar ADC peripherials across the line this information is likely applicable to all of them. Additionally, the techniques and ideas here are generally applicable to all ADCs.</p>
 <p>One more thing before I get started - this is just what I've gathered from the datasheets, application notes, code examples, and observation on real hardware. I could be totally wrong about some of these things! I'll try to make a note when there's something I'm not sure of - and if you know the answer don't hestitate to <a href="https://thea.codes">reach out to me</a>.</p>
@@ -146,7 +122,7 @@
             <span class="pure-form-message"><code>ADC->CTRLB.CORREN</code></span><label for="adc_clock">ADC clock</label>
             <input name="adc_clock" type="text" value="" readonly></input>
             <span class="pure-form-message">kHz</span>
-            <span class="pure-form-message" id="clock-warning">Clock speed is over the maximum of 2,100kHz!</span>
+            <span class="pure-form-message" id="clock-warning" class="form-warning">Clock speed is over the maximum of 2,100kHz!</span>
             <label for="sample_time">Sample time</label>
             <input name="sample_time" type="text" value="" readonly></input>
             <span class="pure-form-message">microseconds</span>
@@ -199,7 +175,7 @@
 <p><img src="../static/adc_impedance.svg" alt="Circuit with impedance" /></p>
 <p>The input impedance is 250kΩ (100kΩ + 150kΩ). When connecting this circuit to the ADC you have to ensure that the ADC is configured so that it has enough time to fully charge that capacitor with that amount of input impedance. The way this is done is by changing the sample time, <code>ADC-&gt;SAMPCTRL.SAMPLEN</code>. Increasing the sample time gives the capacitor a longer amount of time to charge and thus increasing the amount of input impedance the ADC can deal with. It also slightly increases the overall conversion time. Try using the calculator above to get the ADC to work with the 250kΩ impedance shown in the example above (spoilers: you only have to increase the sample time by 1).</p>
 <p>Here's the code for changing the sample time. You should do this before enabling the ADC:</p>
-<pre><span class="c1">// Set the sample time length to accommodate for input impedance.</span>
+<pre class="lang-c"><span class="c1">// Set the sample time length to accommodate for input impedance.</span>
 <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">SAMPCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_SAMPCTRL_SAMPLEN</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </pre>
 <p>You'll run into input impedance a lot. For example, if you have a potentiometer configured as a <a href="https://learn.sparkfun.com/tutorials/voltage-dividers/all#applications">voltage divider</a> to provide a simple knob input for your project then the ADC's max input impedance must be greater than the whole potentiometer's resistance divided by four.</p>
@@ -224,7 +200,7 @@
 <p><img src="../static/adc_chart_3.svg" alt="64 sample error results" /></p>
 <p>This is already a huge improvement over the baseline. Note that I also reduced the scale of the graph. The time cost for doing 64 samples isn't too much of a hit on performance, either.</p>
 <p>Here's the code for configuring multisampling and averaging. Again, do this before enabling the ADC.</p>
-<pre><span class="c1">// Configure multisampling and averaging.</span>
+<pre class="lang-c"><span class="c1">// Configure multisampling and averaging.</span>
 <span class="c1">// Note that ADJRES must be set according to table</span>
 <span class="c1">// 33-3 in the datasheet.</span>
 <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">AVGCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_AVGCTRL_SAMPLENUM_256</span> <span class="o">|</span> <span class="n">ADC_AVGCTRL_ADJRES</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
@@ -249,7 +225,7 @@
 <p>When looking at the error graphs of real-world measurements in previous sections the gain error can be see as a &quot;tilt&quot; in the error line. Ideally, the line of best fit in that chart would be straight across.</p>
 <p>Okay, enough theory. How do you address the gain and offset errors? The SAM D21 has two registers, <code>ADC-&gt;OFFSETCORR</code> and <code>ADC-&gt;GAINCORR</code>, for configuring the hardware to do the correction for you. The hardware will automatically apply the formula <code>result = (conversion_value - OFFSETCORR) * GAINCORR</code>. This is detailed in <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">section 33.6.10 of the datasheet</a>. The datasheet doesn't give a lot of hints on figuring out these values, unfortunately.</p>
 <p>The best way I've found for calculating these values is to take two measurements: one in the bottom quarter of the ADC's range (say, at 15%) and one at the top quarter of the ADC's range (say, at 85%). This is from the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/90003185A.pdf">TB3185 Application Note</a>. Once you have these two measurements you can determine the gain and offset error using these formulas:</p>
-<pre><span class="n">low_expected</span> <span class="o">=</span> <span class="o">...</span>
+<pre class="lang-python3"><span class="n">low_expected</span> <span class="o">=</span> <span class="o">...</span>
 <span class="n">low_measured</span> <span class="o">=</span> <span class="o">...</span>
 <span class="n">high_expected</span> <span class="o">=</span> <span class="o">...</span>
 <span class="n">high_measured</span> <span class="o">=</span> <span class="o">...</span>
@@ -258,7 +234,7 @@
 <span class="n">offset_error</span> <span class="o">=</span> <span class="n">low_expected</span> <span class="o">-</span> <span class="p">(</span><span class="n">gain_error</span> <span class="o">*</span> <span class="n">low_measured</span><span class="p">)</span>
 </pre>
 <p>The gain error is a positive or negative integer that defines a constant value that's applied to every measurement. The gain error is a fractional number that is multiplied by every measurement after offset adjustments are applied. When setting the registers it's important to note that <code>OFFSETCORR</code> is in <a href="https://en.wikipedia.org/wiki/Two%27s_complement">two's complement</a> and <code>GAINCORR</code> is expressed as an integer that's <code>2048 / gain correction</code>. Here's an example of setting the registers:</p>
-<pre><span class="c1">// Offset error is a 12-bit integer in two&#39;s complement format.</span>
+<pre class="lang-c"><span class="c1">// Offset error is a 12-bit integer in two&#39;s complement format.</span>
 <span class="kt">int16_t</span> <span class="n">offset_error</span> <span class="o">=</span> <span class="p">...</span>
 <span class="c1">// Gain error is a 12-bit integer that&#39;s expressed at 2048 / measured gain error.</span>
 <span class="kt">int16_t</span> <span class="n">gain_error</span> <span class="o">=</span> <span class="mi">2048</span> <span class="o">/</span> <span class="p">...;</span>
@@ -354,16 +330,16 @@
           <img class="img-me img-fluid" src="/static/me.png">
         </div>
         <div class="col-md info">
-          <span class="name">Thea Flowers</span><br>
+          <span class="name">Stargirl Flowers</span><br>
           <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
           · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
           · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
           <br>
-          <span class="location"><i class="fas fa-map-marker"></i> Seattle, Washington</span>
+          <span class="location"><i class="fas fa-map-marker"></i> Atlanta, Georgia</span>
         </div>
         <div class="col-md">
           <p class="disclaimer">
-            &copy; 2018<br>
+            &copy; 2018 &mdash; 2020<br>
             All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
             All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
           </p>
@@ -373,7 +349,6 @@
   </div>
 
   <!-- webfonts & icons-->
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
   <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
 
   <!-- Google Analytics (that's right, I'm tracking you) -->
