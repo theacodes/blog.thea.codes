@@ -21,7 +21,7 @@ We eventually saw the rise of services to host our code - which we'll get into i
 
 Then came the distributed version control system "revolution". Git, Mercurial, Fossil, Bazaar, and other popped up around 2005 to help solve the problems of having many developers working on the same project. Thanks in part to its origin in the Linux kernel and support from hosting services like Google Code, BitBucket, and GitHub, Git became the dominant version control system today. In StackOverflow's 2018 survey [87% of respondents use git](https://insights.stackoverflow.com/survey/2018#work-_-version-control) (this was the last year they asked this question).
 
-We migrated out code from archives, to Subversion and friends, to Git, Mercurial and friends, and finally settled on Git as the *de facto* standard.
+We migrated our code from archives, to Subversion and friends, to Git, Mercurial and friends, and finally settled on Git as the *de facto* standard.
 
 
 ## Hosting - the cause of and solution to our problems
