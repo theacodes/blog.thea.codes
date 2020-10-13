@@ -91,4 +91,4 @@ We could help the platform win adoption by adding federation support to and from
 
 A confession - I am a hypocrite. I am clearly a big user of GitHub. I extensively use it for hosting my projects. I'm a member of ten or so organizations. I have a GitHub sponsors profile. I even use GitHub Pages to host the blog you're reading right now.
 
-I am contributing to the monoculture but I would really, really love to see an alternative to hoping between corporations and hoping they play nice with our code.
+I am contributing to the monoculture but I would really, really love to see an alternative to hopping between corporations and hoping they play nice with our code.
