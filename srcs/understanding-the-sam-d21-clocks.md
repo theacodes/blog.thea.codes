@@ -5,7 +5,7 @@ legacy_url: yes
 description: A guide to common SAM D21 clock configuration
 ---
 
-The [Microchip SAM D](https://www.microchip.com/design-centers/32-bit/sam-32-bit-mcus/sam-d-mcus) lineup has a really flexible but sometimes daunting clock system. This post aims to be a gentle introduction to the SAM D21's clock system and a guide for common configurations. It's written as both a *guide* and a *reference* - there is a lot of information here and it's definitely not something that anyone is expected to just absorb with one read. I'm also always open to suggestions and improvements - [open an issue on GitHub](https://github.com/theacodes/blog.thea.codes/issues) and let's chat!
+The [Microchip SAM D](https://www.microchip.com/design-centers/32-bit/sam-32-bit-mcus/sam-d-mcus) lineup has a really flexible but sometimes daunting clock system. This post aims to be a gentle introduction to the SAM D21's clock system and a guide for common configurations. It's written as both a *guide* and a *reference* - there is a lot of information here and it's definitely not something that anyone is expected to just absorb with one read. I'm also always open to suggestions and improvements - [open an issue on GitHub](https://github.com/theacodes/blog.thea.codes/issues) and let's chat! Also, while it's written for the SAM D21, this is applicable to most of the chips in the SAM D lineup, including the SAM D11 and SAM D51.
 
 
 ## Clock system overview
