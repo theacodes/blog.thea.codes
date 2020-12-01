@@ -71,7 +71,7 @@
 <li>Configure a generic clock, for example, <code>GLCK1</code> to use the <code>OSC8M</code> as its clock source.</li>
 <li>Tell the generic clock multiplexer to connect <code>GLCK1</code> to <code>SERCOM0</code>.</li>
 </ol>
-<p>Finally it's important to know the difference between <strong>synchronous</strong> and <strong>asynchronous</strong> clocks. The main system clock which is used to clock the CPU an the internal busses (AHB/APBx) is called <strong>synchronous</strong>. The generic clocks used to drive peripherals are called <strong>asynchronous</strong>. The reason for this distinction is because it's possible (and common) to drive the peripherals using a different clock source than the CPU. Since there are potentially two different clocks at play, <strong>register synchronization</strong> must sometimes be done. More on that later - trust me, it's much less scary than it sounds.</p>
+<p>Finally it's important to know the difference between <strong>synchronous</strong> and <strong>asynchronous</strong> clocks. The main system clock which is used to clock the CPU and the internal busses (AHB/APBx) is called <strong>synchronous</strong>. The generic clocks used to drive peripherals are called <strong>asynchronous</strong>. The reason for this distinction is because it's possible (and common) to drive the peripherals using a different clock source than the CPU. Since there are potentially two different clocks at play, <strong>register synchronization</strong> must sometimes be done. More on that later - trust me, it's much less scary than it sounds.</p>
 <h2>Configuring the main (CPU) clock</h2>
 <p>Let's dive into a concrete example: configuring the main clock and changing the CPU's frequency. The CPU (and the associated busses) are always driven from <code>GCLK0</code> (you'll sometimes see this referred to as <code>GCLK_MAIN</code>) - so you can kind of think of <code>GLCK0</code> as special in that way.</p>
 <p>After reset, the SAM D21 runs at 1 MHz. The reason for this is that the default state for the clock system is:</p>
@@ -100,7 +100,7 @@
 <p>There are <em>two</em> separate, but similar ways to configure the <code>DFLL48M</code> to run the CPU at 48 MHz. If you want accuracy you'll use an <em>external</em> crystal oscillator as the reference clock and run in <em>closed loop mode</em>. Otherwise, you can run in <em>open loop</em> mode.</p>
 <h3>Using an external crystal and closed-loop mode</h3>
 <p>The first approach is to use an external 32.768 kHz crystal oscillator as the reference clock. This method requires some external components but allows for the highest accuracy. This is required for a few peripherals - such as running the USB peripheral in host mode. This can look a bit overwhelming but take it one step at a time and you'll get it - I promise.</p>
-<p>Before trying to run at a higher CPU clock, you need to configure the <em>wait states</em> for the internal flash. This makes sure that the CPU doesn't try to access the flash faster than it can operate. The correct number of wait states for 48 MHz at 3.3v is 1. You can find the wait states for other configurations in Table 37-42 in the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>.</p>
+<p>Before trying to run at a higher CPU clock, you need to configure the <em>wait states</em> for the internal flash. This makes sure that the CPU doesn't try to access the flash faster than it can operate. The correct number of wait states for 48 MHz at 3.3v is 1. You can find the wait states for other configurations in Table 37-42 in the <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a>.</p>
 <pre class="lang-c"><span class="cm">/* Set the correct number of wait states for 48 MHz @ 3.3v */</span>
 <span class="n">NVMCTRL</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">RWS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 </pre>
@@ -143,7 +143,7 @@
     <span class="n">GCLK_CLKCTRL_GEN_GCLK1</span> <span class="o">|</span>
     <span class="n">GCLK_CLKCTRL_CLKEN</span><span class="p">;</span>
 </pre>
-<p>Now that the reference clock is all configured and connected, you can now set up the DFLL. This is described in detail in section 17.6.7.1.2 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>. There's a <em>lot</em> to wrap your head around here so don't sweat it if it takes a few reads to get it:</p>
+<p>Now that the reference clock is all configured and connected, you can now set up the DFLL. This is described in detail in section 17.6.7.1.2 of the <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a>. There's a <em>lot</em> to wrap your head around here so don't sweat it if it takes a few reads to get it:</p>
 <pre class="lang-c"><span class="cm">/* This works around a quirk in the hardware (errata 1.2.1) -</span>
 <span class="cm">   the DFLLCTRL register must be manually reset to this value before</span>
 <span class="cm">   configuration. */</span>
@@ -253,7 +253,7 @@
 <span class="k">while</span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">);</span>
 </pre>
 <h3>USB clock recovery mode</h3>
-<p>I know you're thinking &quot;wait- you said there were two ways to configure 48 MHz&quot;. Well, that's still true. USB clock recovery mode is a small change to the open loop strategy. USB clock recovery mode (detailed in section 17.6.7.2.2 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>) is a neat way of generating a 48 MHz clock from the USB connection. If the SAM D21 is used as a USB device then the DFLL can be configured to use the 1 kHz USB start-of-frame as the reference clock. This is actually <em>required</em> if you don't have an external crystal and you want to operate as a USB device. It's a neat feature that allows for some cost saving when designing hardware.</p>
+<p>I know you're thinking &quot;wait- you said there were two ways to configure 48 MHz&quot;. Well, that's still true. USB clock recovery mode is a small change to the open loop strategy. USB clock recovery mode (detailed in section 17.6.7.2.2 of the <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a>) is a neat way of generating a 48 MHz clock from the USB connection. If the SAM D21 is used as a USB device then the DFLL can be configured to use the 1 kHz USB start-of-frame as the reference clock. This is actually <em>required</em> if you don't have an external crystal and you want to operate as a USB device. It's a neat feature that allows for some cost saving when designing hardware.</p>
 <p>The way to set this up is to take the open loop configuration as a starting point:</p>
 <pre class="lang-c"><span class="cm">/* Set the correct number of wait states for 48 MHz @ 3.3v */</span>
 <span class="n">NVMCTRL</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">RWS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -329,7 +329,7 @@
 <li>The <strong>peripheral interface</strong> clock: this is the <em>synchronous</em> clock from the CPU &amp; associated busses (AHB/APBx).</li>
 <li>The <strong>peripheral core</strong> clock: this is the <em>asynchronous</em> clock that's configured and wired up to the peripheral using the <code>GCLK</code> peripheral.</li>
 </ol>
-<p>The first one you've already set up - it's the CPU clock. It comes into play in a bit in the <em>register synchronization</em> section. The second - the <em>peripheral core</em> clock is what this section talk about.</p>
+<p>The first one you've already set up - it's the CPU clock. It comes into play in a bit in the <em>register synchronization</em> section. The second - the <em>peripheral core</em> clock is what this section covers.</p>
 <p>To enable a peripheral that needs a clock, you'll need to:</p>
 <ol>
 <li>Set up a generic clock generator (<code>GCLK</code>) using one of the clock sources. Remember that multiple peripherals can share the same <code>GCLK</code>, and you can use <code>GCLK0</code> to clock peripherals as well.</li>
@@ -374,7 +374,7 @@
 </pre>
 <h2>Register synchronization</h2>
 <p>You might have noticed that there are a lot of references to <code>SYNCBUSY</code> above. This is a consequence of <em>register synchronization</em>. This is needed because there's two clocks at play when interacting with a peripheral - one clock for the CPU and the busses and a generic clock that's running the peripheral core. A direct example is that the configuration above runs the CPU at 48 MHz and <code>SERCOM0</code> at 8 MHz. Since the core is accessing the same registers as the CPU, some writes and reads need to be synchronized.</p>
-<p>When reading the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet's</a> register descriptions for a peripheral you'll see the term <em>&quot;Write-Synchronized&quot;</em>. This means that when you write to this register the hardware will set the peripheral's <code>SYNCBUSY</code> register while synchronizing the write. For example:</p>
+<p>When reading the <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet's</a> register descriptions for a peripheral you'll see the term <em>&quot;Write-Synchronized&quot;</em>. This means that when you write to this register the hardware will set the peripheral's <code>SYNCBUSY</code> register while synchronizing the write. For example:</p>
 <pre class="lang-c"><span class="cm">/* Enable SERCOM0 */</span>
 <span class="n">SERCOM0</span><span class="o">-&gt;</span><span class="n">SPI</span><span class="p">.</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 
@@ -382,7 +382,7 @@
 <span class="k">while</span> <span class="p">(</span><span class="n">SERCOM0</span><span class="o">-&gt;</span><span class="n">SPI</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="p">)</span> <span class="p">{};</span>
 </pre>
 <p>If you try to write to a peripheral's register while it's busy synchronizing, the CPU will stall until the synchronization is complete.</p>
-<p>You can read more about register synchronization in section 14.3 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>.</p>
+<p>You can read more about register synchronization in section 14.3 of the <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a>.</p>
 <h2>Some tips and miscellanea</h2>
 <ul>
 <li>Failing to unmask the the peripheral in the power management (<code>PM</code>) peripheral and trying to access any peripheral registers will lock the CPU.</li>
@@ -395,7 +395,8 @@
 <ul>
 <li><a href="https://microchipdeveloper.com/32arm:samd21-clock-system-configuration">Microchip Developer - SAM D21 Clock Configuration</a></li>
 <li><a href="https://github.com/adafruit/samd-peripherals/blob/6b531fc923d9f02b14bd731a5f584ddf716e8773/samd/samd21/clocks.c">CircuitPython's clock initialization</a></li>
-<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">Datasheet</a></li>
+<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">Datasheet</a></li>
+<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">Errata</a></li>
 </ul>
 
   </content>

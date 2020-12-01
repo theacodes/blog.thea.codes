@@ -28,7 +28,7 @@ For example, if you wanted to clock the `SERCOM0` peripheral from the 8 MHz inte
 2. Configure a generic clock, for example, `GLCK1` to use the `OSC8M` as its clock source.
 3. Tell the generic clock multiplexer to connect `GLCK1` to `SERCOM0`.
 
-Finally it's important to know the difference between **synchronous** and **asynchronous** clocks. The main system clock which is used to clock the CPU an the internal busses (AHB/APBx) is called **synchronous**. The generic clocks used to drive peripherals are called **asynchronous**. The reason for this distinction is because it's possible (and common) to drive the peripherals using a different clock source than the CPU. Since there are potentially two different clocks at play, **register synchronization** must sometimes be done. More on that later - trust me, it's much less scary than it sounds.
+Finally it's important to know the difference between **synchronous** and **asynchronous** clocks. The main system clock which is used to clock the CPU and the internal busses (AHB/APBx) is called **synchronous**. The generic clocks used to drive peripherals are called **asynchronous**. The reason for this distinction is because it's possible (and common) to drive the peripherals using a different clock source than the CPU. Since there are potentially two different clocks at play, **register synchronization** must sometimes be done. More on that later - trust me, it's much less scary than it sounds.
 
 ## Configuring the main (CPU) clock
 
@@ -360,7 +360,7 @@ Alright, now that you're a master of the synchronous main clock let's talk about
 1. The **peripheral interface** clock: this is the *synchronous* clock from the CPU & associated busses (AHB/APBx).
 2. The **peripheral core** clock: this is the *asynchronous* clock that's configured and wired up to the peripheral using the `GCLK` peripheral.
 
-The first one you've already set up - it's the CPU clock. It comes into play in a bit in the *register synchronization* section. The second - the *peripheral core* clock is what this section talk about.
+The first one you've already set up - it's the CPU clock. It comes into play in a bit in the *register synchronization* section. The second - the *peripheral core* clock is what this section covers.
 
 To enable a peripheral that needs a clock, you'll need to:
 
@@ -448,5 +448,7 @@ You can read more about register synchronization in section 14.3 of the [datashe
 * [Microchip Developer - SAM D21 Clock Configuration](https://microchipdeveloper.com/32arm:samd21-clock-system-configuration)
 * [CircuitPython's clock initialization](https://github.com/adafruit/samd-peripherals/blob/6b531fc923d9f02b14bd731a5f584ddf716e8773/samd/samd21/clocks.c)
 * [Datasheet][datasheet]
+* [Errata][errata]
 
-[datasheet]: http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf
+[datasheet]: https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf
+[errata]: http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf
