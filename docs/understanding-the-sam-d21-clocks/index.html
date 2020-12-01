@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Stargirl (Thea) Flowers - Understanding the SAM D21 clocks</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+
+  
+<meta property="og:title" content="Understanding the SAM D21 clocks - Thea Flowers">
+
+
+<meta property="og:description" content="A guide to common SAM D21 clock configuration">
+
+
+
+<meta property="og:image" content="https://blog.thea.codes/static/me.png">
+
+
+
+<meta name="twitter:image:alt" content="Avatar for Thea Flowers">
+
+
+<meta property="og:url" content="https://blog.thea.codes/understanding-the-sam-d21-clocks">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theavalkyrie">
+
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on November 30, 2020</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Understanding the SAM D21 clocks</h1>
+  <content>
+    <p>The <a href="https://www.microchip.com/design-centers/32-bit/sam-32-bit-mcus/sam-d-mcus">Microchip SAM D</a> lineup has a really flexible but sometimes daunting clock system. This post aims to be a gentle introduction to the SAM D21's clock system and a guide for common configurations. It's written as both a <em>guide</em> and a <em>reference</em> - there is a lot of information here and it's definitely not something that anyone is expected to just absorb with one read. I'm also always open to suggestions and improvements - <a href="https://github.com/theacodes/blog.thea.codes/issues">open an issue on GitHub</a> and let's chat!</p>
+<h2>Clock system overview</h2>
+<p>The clock system for the SAM D21 has a few concepts that are useful to know about before tackling configuration. There won't be any code examples in this section but sit tight - I'll get into some code very shortly.</p>
+<p>First, there are a set of <strong>clock sources</strong>. These are what you generally think of when you think of an &quot;oscillator&quot;. Somewhat surprisingly, the clocks sources are configured using the System Controller (<code>SYSCTRL</code>) peripheral. The SAM D21 has the following clock sources:</p>
+<ul>
+<li>An 8 MHz internal oscillator (<code>OSC8M</code>)</li>
+<li>A 32.768 kHz high-accuracy internal oscillator (<code>OSC32K</code>)</li>
+<li>A 32.768 kHz ultra low-power internal oscillator (<code>OSCULP32K</code>)</li>
+<li>An internal digital frequency locked loop which can track against other clock sources (<code>DFLL48M</code>)</li>
+<li>An internal fractional digital phase-locked loop which can track against other clock sources (<code>FDPLL96M</code>)</li>
+</ul>
+<p>Second, there is the <strong>Generic Clock Controller (<code>GCLK</code>)</strong> peripheral. The general clock peripheral can be seen as a &quot;switchboard&quot; of sorts that allows you to connect <em>clock sources</em> to various peripherals. For the SAM D21, there are <em>eight</em> generic clocks. Peripherals can be configured to use any of these eight clocks and different peripherals can be clocked from the same generic clock.</p>
+<p>For example, if you wanted to clock the <code>SERCOM0</code> peripheral from the 8 MHz internal oscillator you would:</p>
+<ol>
+<li>Enable the 8 MHz oscillator (<code>OSC8M</code>) using the <code>SYSCTRL</code> peripheral.</li>
+<li>Configure a generic clock, for example, <code>GLCK1</code> to use the <code>OSC8M</code> as its clock source.</li>
+<li>Tell the generic clock multiplexer to connect <code>GLCK1</code> to <code>SERCOM0</code>.</li>
+</ol>
+<p>Finally it's important to know the difference between <strong>synchronous</strong> and <strong>asynchronous</strong> clocks. The main system clock which is used to clock the CPU an the internal busses (AHB/APBx) is called <strong>synchronous</strong>. The generic clocks used to drive peripherals are called <strong>asynchronous</strong>. The reason for this distinction is because it's possible (and common) to drive the peripherals using a different clock source than the CPU. Since there are potentially two different clocks at play, <strong>register synchronization</strong> must sometimes be done. More on that later - trust me, it's much less scary than it sounds.</p>
+<h2>Configuring the main (CPU) clock</h2>
+<p>Let's dive into a concrete example: configuring the main clock and changing the CPU's frequency. The CPU (and the associated busses) are always driven from <code>GCLK0</code> (you'll sometimes see this referred to as <code>GCLK_MAIN</code>) - so you can kind of think of <code>GLCK0</code> as special in that way.</p>
+<p>After reset, the SAM D21 runs at 1 MHz. The reason for this is that the default state for the clock system is:</p>
+<ul>
+<li>The 8 MHz internal oscillator (<code>OSC8M</code>) is enabled and divided (&quot;prescaled&quot;) by 8.</li>
+<li>Generic clock 0 (<code>GCLK0</code>) is enabled and uses the 8 MHz internal oscillator as its source.</li>
+</ul>
+<p>Since the 8 MHz oscillator is divided by 8, <code>GLCK0</code> is generating a 1 MHz clock for the CPU.</p>
+<p>This is equivalent to the hardware running this code on startup:</p>
+<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PRESC</span> <span class="o">=</span> <span class="mh">0x03</span>  <span class="c1">// divide by 8</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_SRC_OSC8M</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
+</pre>
+<p>A super common thing you'll see across SAM D21 firmware examples is that the first thing the code does is switch the CPU frequency from 1 MHz to 8 MHz. This is easily done by changing the 8 MHz internal oscillator's prescaler:</p>
+<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PRESC</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span>
+</pre>
+<p>&amp; that's it! Your SAM D21 is now running as a brisk 8 MHz.</p>
+<h2>Running the CPU at 48 MHz</h2>
+<p>But hold on - the SAM D21 can run at a much much faster 48 MHz! How does that work? Well, this requires quite a lot more configuration and involves the <em>internal digital frequency locked loop</em> (<code>DFLL48M</code>).</p>
+<p>This DFLL took me a long time to wrap my head around. In very basic terms you can think of a frequency locked loop as a <em>clock multiplier</em>. Given a reference clock it can multiply that clock's frequency by some given amount - so if you have a 1 MHz reference clock signal going into a DFLL configured to multiply it by 4, you'll get a 4 MHz clock signal.</p>
+<p>With that in mind you can hopefully see how the DFLL can generate a 48 MHz clock from a lower frequency reference clock. You have to tell it what clock signal to follow and tell it how much to multiply the rate by.</p>
+<p>There are <em>two</em> separate, but similar ways to configure the <code>DFLL48M</code> to run the CPU at 48 MHz. If you want accuracy you'll use an <em>external</em> crystal oscillator as the reference clock and run in <em>closed loop mode</em>. Otherwise, you can run in <em>open loop</em> mode.</p>
+<h3>Using an external crystal and closed-loop mode</h3>
+<p>The first approach is to use an external 32.768 kHz crystal oscillator as the reference clock. This method requires some external components but allows for the highest accuracy. This is required for a few peripherals - such as running the USB peripheral in host mode. This can look a bit overwhelming but take it one step at a time and you'll get it - I promise.</p>
+<p>Before trying to run at a higher CPU clock, you need to configure the <em>wait states</em> for the internal flash. This makes sure that the CPU doesn't try to access the flash faster than it can operate. The correct number of wait states for 48 MHz at 3.3v is 1. You can find the wait states for other configurations in Table 37-42 in the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>.</p>
+<pre class="lang-c"><span class="cm">/* Set the correct number of wait states for 48 MHz @ 3.3v */</span>
+<span class="n">NVMCTRL</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">RWS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</pre>
+<p>With that done, the next step is to enable the external crystal oscillator:</p>
+<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">XOSC32K</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="cm">/* Crystal oscillators can take a long time to startup. This</span>
+<span class="cm">       waits the maximum amount of time (4 seconds). This can be</span>
+<span class="cm">       reduced depending on your crystal oscillator. */</span>
+    <span class="n">SYSCTRL_XOSC32K_STARTUP</span><span class="p">(</span><span class="mh">0x7</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">SYSCTRL_XOSC32K_EN32K</span> <span class="o">|</span>
+    <span class="n">SYSCTRL_XOSC32K_XTALEN</span><span class="p">;</span>
+
+<span class="cm">/* This has to be a separate write as per datasheet section 17.6.3 */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">XOSC32K</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the external crystal to be ready */</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">XOSC32KRDY</span><span class="p">);</span>
+</pre>
+<p>With the crystal oscillator setup, the next step is to wire it up the a generic clock. This is so it can be used as the reference for the DFLL. In this case it'll be <code>GLCK1</code>, but it can be any clock other than <code>GCLK0</code>. It might seem a little strange to go from a clock source (<code>XOSC32K</code>, 32.768 kHz) to a generic clock (<code>GCLK1</code>) and then back to clock source (<code>DFLL48M</code>, 48MHz) and finally to another generic clock (<code>GCLK0</code>, 48Mhz), but that's the way it works!</p>
+<p>This code sets up <code>GCLK1</code> to use <code>XOSC32K</code> as the clock source:</p>
+<pre class="lang-c"><span class="cm">/* Configure GCLK1&#39;s divider - in this case, no division - so just divide by one */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENDIV</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_GENDIV_ID</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENDIV_DIV</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="cm">/* Setup GCLK1 using the external 32.768 kHz oscillator */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> 
+    <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_SRC_XOSC32K</span> <span class="o">|</span>
+    <span class="cm">/* Improve the duty cycle. */</span>
+    <span class="n">GCLK_GENCTRL_IDC</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete */</span>
+<span class="k">while</span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">);</span>
+</pre>
+<p>With <code>GCLK1</code> now providing the 32.768 kHz reference clock, the next step is to connect <code>GCLK1</code>'s output to the DFLL's reference clock:</p>
+<pre class="lang-c"><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">CLKCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_CLKCTRL_ID_DFLL48</span> <span class="o">|</span>
+    <span class="n">GCLK_CLKCTRL_GEN_GCLK1</span> <span class="o">|</span>
+    <span class="n">GCLK_CLKCTRL_CLKEN</span><span class="p">;</span>
+</pre>
+<p>Now that the reference clock is all configured and connected, you can now set up the DFLL. This is described in detail in section 17.6.7.1.2 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>. There's a <em>lot</em> to wrap your head around here so don't sweat it if it takes a few reads to get it:</p>
+<pre class="lang-c"><span class="cm">/* This works around a quirk in the hardware (errata 1.2.1) -</span>
+<span class="cm">   the DFLLCTRL register must be manually reset to this value before</span>
+<span class="cm">   configuration. */</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">SYSCTRL_DFLLCTRL_ENABLE</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+
+<span class="cm">/* Set up the multiplier. This tells the DFLL to multiply the 32.768 kHz</span>
+<span class="cm">   reference clock to 48 MHz */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLMUL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="cm">/* This value is output frequency / reference clock frequency,</span>
+<span class="cm">       so 48 MHz / 32.768 kHz */</span>
+    <span class="n">SYSCTRL_DFLLMUL_MUL</span><span class="p">(</span><span class="mi">1465</span><span class="p">),</span>
+    <span class="cm">/* The coarse and fine step are used by the DFLL to lock</span>
+<span class="cm">       on to the target frequency. These are set to half</span>
+<span class="cm">       of the maximum value. Lower values mean less overshoot,</span>
+<span class="cm">       whereas higher values typically result in some overshoot but</span>
+<span class="cm">       faster locking. */</span>
+    <span class="n">SYSCTRL_DFLLMUL_FSTEP</span><span class="p">(</span><span class="mi">511</span><span class="p">),</span> <span class="c1">// max value: 1023</span>
+    <span class="n">SYSCTRL_DFLLMUL_CSTEP</span><span class="p">(</span><span class="mi">31</span><span class="p">);</span>  <span class="c1">// max value: 63</span>
+
+<span class="cm">/* Wait for the write to finish */</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+</pre>
+<p>Before enabling the DFLL, you can set some values to help it initialize faster. When initialized, the DFLL will try to lock on to the the target frequency. It does this by adjusting the <code>DFLLVAL.COARSE</code> and <code>DFLLVAL.FINE</code> registers. There's a factory calibration value for the coarse register that you should load that'll start the DFLL at a frequency close to 48 MHz and reduce locking time:</p>
+<pre class="lang-c"><span class="kt">uint32_t</span> <span class="n">coarse</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="n">FUSES_DFLL48M_COARSE_CAL_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">FUSES_DFLL48M_COARSE_CAL_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">FUSES_DFLL48M_COARSE_CAL_Pos</span><span class="p">;</span>
+
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLVAL</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">COARSE</span> <span class="o">=</span> <span class="n">coarse</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to finish */</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+</pre>
+<p>The final step in setting up the DFLL is to set it to closed loop mode and turn it on:</p>
+<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> 
+    <span class="cm">/* Closed loop mode */</span>
+    <span class="n">SYSCTRL_DFLLCTRL_MODE</span> <span class="o">|</span>
+    <span class="cm">/* Wait for the frequency to be locked before outputting the clock */</span>
+    <span class="n">SYSCTRL_DFLLCTRL_WAITLOCK</span> <span class="o">|</span>
+    <span class="cm">/* Enable it */</span>
+    <span class="n">SYSCTRL_DFLLCTRL_ENABLE</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the frequency to lock */</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLLCKC</span> <span class="o">||</span> <span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLLCKF</span><span class="p">)</span> <span class="p">{}</span>
+</pre>
+<p>Alright, almost done! The final bit is to switch <code>GCLK0</code> to use the DFLL instead of the 8 MHz internal oscillator. As soon as this is done the CPU will be running at 48 MHz:</p>
+<pre class="lang-c"><span class="cm">/* Setup GCLK0 using the DFLL @ 48 MHz */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_SRC_DFLL48M</span> <span class="o">|</span>
+    <span class="cm">/* Improve the duty cycle. */</span>
+    <span class="n">GCLK_GENCTRL_IDC</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete */</span>
+<span class="k">while</span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">);</span>
+</pre>
+<p><strong>That's it!</strong> Take a deep breath, that was a lot! To review:</p>
+<ol>
+<li>Set up <code>XOSC32K</code> in <code>SYSCTRL</code>.</li>
+<li>Configure <code>GCLK1</code> to use <code>XOSC32K</code> as its clock source.</li>
+<li>Connect <code>GCLK1</code> to the DFLL reference clock input.</li>
+<li>Configure <code>DFLL48M</code> to multiply the 32.768 kHz reference to 48 MHz.</li>
+<li>Configure <code>GCLK0</code> to use the <code>DFLL48M</code> as its clock source.</li>
+</ol>
+<h3>Using open loop mode</h3>
+<p>If you don't need the accuracy that comes from using an external 32.768 kHz crystal, you can set up the DFLL in <em>open loop</em> mode. This means that the DFLL isn't following any specific reference clock, it's just outputting a frequency directly based on its configuration.</p>
+<p>As with closed loop mode, you'll need to set up the proper flash wait states:</p>
+<pre class="lang-c"><span class="cm">/* Set the correct number of wait states for 48 MHz @ 3.3v */</span>
+<span class="n">NVMCTRL</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">RWS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</pre>
+<p>With that taken care of, the next step is to load the coarse and fine values for the DFLL from the factory calibration. This will get the DFLL pretty close to 48 MHz:</p>
+<pre class="lang-c"><span class="cm">/* This works around a quirk in the hardware (errata 1.2.1) -</span>
+<span class="cm">   the DFLLCTRL register must be manually reset to this value before</span>
+<span class="cm">   configuration. */</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">SYSCTRL_DFLLCTRL_ENABLE</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+
+<span class="cm">/* Write the coarse and fine calibration from NVM. */</span>
+<span class="kt">uint32_t</span> <span class="n">coarse</span> <span class="o">=</span>
+    <span class="p">((</span><span class="o">*</span><span class="p">(</span><span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="n">FUSES_DFLL48M_COARSE_CAL_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">FUSES_DFLL48M_COARSE_CAL_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">FUSES_DFLL48M_COARSE_CAL_Pos</span><span class="p">;</span>
+<span class="kt">uint32_t</span> <span class="n">fine</span> <span class="o">=</span>
+    <span class="p">((</span><span class="o">*</span><span class="p">(</span><span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="n">FUSES_DFLL48M_FINE_CAL_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">FUSES_DFLL48M_FINE_CAL_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">FUSES_DFLL48M_FINE_CAL_Pos</span><span class="p">;</span>
+
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLVAL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">SYSCTRL_DFLLVAL_COARSE</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span> <span class="o">|</span> <span class="n">SYSCTRL_DFLLVAL_FINE</span><span class="p">(</span><span class="n">fine</span><span class="p">);</span>
+
+<span class="cm">/* Wait for the write to finish. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>Now you can go ahead and enable the DFLL:</p>
+<pre class="lang-c"><span class="cm">/* Enable the DFLL */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to finish */</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>Just as with the closed loop example, the final step is to switch <code>GCLK0</code> to use the DFLL as its clock source:</p>
+<pre class="lang-c"><span class="cm">/* Setup GCLK0 using the DFLL @ 48 MHz */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_SRC_DFLL48M</span> <span class="o">|</span>
+    <span class="cm">/* Improve the duty cycle. */</span>
+    <span class="n">GCLK_GENCTRL_IDC</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete */</span>
+<span class="k">while</span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">);</span>
+</pre>
+<h3>USB clock recovery mode</h3>
+<p>I know you're thinking &quot;wait- you said there were two ways to configure 48 MHz&quot;. Well, that's still true. USB clock recovery mode is a small change to the open loop strategy. USB clock recovery mode (detailed in section 17.6.7.2.2 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>) is a neat way of generating a 48 MHz clock from the USB connection. If the SAM D21 is used as a USB device then the DFLL can be configured to use the 1 kHz USB start-of-frame as the reference clock. This is actually <em>required</em> if you don't have an external crystal and you want to operate as a USB device. It's a neat feature that allows for some cost saving when designing hardware.</p>
+<p>The way to set this up is to take the open loop configuration as a starting point:</p>
+<pre class="lang-c"><span class="cm">/* Set the correct number of wait states for 48 MHz @ 3.3v */</span>
+<span class="n">NVMCTRL</span><span class="o">-&gt;</span><span class="n">CTRLB</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">RWS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="cm">/* This works around a quirk in the hardware (errata 1.2.1) -</span>
+<span class="cm">   the DFLLCTRL register must be manually reset to this value before</span>
+<span class="cm">   configuration. */</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">SYSCTRL_DFLLCTRL_ENABLE</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">);</span>
+
+<span class="cm">/* Write the coarse and fine calibration from NVM. */</span>
+<span class="kt">uint32_t</span> <span class="n">coarse</span> <span class="o">=</span>
+    <span class="p">((</span><span class="o">*</span><span class="p">(</span><span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="n">FUSES_DFLL48M_COARSE_CAL_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">FUSES_DFLL48M_COARSE_CAL_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">FUSES_DFLL48M_COARSE_CAL_Pos</span><span class="p">;</span>
+<span class="kt">uint32_t</span> <span class="n">fine</span> <span class="o">=</span>
+    <span class="p">((</span><span class="o">*</span><span class="p">(</span><span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="n">FUSES_DFLL48M_FINE_CAL_ADDR</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">FUSES_DFLL48M_FINE_CAL_Msk</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">FUSES_DFLL48M_FINE_CAL_Pos</span><span class="p">;</span>
+
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLVAL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">SYSCTRL_DFLLVAL_COARSE</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span> <span class="o">|</span> <span class="n">SYSCTRL_DFLLVAL_FINE</span><span class="p">(</span><span class="n">fine</span><span class="p">);</span>
+
+<span class="cm">/* Wait for the write to finish. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>Next, configure the settings to enable USB clock recovery mode:</p>
+<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span>
+    <span class="cm">/* Enable USB clock recovery mode */</span>
+    <span class="n">SYSCTRL_DFLLCTRL_USBCRM</span> <span class="o">|</span>
+    <span class="cm">/* Disable chill cycle as per datasheet to speed up locking.</span>
+<span class="cm">       This is specified in section 17.6.7.2.2, and chill cycles</span>
+<span class="cm">       are described in section 17.6.7.2.1. */</span>
+    <span class="n">SYSCTRL_DFLLCTRL_CCDIS</span><span class="p">;</span>
+
+<span class="cm">/* Configure the DFLL to multiply the 1 kHz clock to 48 MHz */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLMUL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="cm">/* This value is output frequency / reference clock frequency,</span>
+<span class="cm">       so 48 MHz / 1 kHz */</span>
+    <span class="n">SYSCTRL_DFLLMUL_MUL</span><span class="p">(</span><span class="mi">48000</span><span class="p">),</span>
+    <span class="cm">/* The coarse and fine values can be set to their minimum</span>
+<span class="cm">       since coarse is fixed in USB clock recovery mode and</span>
+<span class="cm">       fine should lock on quickly. */</span>
+    <span class="n">SYSCTRL_DFLLMUL_FSTEP</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">SYSCTRL_DFLLMUL_CSTEP</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</pre>
+<p>Then set the DFLL into closed loop mode and enable it:</p>
+<pre class="lang-c"><span class="cm">/* Closed loop mode */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">MODE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="cm">/* Enable the DFLL */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">DFLLCTRL</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete */</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">DFLLRDY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>This can be a little confusing but here's what happens:</p>
+<ul>
+<li>If there isn't a USB connection then things work just as they did in open loop mode. The DFLL outputs a clock <em>close</em> to 48 MHz and does not have a reference clock.</li>
+<li>When there is a USB connection then things work similar to the way they did in closed loop mode. The DFLL follows the 1 kHz USB start of frame message and outputs a much more accurate 48 MHz clock.</li>
+</ul>
+<p>After setting all of this up the final step is again to tell <code>GCLK0</code> to use the DFLL as its clock source:</p>
+<pre class="lang-c"><span class="cm">/* Setup GCLK0 using the DFLL @ 48 MHz */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_SRC_DFLL48M</span> <span class="o">|</span>
+    <span class="cm">/* Improve the duty cycle. */</span>
+    <span class="n">GCLK_GENCTRL_IDC</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete */</span>
+<span class="k">while</span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<h2>Peripheral clocks</h2>
+<p>Alright, now that you're a master of the synchronous main clock let's talk about peripheral clocks. Each of the SAM D21's peripherals deal with two different clock domains:</p>
+<ol>
+<li>The <strong>peripheral interface</strong> clock: this is the <em>synchronous</em> clock from the CPU &amp; associated busses (AHB/APBx).</li>
+<li>The <strong>peripheral core</strong> clock: this is the <em>asynchronous</em> clock that's configured and wired up to the peripheral using the <code>GCLK</code> peripheral.</li>
+</ol>
+<p>The first one you've already set up - it's the CPU clock. It comes into play in a bit in the <em>register synchronization</em> section. The second - the <em>peripheral core</em> clock is what this section talk about.</p>
+<p>To enable a peripheral that needs a clock, you'll need to:</p>
+<ol>
+<li>Set up a generic clock generator (<code>GCLK</code>) using one of the clock sources. Remember that multiple peripherals can share the same <code>GCLK</code>, and you can use <code>GCLK0</code> to clock peripherals as well.</li>
+<li>Configure the generic clock multiplexer to connect the <code>GCLK</code> to the peripheral.</li>
+<li>Enable the peripheral's interface clock using the power management (<code>PM</code>) peripheral.</li>
+</ol>
+<p>Here's a concrete example: let's configure the clock for <code>SERCOM0</code>.</p>
+<p>The first step is to setup a generic clock generator. You could use <code>GCLK0</code>, but I commonly use a generic clock that uses the 8 MHz oscillator as a clock source for <code>SERCOM</code> peripherals. So this configures <code>GCLK2</code> to use the 8 MHz oscillator:</p>
+<pre class="lang-c"><span class="cm">/* Configure GCLK2&#39;s divider - in this case, no division - so just divide by one */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENDIV</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_GENDIV_ID</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENDIV_DIV</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="cm">/* Setup GCLK2 using the internal 8 MHz oscillator */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> 
+    <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span>
+    <span class="n">GCLK_GENCTRL_SRC_OSC8M</span> <span class="o">|</span>
+    <span class="cm">/* Improve the duty cycle. */</span>
+    <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete */</span>
+<span class="k">while</span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>The second step is to tell the clock multiplexer to connect <code>GCLK2</code> to <code>SERCOM0</code>:</p>
+<pre class="lang-c"><span class="cm">/* Connect GCLK2 to SERCOM0 */</span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">CLKCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_CLKCTRL_GEN_GCLK2</span> <span class="o">|</span>
+    <span class="n">GEM_SPI_GCLK_CLKCTRL_ID</span> <span class="o">|</span>
+    <span class="n">GCLK_CLKCTRL_ID_SERCOM0_CORE</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>Finally enable the peripheral interface clock using the power management peripheral:</p>
+<pre class="lang-c"><span class="n">PM</span><span class="o">-&gt;</span><span class="n">APBCMASK</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PM_APBCMASK_SERCOM0</span><span class="p">;</span>
+</pre>
+<p>At this point the peripheral is ready to use! You can software reset the peripheral and start configuring it as needed:</p>
+<pre class="lang-c"><span class="n">SERCOM0</span><span class="o">-&gt;</span><span class="n">SPI</span><span class="p">.</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SWRST</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">SERCOM0</span><span class="o">-&gt;</span><span class="n">SPI</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SWRST</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="p">...</span>
+</pre>
+<h2>Register synchronization</h2>
+<p>You might have noticed that there are a lot of references to <code>SYNCBUSY</code> above. This is a consequence of <em>register synchronization</em>. This is needed because there's two clocks at play when interacting with a peripheral - one clock for the CPU and the busses and a generic clock that's running the peripheral core. A direct example is that the configuration above runs the CPU at 48 MHz and <code>SERCOM0</code> at 8 MHz. Since the core is accessing the same registers as the CPU, some writes and reads need to be synchronized.</p>
+<p>When reading the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet's</a> register descriptions for a peripheral you'll see the term <em>&quot;Write-Synchronized&quot;</em>. This means that when you write to this register the hardware will set the peripheral's <code>SYNCBUSY</code> register while synchronizing the write. For example:</p>
+<pre class="lang-c"><span class="cm">/* Enable SERCOM0 */</span>
+<span class="n">SERCOM0</span><span class="o">-&gt;</span><span class="n">SPI</span><span class="p">.</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+<span class="cm">/* Wait for the write to complete before modifying any other SERCOM0 registers */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">SERCOM0</span><span class="o">-&gt;</span><span class="n">SPI</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="p">)</span> <span class="p">{};</span>
+</pre>
+<p>If you try to write to a peripheral's register while it's busy synchronizing, the CPU will stall until the synchronization is complete.</p>
+<p>You can read more about register synchronization in section 14.3 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">datasheet</a>.</p>
+<h2>Some tips and miscellanea</h2>
+<ul>
+<li>Failing to unmask the the peripheral in the power management (<code>PM</code>) peripheral and trying to access any peripheral registers will lock the CPU.</li>
+<li>Synchronization stalls aren't usually that big of a deal, but explicitly handling them makes sure that interrupts will be properly serviced while waiting for synchronization.</li>
+<li>It might seem odd that there are <em>three</em> different options for a 32.768 kHz oscillator. This mystery is solved by consulting the <em>electrical characteristics</em> section of the datasheet (section 37.13). Using an external crystal (<code>XOSC32K</code>) will give a <em>very</em> accurate frequency of 32.768 kHz with about 100ppm of drift, but it'll consume around 2.19 μA. <code>OSC32K</code> has a frequency between 32.276 - 33.260 kHz and consumes at most 1.31 μA. Finally, <code>OSCULP32K</code> has a frequency between 31.293 - 34.570 kHz and consumes at most 125 nA. It basically comes down to a tradeoff between accuracy and power consumption. In many cases you can use the ultra low power internal oscillator (<code>OSCULP32K</code>) and save a lot on power consumption.</li>
+<li>The DFLL48M in open loop mode will output a frequency between 47 MHz - 49 MHz as long as you load the factory coarse calibration value. In closed loop mode with an external crystal oscillator it'll be between 47.963 MHz - 47.981 MHz.</li>
+<li>Pay close attention to the maximum clock that a peripheral can run at. For example, the DAC peripheral can only run at 350 kHz (datasheet table 37-6). Also note that some peripherals can have a high frequency clock input but they must configure their peripheral clock divider to be lower - for example, the ADC peripheral can have an input clock of 48MHz but can only run at 2.1 MHz (datasheet table 37-24), so you would have to configure <code>ADC-&gt;CTRLB.bit.PRESCALER</code> appropriately.</li>
+</ul>
+<h2>References and further reading</h2>
+<ul>
+<li><a href="https://microchipdeveloper.com/32arm:samd21-clock-system-configuration">Microchip Developer - SAM D21 Clock Configuration</a></li>
+<li><a href="https://github.com/adafruit/samd-peripherals/blob/6b531fc923d9f02b14bd731a5f584ddf716e8773/samd/samd21/clocks.c">CircuitPython's clock initialization</a></li>
+<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM-D21-Family-Silicon-Errata-and-DataSheet-Clarification-DS80000760D.pdf">Datasheet</a></li>
+</ul>
+
+  </content>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Stargirl Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Atlanta, Georgia</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018 &mdash; 2020<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>
