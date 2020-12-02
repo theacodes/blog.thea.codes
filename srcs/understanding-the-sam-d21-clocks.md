@@ -1,6 +1,6 @@
 ---
 title: "Understanding the SAM D21 clocks"
-date: 2020-11-30
+date: 2020-12-02
 legacy_url: yes
 description: A guide to common SAM D21 clock configuration
 ---
@@ -146,13 +146,13 @@ while(!SYSCTRL->PCLKSR.bit.DFLLRDY);
 SYSCTRL->DFLLMUL.reg =
     /* This value is output frequency / reference clock frequency,
        so 48 MHz / 32.768 kHz */
-    SYSCTRL_DFLLMUL_MUL(1465),
+    SYSCTRL_DFLLMUL_MUL(1465) |
     /* The coarse and fine step are used by the DFLL to lock
        on to the target frequency. These are set to half
        of the maximum value. Lower values mean less overshoot,
        whereas higher values typically result in some overshoot but
        faster locking. */
-    SYSCTRL_DFLLMUL_FSTEP(511), // max value: 1023
+    SYSCTRL_DFLLMUL_FSTEP(511) | // max value: 1023
     SYSCTRL_DFLLMUL_CSTEP(31);  // max value: 63
 
 /* Wait for the write to finish */
@@ -312,11 +312,11 @@ SYSCTRL->DFLLCTRL.reg |=
 SYSCTRL->DFLLMUL.reg =
     /* This value is output frequency / reference clock frequency,
        so 48 MHz / 1 kHz */
-    SYSCTRL_DFLLMUL_MUL(48000),
+    SYSCTRL_DFLLMUL_MUL(48000) |
     /* The coarse and fine values can be set to their minimum
        since coarse is fixed in USB clock recovery mode and
        fine should lock on quickly. */
-    SYSCTRL_DFLLMUL_FSTEP(1),
+    SYSCTRL_DFLLMUL_FSTEP(1) |
     SYSCTRL_DFLLMUL_CSTEP(1);
 ```
 
@@ -434,6 +434,50 @@ while (SERCOM0->SPI.SYNCBUSY.bit.ENABLE) {};
 If you try to write to a peripheral's register while it's busy synchronizing, the CPU will stall until the synchronization is complete.
 
 You can read more about register synchronization in section 14.3 of the [datasheet][datasheet].
+
+## Debugging clocks with an oscilloscope
+
+If you have access to an oscilloscope you can take advantage of a nice feature of the SAM D chips: outputting a generic clock (`GCLK`) to an I/O pin. This is super useful when you're trying to verify that all of your clocks are working correctly. When debugging this way I *highly* recommend that you don't mess with `GCLK0` at all so that you don't have to worry about a bad configuration breaking the CPU clock.
+
+To enable clock output you need to set the `OE` bit when configuring a generic clock through `GCLK->GENCTRL`. For example, this configures `GCLK1` and enables I/O output:
+
+```c
+GCLK->GENCTRL.reg = 
+    GCLK_GENCTRL_ID(1) |
+    GCLK_GENCTRL_SRC_XOSC32K |
+    GCLK_GENCTRL_IDC |
+    GCLK_GENCTRL_GENEN |
+    /* Enable outputting the clock to an I/O pin. */
+    GCLK_GENCTRL_OE;
+
+/* Wait for the write to complete */
+while(GCLK->STATUS.bit.SYNCBUSY);
+```
+
+Once that's configured you'll need to configure the port multiplexer to connect the `GCLK` output to a pin. For example, this sets up `PA15` to output `GCLK1`:
+
+```c
+PORT->Group[0].DIRSET.reg = (1 << 15);
+PORT->Group[0].PINCFG[15].reg |= PORT_PINCFG_PMUXEN;
+PORT->Group[0].PMUX[15 >> 1].bit.PMUXO |= PORT_PMUX_PMUXO_H;
+```
+
+With that complete you can connect an oscilloscope to `PA15` and observe the clock:
+
+![A 32kHz clock from GCLK1](../static/2020-12-2/32khz.png)
+
+Like many other I/O peripherals there's only a certain set of pins you can use for this. This is covered in detail in the port multiplexing section of the [datasheet][datasheet], but here's a handy table for the SAM D21:
+
+| GCLK | I/O Pins | Mux |
+| --- | --- | --- |
+| GCLK0 | PA14, PB14, PB22, PA27, PA28, PA30 | H |
+| GCLK1 | PA15, PB15, PB23 | H |
+| GCLK2 | PA16, PB16 | H |
+| GCLK3 | PA17, PB17 | H |
+| GCLK4 | PA10, PB10, PA20 | H |
+| GCLK5 | PA11, PB11, PA21 | H |
+| GCLK6 | PA12, PA22 | H |
+| GCLK7 | PB13, PA23 | H |
 
 ## Some tips and miscellanea
 
