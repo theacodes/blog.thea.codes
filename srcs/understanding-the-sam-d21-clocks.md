@@ -44,8 +44,8 @@ Since the 8 MHz oscillator is divided by 8, `GLCK0` is generating a 1 MHz clock 
 This is equivalent to the hardware running this code on startup:
 
 ```c
-SYSCTRL->OSC8M.bit.PRESC = 0x03  // divide by 8
-SYSCTRL->OSC8M.bit.ENABLE = 1
+SYSCTRL->OSC8M.bit.PRESC = 0x03;  // divide by 8
+SYSCTRL->OSC8M.bit.ENABLE = 1;
 
 GCLK->GENCTRL.reg =
     GCLK_GENCTRL_ID(0) |

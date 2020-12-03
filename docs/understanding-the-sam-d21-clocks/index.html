@@ -81,8 +81,8 @@
 </ul>
 <p>Since the 8 MHz oscillator is divided by 8, <code>GLCK0</code> is generating a 1 MHz clock for the CPU.</p>
 <p>This is equivalent to the hardware running this code on startup:</p>
-<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PRESC</span> <span class="o">=</span> <span class="mh">0x03</span>  <span class="c1">// divide by 8</span>
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span>
+<pre class="lang-c"><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PRESC</span> <span class="o">=</span> <span class="mh">0x03</span><span class="p">;</span>  <span class="c1">// divide by 8</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">OSC8M</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 
 <span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">GENCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
     <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span>
