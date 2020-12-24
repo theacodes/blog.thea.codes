@@ -259,3 +259,17 @@ footer {
   color: red;
   font-weight: bold;
 }
+
+/* Support me! */
+.support-me {
+  display: block;
+  padding: 2em;
+  margin: 4em auto;
+  max-width: 80%;
+  color: white;
+  background-color: #17a2b8;
+}
+
+.support-me a, .support-me a:hover, .support-me a:active, .support-me a:visited {
+  color: #c2ffdf;
+}
