@@ -54,11 +54,12 @@
   <h1>Phase-shifted PWM on SAMD21</h1>
   <content>
     <p>I recently started working on a project that required me to output two separate PWMs from a microcontroller that needed to be <em>phase shifted</em>. That is, relative to each other the waves are <em>offset</em> in time:</p>
-<p><img src="../static/phase_shift.svg" alt="phase-shifed sine waves" /></p>
+<p><img alt="phase-shifed sine waves" src="../static/phase_shift.svg" /></p>
 <div class="image-caption"><a href=https://commons.wikimedia.org/wiki/File:Phase_shift.svg" target="_blank">Peppergrower / CC BY-SA</a></div>
+
 <p>Unfortunately, I couldn't find any good resources on how to accomplish this with my favorite 32-bit ARM microcontroller, the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18">SAM D21</a>, which is used in the Arduino Zero and Adafruit's M0 series. So I set out to figure this out - and with a little help from Twitter and friends I was able to get it working.</p>
 <p>This method should also work with the SAM D51 and other chips in the SAM family with the <em>TCC</em> peripheral.</p>
-<h2>How PWM works on the SAM D21</h2>
+<h2 id="how-pwm-works-on-the-sam-d21">How PWM works on the SAM D21</h2>
 <p>In order to pull this off I first needed to understand at the hardware level how PWMs are generated. Arduino &amp; friends <em>really</em> abstract this because there are several different ways to accomplish a PWM output and the peripheral that does this, the TCC, is extremely complex. The reason this is such a complex peripheral is that it's not just for generating PWMs - it can be used to control complex motor drivers and such!</p>
 <p>Luckily, Shawn Hymel has a great blog post on <a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/">creating PWM outputs using registers</a>. This was my starting point for making this happen.</p>
 <p>Getting a TCC to create a PWM output comes down to these steps:</p>
@@ -70,7 +71,7 @@
 <li>Configure the output pin and wire it up to the TCC.</li>
 <li>Start the TCC.</li>
 </ol>
-<h2>Configuring the TCCs</h2>
+<h2 id="configuring-the-tccs">Configuring the TCCs</h2>
 <p>Since I want to output <em>two</em> waveforms, I need to configure two TCCs at once.</p>
 <p>Here's the code for enabling the bus clock - if you're on Arduino, it's likely that the Arduino libraries have already done this. If you're on ASF4 or something like that, you'll definitely need to do this.</p>
 <pre class="lang-c"><span class="cm">/* Enable the APB clock for TCC0 &amp; TCC1. */</span>
@@ -92,7 +93,7 @@
 <span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">TCC_CTRLA_PRESCALER</span><span class="p">(</span><span class="n">TCC_CTRLA_PRESCALER_DIV16_Val</span><span class="p">);</span>
 <span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">TCC_CTRLA_PRESCALER</span><span class="p">(</span><span class="n">TCC_CTRLA_PRESCALER_DIV16_Val</span><span class="p">);</span>
 </pre>
-<p>Next, you'll need to configure the waveform output for the TCCs. There's a handful of different waveform configurations you can use but in this case the simplest one, &quot;Normal PWM&quot;, is the right one.</p>
+<p>Next, you'll need to configure the waveform output for the TCCs. There's a handful of different waveform configurations you can use but in this case the simplest one, "Normal PWM", is the right one.</p>
 <pre class="lang-c"><span class="cm">/* Use &quot;Normal PWM&quot; */</span>
 <span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">WAVE</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">TCC_WAVE_WAVEGEN_NPWM</span><span class="p">;</span>
 <span class="cm">/* Wait for bus synchronization */</span>
@@ -165,8 +166,8 @@
 </pre>
 <p>Alright, with all that there is now two perfectly synchronized square waves
 on the output:</p>
-<p><img src="../static/pwm-synced.gif" alt="Synchronized PWM outputs" /></p>
-<h2>Shifting the phase</h2>
+<p><img alt="Synchronized PWM outputs" src="../static/pwm-synced.gif" /></p>
+<h2 id="shifting-the-phase">Shifting the phase</h2>
 <p>Now that there's two PWM outputs working, we can talk about how to shift the
 phase around.</p>
 <p>The idea is to manually set the second TCC's <code>COUNT</code> to a value other than <code>0</code>
@@ -175,9 +176,9 @@ at the start. Setting this value will cause that TCC's output to be out of phase
 <pre class="lang-c"><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">period</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
 </pre>
 <p>Now the waveforms are out of phase:</p>
-<p><img src="../static/pwm-offset.png" alt="PWM outputs with a phase offset" /></p>
+<p><img alt="PWM outputs with a phase offset" src="../static/pwm-offset.png" /></p>
 <p>Huzzah! Victory, right? Well, yes, if you don't ever want to change the phase relationship after starting the timers. I do - I want to be able to change the phase based on external input. So I had to dive a little deeper.</p>
-<h2>Modifying the phase after starting the TCCs</h2>
+<h2 id="modifying-the-phase-after-starting-the-tccs">Modifying the phase after starting the TCCs</h2>
 <p>Unfortunately you can't modify the phase of TCC1 while the timers are running using the simple formula above. You have to take into account the current <code>COUNT</code> from TCC0. So the basic idea is:</p>
 <ol>
 <li>Read the value of <code>COUNT</code> from TCC0.</li>
@@ -192,8 +193,8 @@ at the start. Setting this value will cause that TCC's output to be out of phase
 </pre>
 <p>Note that I also perform a <code>% period</code>. This keeps the <code>COUNT</code> from being above the <code>PER</code> register which would cause the timer to have to overflow before restarting - not ideal as that could take quite a while!</p>
 <p>And that's it! With that you can actually change the phase dynamically! Check it out:</p>
-<p><img src="../static/pwm-scope.gif" alt="Animation of PWM waveforms with changing phase" /></p>
-<h2>Wrapping up</h2>
+<p><img alt="Animation of PWM waveforms with changing phase" src="../static/pwm-scope.gif" /></p>
+<h2 id="wrapping-up">Wrapping up</h2>
 <p>That's all! Thanks for reading this and I hope it's helpful to some poor soul who's fighting with the PWM output on the SAMD21. Here's some resources if you want to read more about this sort of stuff.</p>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Pulse-width_modulation">PWM on Wikipedia</a></li>
@@ -203,7 +204,6 @@ at the start. Setting this value will cause that TCC's output to be out of phase
 <li><a href="https://github.com/ocrdu/Arduino_SAMD21_turbo_PWM">Arduino SAMD21 Turbo PWM library</a></li>
 <li><a href="http://ww1.microchip.com/downloads/en/AppNotes/Atmel-42357-Using-the-Timer-Counter-for-Control-Applications_ApplicationNote_AT07690.pdf">SAM D11 TCC application notes</a></li>
 </ul>
-
   </content>
  
   <aside class="support-me">

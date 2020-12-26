@@ -53,7 +53,7 @@
   <content>
     <p>I <strong>love</strong> Google App Engine. I've spent over 3 years working with the platform - building apps inside of App Engine's limitations long before the rest of the Cloud Platform had come to light. Because I've been working with App Engine so long it's become my hammer of choice, my <em>Mjolnir</em>.</p>
 <p>We all know the problem with hammers. If you have a hammer, every problem looks like a nail. If you have the hammer of the Gods, you just keep hammering until it works.</p>
-<h3>Syncing Users</h3>
+<h3 id="syncing-users">Syncing Users</h3>
 <p>I found myself recently tied up in this madness. We've created various applications that utilize information from the <a href="https://developers.google.com/admin-sdk/directory/">Google Directory API</a>. We use it for enterprise applications to be able to gather information about the logged-in user such their real name, group memberships, photos, etc.</p>
 <p>The task of syncing the directory is where my hammer logic became a folly.</p>
 <p>Because the Google Directory API imposes some rather low quotas it's impractical for us to fetch the information for the users on-demand. What we do instead is sync an entire copy of the directory's users and groups on a regular (such as nightly) basis. There are also provisions in the API to get <a href="https://developers.google.com/admin-sdk/directory/v1/guides/push">push notifications for users</a> which we take advantage of.</p>
@@ -63,7 +63,7 @@
 <li>Fetch all of the groups in the domain and save them to the datastore.</li>
 </ol>
 <p>We implemented this via the task queue- which is a fantastic choice for this kind of work. We spin off two tasks and they churn through the API and save their respective data models.</p>
-<h3>Problem one - group membership</h3>
+<h3 id="problem-one-group-membership">Problem one - group membership</h3>
 <p>At this point my hammer served me well- but then we had an application that required us to determine group membership. Our task pipeline immediately became more complex:</p>
 <ol>
 <li>Fetch all of the users in the domain and save them to the datastore.</li>
@@ -71,7 +71,7 @@
 <li>When the users are done syncing, go through each user in the datastore and query for the groups that they belong to and update the user's record.</li>
 </ol>
 <p>We could've fetched the groups while fetching all of the users, but we found it faster to do is this way because it's more parallelizable. This also worked well enough in the task queue - sure, it tended to have to retry due to either quota issues or 5xx errors from the Directory API, but none of the directories we worked with so far had any issues. It was clear to me at this point that our approach was beginning to smell.</p>
-<h3>Problem two - nested groups</h3>
+<h3 id="problem-two-nested-groups">Problem two - nested groups</h3>
 <p>Surprisingly you can nest a Google group within another group. This means you can have a relationship like this:</p>
 <pre><code>- all-hr@domain.com
     - hr-admins@domain.com
@@ -89,7 +89,7 @@
 <li>When the users, groups, and group members are done syncing, go through each user and query each group that they're a direct member of. Then, for each of these direct groups do a recursive lookup to determine all ancestors.</li>
 </ol>
 <p>Expressing that last step with the task queue and datastore is very difficult. Not having all of the data in memory means lots of RPCs and look ups to make it happen. There's no practical way to keep it all in memory as App Engine's instance classes aren't particularly suited for this workload. The code was complex and hard to understand but worked for the most part.</p>
-<h3>Problem three - scale changes everything</h3>
+<h3 id="problem-three-scale-changes-everything">Problem three - scale changes everything</h3>
 <p>This worked for smaller domains (around 10,000 users and 200-300 groups). But we came across a domain with daunting size: 250,000 users and 10,000 groups.</p>
 <p>This caused a host of problems:</p>
 <ol>
@@ -101,7 +101,7 @@
 <li>Our datastore writes and reads were insane. It sometimes cost nearly $6 to do the sync <em>in datastore writes and read alone</em>.</li>
 </ol>
 <p>The result was not pretty. We have incomplete and partial data almost always. The nested group logic was particular sensitive to this- one broken link and access control falls apart. This wasn't the solution we needed - our hammer had failed us.</p>
-<h3>Keep it simple, stupid</h3>
+<h3 id="keep-it-simple-stupid">Keep it simple, stupid</h3>
 <p>Despite being difficult to implement using the task queues this sync is actually easily suited to a simple, straightforward python program:</p>
 <ol>
 <li>Get all users in the domain into a list called <code>users</code>.</li>
@@ -114,9 +114,8 @@
 <p>After a bit of tweaking, it worked. It did in one hour on my laptop what took App Engine six. Having all of the data in memory at once makes the logic to expand the nested groups trivial and drastically reduces cost.</p>
 <p>The last remaining piece was persistence. I wanted something faster and cheaper than the datastore but I couldn't use memcache because of its eviction policy. So I made the code write its output to <a href="http://redis.io/">redis</a> and deployed it on to a compute engine instance.</p>
 <p>I then set up the sync script to run on a crontab on that instance. I adapted the rest of the application code to read the user info from redis instead of the datastore. It was all too easy from this point. It costs on average $1-$2 a day depending on the instance class used.</p>
-<h3>Conclusion</h3>
+<h3 id="conclusion">Conclusion</h3>
 <p>App Engine is great for so many things and it's served me so well over the years, however, the lesson learned here is <strong>not to be afraid of hybrid solutions</strong>. We can sometimes get scared of IaaS over PaaS because of the looming threat of complexity and maintenance but if it makes your solution much easier and much cheaper to implement it can be worth the small trade-off. <strong>Don't forget that you have more than one tool in your toolbox</strong>.</p>
-
   </content>
  
   <aside class="support-me">

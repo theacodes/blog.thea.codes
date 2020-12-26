@@ -53,11 +53,11 @@
   </aside>
   <h1>Getting the most out of the SAM D21's ADC</h1>
   <content>
-    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/forms-min.css" />
+    <p><link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/forms-min.css" /></p>
 <p>In my <a href="../reading-analog-values-with-the-samd-adc">previous blog post</a>, I walked through how to do a basic analog read using the SAM D21's Analog to Digital converter (ADC). While this simple setup can work for a lot of cases, it's not uncommon to want to get better performance or accuracy out of the ADC.</p>
 <p>This post explores the various configuration options for the ADC and how it impacts speed and accuracy. Since the SAM D family has similar ADC peripherials across the line this information is likely applicable to all of them. Additionally, the techniques and ideas here are generally applicable to all ADCs.</p>
 <p>One more thing before I get started - this is just what I've gathered from the datasheets, application notes, code examples, and observation on real hardware. I could be totally wrong about some of these things! I'll try to make a note when there's something I'm not sure of - and if you know the answer don't hestitate to <a href="https://thea.codes">reach out to me</a>.</p>
-<h2>A handy dandy calculator</h2>
+<h2 id="a-handy-dandy-calculator">A handy dandy calculator</h2>
 <p>There's several configuration options for the SAM D21 ADC. Some of them impact speed, some impact accuracy, and some impact both. I created this calculator to show how the various registers impact the ADC. This is a <em>super</em> handy tool for tuning the ADC for your particular use case and takes a lot of the guess work out of it. It's what I wish I had when I first started with the SAM D21.</p>
 <p><strong>Important note</strong>: This calculator is only valid for <em>single ended, one-shot measurements</em>. On the whole, differential measurements and free-running mode take slightly less time. You can read more details about their timing in <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">Section 33.6.5.1 of the datasheet</a>.</p>
 <div id="conversion-time-calculator">
@@ -168,36 +168,37 @@
     calc();
 })();
 </script>
+
 <p>The most important numbers to note here are the <strong>conversion time</strong> and the <strong>max input impedance</strong>. The conversion time is the overall time it takes to perform the conversion - this takes into account the clock, sample time, and propagation delay (it's not a simple sum, unfortunately). The impedance is our first topic for tuning.</p>
-<h2>Input impedance</h2>
+<h2 id="input-impedance">Input impedance</h2>
 <p>The ADC on the SAM D21 makes measurements by charging a capacitor to the input voltage. In order for measurements to be accurate the capacitor must have enough time to charge up to the input voltage before sampling occurs. How long this takes depends on the input <a href="https://en.wikipedia.org/wiki/Electrical_impedance">impedance</a>. If you assume that you're measuring DC voltage then impedance is the same as resistance. So you just have to think about all of the resistance between the voltage you're trying to measure and the ADC input pin.</p>
 <p>For example, for this circuit:</p>
-<p><img src="../static/adc_impedance.svg" alt="Circuit with impedance" /></p>
+<p><img alt="Circuit with impedance" src="../static/adc_impedance.svg" /></p>
 <p>The input impedance is 250kΩ (100kΩ + 150kΩ). When connecting this circuit to the ADC you have to ensure that the ADC is configured so that it has enough time to fully charge that capacitor with that amount of input impedance. The way this is done is by changing the sample time, <code>ADC-&gt;SAMPCTRL.SAMPLEN</code>. Increasing the sample time gives the capacitor a longer amount of time to charge and thus increasing the amount of input impedance the ADC can deal with. It also slightly increases the overall conversion time. Try using the calculator above to get the ADC to work with the 250kΩ impedance shown in the example above (spoilers: you only have to increase the sample time by 1).</p>
 <p>Here's the code for changing the sample time. You should do this before enabling the ADC:</p>
 <pre class="lang-c"><span class="c1">// Set the sample time length to accommodate for input impedance.</span>
 <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">SAMPCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">ADC_SAMPCTRL_SAMPLEN</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </pre>
 <p>You'll run into input impedance a lot. For example, if you have a potentiometer configured as a <a href="https://learn.sparkfun.com/tutorials/voltage-dividers/all#applications">voltage divider</a> to provide a simple knob input for your project then the ADC's max input impedance must be greater than the whole potentiometer's resistance divided by four.</p>
-<p>This illustrates why: when the potentiometer is close to the end, to the ADC it &quot;looks like&quot; a very low-value resistor to one end in parallel to the rest of the  potentiometer to the other end. When two very different resistors are in parallel, the overall resistance is close to the smaller value. The impedance is largest at the midpoint: Here both halves are half of the potentiometer's value and the overall impedance is going to be half of that because both are in parallel.</p>
-<p><img src="../static/adc_pot.svg" alt="Circuit with potentiometer" /></p>
+<p>This illustrates why: when the potentiometer is close to the end, to the ADC it "looks like" a very low-value resistor to one end in parallel to the rest of the  potentiometer to the other end. When two very different resistors are in parallel, the overall resistance is close to the smaller value. The impedance is largest at the midpoint: Here both halves are half of the potentiometer's value and the overall impedance is going to be half of that because both are in parallel.</p>
+<p><img alt="Circuit with potentiometer" src="../static/adc_pot.svg" /></p>
 <p>If you have a use case where you <em>don't</em> want to increase the sample time for the ADC, you can use a <a href="https://en.wikipedia.org/wiki/Buffer_amplifier">buffer</a> to change the source impedance, like in this circuit that provides a source impedance of just 1kΩ:</p>
-<p><img src="../static/adc_buffer.svg" alt="Circuit with active buffer" /></p>
+<p><img alt="Circuit with active buffer" src="../static/adc_buffer.svg" /></p>
 <p>For more details on how the calcuator figures out the max input impedance and how the capacitor charging works see <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">section 37.11.4.3 of the datasheet</a>.</p>
-<h2>Baseline</h2>
-<p>Alright, now that you've got the ADC configured with the proper input impedance you can get a sense for the baseline accuracy of the measurements. ADCs have a couple of real-world properties that impact accuracy. These are generally presented by the manufacturer as a range of <a href="https://en.wikipedia.org/wiki/Integral_nonlinearity">Integral Nonlinearity</a> and <a href="https://en.wikipedia.org/wiki/Differential_nonlinearity">Differential Nonlinearity</a>. Those scary words basically just boil down to &quot;how does the ADC's <em>actual</em> measurements compare to what I <em>expect</em> the measurements to be?&quot; For example, if you give the ADC <code>1.0v</code> and it measures <code>1.1v</code> that's some of that non-linearity showing through.</p>
+<h2 id="baseline">Baseline</h2>
+<p>Alright, now that you've got the ADC configured with the proper input impedance you can get a sense for the baseline accuracy of the measurements. ADCs have a couple of real-world properties that impact accuracy. These are generally presented by the manufacturer as a range of <a href="https://en.wikipedia.org/wiki/Integral_nonlinearity">Integral Nonlinearity</a> and <a href="https://en.wikipedia.org/wiki/Differential_nonlinearity">Differential Nonlinearity</a>. Those scary words basically just boil down to "how does the ADC's <em>actual</em> measurements compare to what I <em>expect</em> the measurements to be?" For example, if you give the ADC <code>1.0v</code> and it measures <code>1.1v</code> that's some of that non-linearity showing through.</p>
 <p>Before tweaking the ADC settings to get better accuracy it's important to understand what the <em>current</em> accuracy looks like. For my tests, I used a precision voltage source (a calibrated 16-bit digital to analog converter) and measured 100 data points across the input voltage range of the ADC. I then compared the measured values against the expected values to determine the amount of error.</p>
 <p>Here's two images that show the real-world performance of the SAM D21 ADC with minimal configuration - the same configuration used in my previous blog post and similar to the configuration you'll see by default in Arduino: 12 bit, one sample, no offset or gain correction.</p>
 <p>Here's the measured results compared against the expected values:</p>
-<p><img src="../static/adc_chart_1.svg" alt="baseline comparison" /></p>
+<p><img alt="baseline comparison" src="../static/adc_chart_1.svg" /></p>
 <p>And here's that same data but represented as the amount that each measurement was off from the expected measurement:</p>
-<p><img src="../static/adc_chart_2.svg" alt="baseline error" /></p>
+<p><img alt="baseline error" src="../static/adc_chart_2.svg" /></p>
 <p>While this isn't entirely awful there is still lots of room for improvement! The next few sections will discuss techniques for improving the ADC's accuracy.</p>
 <p>By the way, if you want some more information on all the different real world properties of ADCs and DACs and how those affect accuracy, check out this <a href="https://www.ti.com/lit/an/slaa013/slaa013.pdf">application note from TI on data converters</a>.</p>
-<h2>Multisampling and averaging</h2>
+<h2 id="multisampling-and-averaging">Multisampling and averaging</h2>
 <p>You can improve the SAM D21 ADC accuracy by taking multiple samples for a measurement and then averaging them. Luckily, the hardware can do this for you. However, since multisampling and averaging cause each measurement to take a longer amount of time you'll need to balance speed and accuracy for your use case. If you're measuring something that doesn't need to be sampled at very high rate using more multisampling and averaging is a good idea. The general rule of thumb is to use as much as you can while still sampling fast enough to meet your requirements.</p>
 <p>I'm going to show you how multisampling and averaging can impact accuracy. The SAM D21 can be configured to average <code>1</code> to <code>1024</code> samples in steps of powers of two. For the first test I set the number of samples to average to <code>64</code>. Here's the results:</p>
-<p><img src="../static/adc_chart_3.svg" alt="64 sample error results" /></p>
+<p><img alt="64 sample error results" src="../static/adc_chart_3.svg" /></p>
 <p>This is already a huge improvement over the baseline. Note that I also reduced the scale of the graph. The time cost for doing 64 samples isn't too much of a hit on performance, either.</p>
 <p>Here's the code for configuring multisampling and averaging. Again, do this before enabling the ADC.</p>
 <pre class="lang-c"><span class="c1">// Configure multisampling and averaging.</span>
@@ -213,16 +214,17 @@
 </pre>
 <p>Okay, so <code>64</code> samples looks better, but what if you use even more samples? How much does that improve things?</p>
 <p>Well here's at <code>256</code> samples:</p>
-<p><img src="../static/adc_chart_4.svg" alt="256 sample error results" /></p>
+<p><img alt="256 sample error results" src="../static/adc_chart_4.svg" /></p>
 <p>And at <code>1024</code> samples:</p>
-<p><img src="../static/adc_chart_5.svg" alt="1024 sample error results" /></p>
+<p><img alt="1024 sample error results" src="../static/adc_chart_5.svg" /></p>
 <p>For higher sample rates the error curve tends to flatten out - indicating that the ADC is exhibiting a more linear transfer function - which is a good thing. However, notice that the curve as a whole has migrated upwards a bit. From what I can gather this is due to <em>offset error</em> accumulating, and offset error is the topic of the next section.</p>
-<h2>Offset &amp; gain error correction</h2>
+<h2 id="offset-gain-error-correction">Offset &amp; gain error correction</h2>
 <p>Okay, so you've determined how much multisampling you want to use for your application, however, things aren't quite perfect. If you're like me and decided to go with <code>256</code> samples you now have an offset on all of your measurements. You could just update your firmware to subtract the offset from each measurement but the hardware can actually do this <em>and a little more</em> for you.</p>
 <p>The SAM D21 has the ability to apply both <em>offset</em> and <em>gain error</em> correction. <em>Offset error</em> is pretty easy to intuit from what you've experienced so far and the graphs above - it's a constant amount of error on each measurement. The <em>gain error</em> is a bit more subtle. It's the difference between the measured value and the expected value at the top of the ADC's range - that is, it's deviation from the <em>slope</em> of the ideal transfer function. This picture illustrates this:</p>
-<p><img src="../static/adc_total_error.png" alt="gain error" /></p>
+<p><img alt="gain error" src="../static/adc_total_error.png" /></p>
 <div class="image-caption"><em>Source: Microchip Application Note TB3185</em></div>
-<p>When looking at the error graphs of real-world measurements in previous sections the gain error can be see as a &quot;tilt&quot; in the error line. Ideally, the line of best fit in that chart would be straight across.</p>
+
+<p>When looking at the error graphs of real-world measurements in previous sections the gain error can be see as a "tilt" in the error line. Ideally, the line of best fit in that chart would be straight across.</p>
 <p>Okay, enough theory. How do you address the gain and offset errors? The SAM D21 has two registers, <code>ADC-&gt;OFFSETCORR</code> and <code>ADC-&gt;GAINCORR</code>, for configuring the hardware to do the correction for you. The hardware will automatically apply the formula <code>result = (conversion_value - OFFSETCORR) * GAINCORR</code>. This is detailed in <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">section 33.6.10 of the datasheet</a>. The datasheet doesn't give a lot of hints on figuring out these values, unfortunately.</p>
 <p>The best way I've found for calculating these values is to take two measurements: one in the bottom quarter of the ADC's range (say, at 15%) and one at the top quarter of the ADC's range (say, at 85%). This is from the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/90003185A.pdf">TB3185 Application Note</a>. Once you have these two measurements you can determine the gain and offset error using these formulas:</p>
 <pre class="lang-python3"><span class="n">low_expected</span> <span class="o">=</span> <span class="o">...</span>
@@ -298,18 +300,20 @@
     calc();
 })();
 </script>
+
 <p>Wonderful. With the gain and offset correction enabled the 12-bit, 256 sample measurement is now a lot closer to reality:</p>
-<p><img src="../static/adc_chart_6.svg" alt="gain and offset error correction enabled" /></p>
-<h2>Above and beyond</h2>
+<p><img alt="gain and offset error correction enabled" src="../static/adc_chart_6.svg" /></p>
+<h2 id="above-and-beyond">Above and beyond</h2>
 <p>After multisampling, averaging, and gain and offset correction the ADC measurements are quite good. This is certainly more than enough accuracy for most applications. But what about other applications that need a bit more accuracy? Well, there's a few more approaches that can be taken. You could borrow an approach used in <a href="https://www.ti.com/lit/ug/tidua11a/tidua11a.pdf?ts=1595034352276">sensor linearization</a> and apply a <a href="https://en.wikipedia.org/wiki/Lookup_table">lookup table</a> with <a href="https://en.wikipedia.org/wiki/Linear_interpolation">linear interpolation</a> to further correct the measurements.</p>
 <p>In this case the lookup table stores <em>calibration values</em> - basically, the same data that I've been using to create the charts above. It's a map of the measured value and the expected value across multiple points (<em>setpoints</em>) in the ADC's range. It doesn't take too many setpoints to accomplish good results - even just 10 setpoints can make a major difference.</p>
 <p>With the calibration values you can use linear interpolation to adjust new measurements to correct for errors. The basic idea is to figure out which two setpoints the new measurement is between and then interpolate between the two setpoints to determine the adjust value. Hopefully this illustration is illuminating:</p>
-<p><img src="../static/adc_interpolation.svg" alt="Lookup &amp; linear interpolation illustration" /></p>
+<p><img alt="Lookup &amp; linear interpolation illustration" src="../static/adc_interpolation.svg" /></p>
 <div class="image-caption"><em>The measured value is adjusted according to the setpoints that it's in between. The top values for each setpoint are the measured ADC codes, the bottom values are the expected codes.</em></div>
+
 <p>I used this technique with the datasets above and was able to achieve excellent results with the SAM D21 ADC:</p>
-<p><img src="../static/adc_chart_7.svg" alt="Error measurement when using a lookup table and interpolation with the SAMD21 ADC" /></p>
+<p><img alt="Error measurement when using a lookup table and interpolation with the SAMD21 ADC" src="../static/adc_chart_7.svg" /></p>
 <p>Of course, this technique takes more CPU time since you have to do calculations using the CPU for every measurement. However, for some applications this is a good tradeoff.</p>
-<h2>Wrap up &amp; resources</h2>
+<h2 id="wrap-up-resources">Wrap up &amp; resources</h2>
 <p>Alright! This article was a bit long but I hope it has provided some useful insight into getting the most out of your ADC. Below is a list of resources I used when researching this post and some links for further reading.</p>
 <ul>
 <li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">SAM D21 Datasheet</a></li>
@@ -319,7 +323,6 @@
 <li><a href="https://www.ti.com/lit/ug/tidua11a/tidua11a.pdf?ts=1595034352276">Optimized Sensor Linearization for Thermocouple</a></li>
 <li><a href="https://stackoverflow.com/a/7091791">Example lookup table &amp; linear interpolation code</a></li>
 </ul>
-
   </content>
  
   <aside class="support-me">

@@ -76,7 +76,7 @@
             <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">home_page_for_groups</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">page</span>
 </pre>
-<p>This optimization turned out to be fantastic. We reduced the response time from over 60s to 100-300ms dependening on cache. At this point we thought we were heroes and that we'd fixed the issue, however, just as I was ready to call it a day my colleague said &quot;Wait- I'm getting the wrong home page. Did we mess up something?&quot;</p>
+<p>This optimization turned out to be fantastic. We reduced the response time from over 60s to 100-300ms dependening on cache. At this point we thought we were heroes and that we'd fixed the issue, however, just as I was ready to call it a day my colleague said "Wait- I'm getting the wrong home page. Did we mess up something?"</p>
 <p>We tried with a couple of other users. We tried without caching. No matter what we did, users were going to the wrong home page and not the one their group membership said they should go to. At this point we think we're crazy- until we added some logging:</p>
 <pre class="lang-python3"><span class="k">def</span> <span class="nf">find_home_page_for_user</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
     <span class="n">pages</span> <span class="o">=</span> <span class="n">get_home_pages</span><span class="p">()</span>
@@ -87,7 +87,7 @@
                 <span class="k">return</span> <span class="n">page</span>
 </pre>
 <p>It's at this point that we see something is very wrong. According to the Google Admin Console our test user is in two groups, but, according to the logging statement our user is in about 100 groups. This doesn't add up. Why does our application believe the user is in these groups?</p>
-<p>We tried with other users and it turns out our application seems to think that every user is a member of every group in the domain. &quot;Ah ha&quot;, we thought, &quot;we probably somehow messed up and we're making the API call to the Google directory incorrectly&quot;. We assumed we'd left out the parameter to filter the returned groups by the user.</p>
+<p>We tried with other users and it turns out our application seems to think that every user is a member of every group in the domain. "Ah ha", we thought, "we probably somehow messed up and we're making the API call to the Google directory incorrectly". We assumed we'd left out the parameter to filter the returned groups by the user.</p>
 <p>But much to our dismay, our client call seemed correct:</p>
 <pre class="lang-python3"><span class="n">groups</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">userKey</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </pre>
@@ -102,8 +102,7 @@
         <span class="k">return</span> <span class="n">page</span>
 </pre>
 <p>We can now see that the issue would've rarely, if ever, presented itself if our users are only in 3-4 groups on average. However, when the system believes the user to be in over 100 groups there's no way this will finish in 60 seconds as it will try to issue a query for every group in the domain (in the worst case). We optimized and fixed the wrong bug to find the right one.</p>
-<p>I've heard &quot;premature optimization is the root of all evil&quot;. Had we taken the time to add logging and make sure our assumptions were correct we would've fixed the right bug first and then optimized. However, we still had the luck of stumbling into discovering the real issue and making the system faster and more predictable in the process.</p>
-
+<p>I've heard "premature optimization is the root of all evil". Had we taken the time to add logging and make sure our assumptions were correct we would've fixed the right bug first and then optimized. However, we still had the luck of stumbling into discovering the real issue and making the system faster and more predictable in the process.</p>
   </content>
  
   <aside class="support-me">

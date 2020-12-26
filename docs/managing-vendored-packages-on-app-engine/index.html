@@ -53,10 +53,10 @@
   <content>
     <p><strong>N.B.:</strong> You don't need to follow this post anymore. I've gotten this functionality built-in to the Google App Engine standard environment. See the <a href="https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27">official documentation</a>.</p>
 <p>Recently I had a discussion with <a href="http://github.com/webmaven">Michael Bernstein</a> about vendoring packages in App Engine projects and some of the headaches that come with doing that. We worked together to solve various issues, both in what <a href="https://github.com/GoogleCloudPlatform/appengine-python-bottle-skeleton/pull/12">we were doing</a> and with the <a href="https://github.com/pypa/pip/pull/2007">tools available</a> to us. This post is intended to catalogue my personal approach to vendoring in App Engine.</p>
-<h3>The problem</h3>
+<h3 id="the-problem">The problem</h3>
 <p>Even trivial python web applications often need one or more third-party packages. The generally agreed way to do this is to simple use <code>pip install</code> to make it happen. Modern development and deployment practices usually require each application to have its own <a href="http://virtualenv.readthedocs.org/en/latest/">virtualenv</a> to isolate application-specific packages from system-wide packages. This is absolutely fantastic and perfectly follows the guidelines laid out in the <a href="http://12factor.net/dependencies">twelve-factor app</a>.</p>
 <p>Unfortunately, those of us using App Engine do not have proper virtualenv support. In an ideal world we would create our <code>requirements.txt</code> and the app engine runtime would take care of the rest (downloading, installing, and wiring these packages in a virtualenv). This means we have to resort to vendoring.</p>
-<h3>What is vendoring?</h3>
+<h3 id="what-is-vendoring">What is vendoring?</h3>
 <p>Vendoring is when you essentially bundle third-party dependencies within your application's source tree. It's an <a href="https://gist.github.com/datagrok/8577287">anti-pattern</a>, but it's the only choice we've got. What you end up with is a folder structure that looks like this:</p>
 <pre><code>my-application/
 - handlers/
@@ -66,14 +66,14 @@
   - oauth2client
   ...
 </code></pre>
-<p>Some people call the vendor folder <code>lib</code> (like me) some call it <code>vendor</code> or <code>third-party</code> and so on. It doesn't matter what you call it; the idea is the same. We're installing (or copying) all of our dependencies into a folder within our application instead of &quot;properly&quot; installing them in a virtualenv or system-wide.</p>
-<h3>How to vendor with App Engine</h3>
+<p>Some people call the vendor folder <code>lib</code> (like me) some call it <code>vendor</code> or <code>third-party</code> and so on. It doesn't matter what you call it; the idea is the same. We're installing (or copying) all of our dependencies into a folder within our application instead of "properly" installing them in a virtualenv or system-wide.</p>
+<h3 id="how-to-vendor-with-app-engine">How to vendor with App Engine</h3>
 <p>In theory it's simple. You essentially need two things:</p>
 <ol>
 <li>A way to install packages into your application's. <code>lib</code> folder</li>
 <li>A way to import things from the <code>lib</code> folder.</li>
 </ol>
-<h3>Installing packages</h3>
+<h3 id="installing-packages">Installing packages</h3>
 <p>We can use <code>pip</code> along with the <code>--target</code> argument to install packages:</p>
 <pre><code>pip install --target=lib requests
 </code></pre>
@@ -90,7 +90,7 @@ google-api-python-client==1.2
 <pre><code>pip install --upgrade --target=lib requests
 </code></pre>
 <p>Until then you'll first need to remove any installed versions of the library as well as any <code>egg-info</code> or <code>dist-info</code> files.</p>
-<h3>Using Packages</h3>
+<h3 id="using-packages">Using Packages</h3>
 <p>We've got the packages vendored into our application but how do we actually use them? If you were brave enough to try <code>import requests</code> at this point you would've been greeted with an <code>ImportError</code>. With App Engine we need to do a bit of path manipulation to make things work correctly.</p>
 <p>To setup our path manipulation we have to create (or modify) the <code>appengine_config.py</code> file in our application's root directory. The filename is important and it must also live in the same directory as your <code>app.yaml</code>.</p>
 <pre class="lang-python3"><span class="sd">&quot;&quot;&quot;</span>
@@ -135,14 +135,13 @@ google-api-python-client==1.2
 <span class="n">add_vendor_packages</span><span class="p">(</span><span class="s1">&#39;lib&#39;</span><span class="p">)</span>
 </pre>
 <p>The code above is the result of a lot of fumbling. This is so easy to get wrong and it's easy to make it only work halfway. It probably still doesn't cover every edge case. If you find problems with it please let me know as I will gladly update this code to fix it. Big thanks again to <a href="https://github.com/webmaven">Michael</a> for helping this work with namespaced packages.</p>
-<h3>Conclusion</h3>
+<h3 id="conclusion">Conclusion</h3>
 <p>Vendoring with App Engine requires:</p>
 <ol>
 <li>Installing your packages with <code>pip install --target=lib</code>.</li>
 <li>Using <code>appengine_config.py</code> to modify <code>sys.path</code> to include your vendor folder.</li>
 </ol>
 <p>I've used the guidelines laid out here extensively in almost every project I've put together over the last few years. While I'm still waiting for true virtualenv support in App Engine I think that this setup works well enough for now.</p>
-
   </content>
  
   <aside class="support-me">

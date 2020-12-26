@@ -55,7 +55,7 @@
   <content>
     <p>I've been diving deeper and deeper into the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18">SAM D21's</a> hardware over the last few weeks. I've been trying to grasp as much as I can at the hardware level so that I can take advantage of some of the more advanced features that higher-level environments like <a href="https://www.arduino.cc/">Arduino</a> and <a href="https://circuitpython.org">CircuitPython</a> can obscure behind the friendly <code>analogRead</code> function. This means working at things at the hardware register level.</p>
 <p>Today I started working with the SAM D21's <a href="https://en.wikipedia.org/wiki/Analog-to-digital_converter">Analog to Digital Converter</a> (ADC). This peripheral lets you measure analog voltage on one of the microcontroller's pins and is super useful for my synthesizer projects. This post walks through setting up the ADC and reading a value. It's also pretty likely that this information applies to other controllers in the SAM family, such as the SAM D51.</p>
-<h2>How the ADC works</h2>
+<h2 id="how-the-adc-works">How the ADC works</h2>
 <p>The ADC is one of the SAM D21's more straightforward peripherals so thankfully the setup isn't too complex and boils down to these steps:</p>
 <ol>
 <li>Enable the bus clock to the ADC.</li>
@@ -66,7 +66,7 @@
 <li>Start the ADC and trigger a measurement.</li>
 </ol>
 <p>It's also important to note that The SAM D21 has one single ADC but it has multiple channels. This means that while you can only measure one pin (channel) at a time, you can swap between the channels to measure the voltage on multiple pins. This post will only show using one pin but it should give you enough to go on if you want to read multiple pins.</p>
-<h2>Configuring the ADC</h2>
+<h2 id="configuring-the-adc">Configuring the ADC</h2>
 <p>Okay, to start you'll need to enable the bus clock. This lets the microcontroller talk to the ADC peripheral - nothing works without this! If you're using Arduino or something like that it's likely that this is already done for you - but it won't hurt to do it again.</p>
 <pre class="lang-c"><span class="cm">/* Enable the APB clock for the ADC. */</span>
 <span class="n">PM</span><span class="o">-&gt;</span><span class="n">APBCMASK</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PM_APBCMASK_ADC</span><span class="p">;</span>
@@ -145,7 +145,7 @@
 <span class="cm">/* Enable the ADC. */</span>
 <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 </pre>
-<h2>Measuring and reading values</h2>
+<h2 id="measuring-and-reading-values">Measuring and reading values</h2>
 <p>Okay, so you've configured the ADC and you're ready to measure stuff. You can do that by triggering the ADC and waiting for a result to be ready. Here's how you do it:</p>
 <pre class="lang-c"><span class="cm">/* Wait for bus synchronization. */</span>
 <span class="k">while</span> <span class="p">(</span><span class="n">ADC</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
@@ -163,7 +163,7 @@
 <span class="kt">uint32_t</span> <span class="n">result</span> <span class="o">=</span> <span class="n">ADC</span><span class="o">-&gt;</span><span class="n">RESULT</span><span class="p">.</span><span class="n">reg</span><span class="p">;</span>
 </pre>
 <p>That's it! You can do that over and over again to continue reading from the ADC. Something <strong>super important to note</strong>: you <strong>must</strong> throw away the first reading from the ADC because the first reading won't be accurate at all. This is just how the hardware works and it's called out specifically in the datasheet.</p>
-<h2>Wrapping up</h2>
+<h2 id="wrapping-up">Wrapping up</h2>
 <p>I hope this post is helpful for someone - either someone wanting to learn more about register-level microcontroller programming or someone looking to get the SAM D21 ADC working for their project. I'll be writing a follow up post on some more advanced features of the ADC soon - stay tuned!</p>
 <p>Here's some resources about the SAM D21 ADC that I used when researching this topic and writing this post, they may be useful as further reading:</p>
 <ul>
@@ -173,7 +173,6 @@
 <li><a href="https://github.com/arduino/ArduinoCore-samd/blob/master/cores/arduino/wiring_analog.c">Arduino's SAMD21 core analog source code</a></li>
 <li><a href="https://github.com/Molorius/ATSAMD21-ADC">ATSAMD21-ADC library</a></li>
 </ul>
-
   </content>
  
   <aside class="support-me">

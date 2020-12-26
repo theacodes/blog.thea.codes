@@ -55,17 +55,17 @@
 <p><em>Catch <a href="../genesynth-part-1-idea-and-research">part 1</a> if you missed it.</em></p>
 </blockquote>
 <p>Now that I had a basic idea of what I wanted to do with my Genesis-inspired synthesizer, I went about researching some parts.</p>
-<h2>Obtaining the chips</h2>
+<h2 id="obtaining-the-chips">Obtaining the chips</h2>
 <p>As mentioned in the <a href="genesynth-part-1-idea-and-research">previous post</a>, the Genesis used two sound chips: a <a href="https://en.wikipedia.org/wiki/Yamaha_YM2612">Yamaha YM2612</a> for FM synthesis and a <a href="https://en.wikipedia.org/wiki/Texas_Instruments_SN76489">Texas Instruments SN76489 PSG</a> for square waves.</p>
 <p>Neither of these chips are produced anymore, so really the only option for obtaining these easily is via Ebay. There's several sellers of these chips, which are presumably harvested from consoles, computers, and other digital junk. I was able to obtain them for around $3/each which is honestly really affordable. I bought several just in case one was bad or I managed to fry one (spoiler: I did).</p>
 <p>I've also heard <a href="https://twitter.com/glowascii/status/1008716401824022528">rumors of a vending machine in Japan where you can just buy these</a>. What an absolutely magical place.</p>
-<h2>Talking to the chips</h2>
+<h2 id="talking-to-the-chips">Talking to the chips</h2>
 <p>Here's the hard part: actually communicating with these chips. This part is <em>hard</em> and in fact I still haven't quite gotten this right.</p>
-<p>The YM2612 can somewhat be treated as sort of a RAM chip. A very temperamental RAM chip. It basically has a large number of &quot;registers&quot; exposed as a memory map. These registers control everything from the notes being played to the FM parameters. You write data to these registers using an 8-bit bus by first writing the register address then writing the register value.</p>
-<p><img src="../static/ym2612-registers.png" alt="YM2612 Registers" /></p>
+<p>The YM2612 can somewhat be treated as sort of a RAM chip. A very temperamental RAM chip. It basically has a large number of "registers" exposed as a memory map. These registers control everything from the notes being played to the FM parameters. You write data to these registers using an 8-bit bus by first writing the register address then writing the register value.</p>
+<p><img alt="YM2612 Registers" src="../static/ym2612-registers.png" /></p>
 <p>(You can read more about the memory map over at <a href="http://www.smspower.org/maxim/Documents/YM2612">Maxim's World of Stuff</a>)</p>
 <p>The timing here is really tricky. The YM2612 will actually see the write relatively quick. Take a look at the write timing diagram from the <a href="/files/YM3438_APL.pdf">manual</a>:</p>
-<p><img src="../static/ym2612-write-timing.png" alt="YM2612 Write Timing" /></p>
+<p><img alt="YM2612 Write Timing" src="../static/ym2612-write-timing.png" /></p>
 <p>However, the chip will not finish <em>processing</em> the write for several internal cycles. The number of cycles actually depends on which register you changed. Some folks on forums have done a little research and determined that there is a safe minimum that will cover you so that's what I've tried to do so far.</p>
 <p>The code for writing to the YM2612 looks a little like this:</p>
 <pre class="lang-c++"><span class="kt">void</span> <span class="nf">set_reg</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">address</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">port</span><span class="p">)</span> <span class="p">{</span>
@@ -97,21 +97,22 @@
 <span class="p">}</span>
 </pre>
 <p>With a basic write command, I was ready to start experimenting with the hardware.</p>
-<h2>Proof of concept using Arduino</h2>
+<h2 id="proof-of-concept-using-arduino">Proof of concept using Arduino</h2>
 <p>I decided to start with a microcontroller I had on hand and didn't mind if I ruined: an Arduino Uno. I wired up the data bus and control lines between the Ardiuno and YM2612 and setup the Ardiuno to output the 8Mhz clock needed by the YM2612 as well.</p>
 <p>I was able to get a simple <a href="http://www.smspower.org/maxim/Documents/YM2612#testprogram">test patch</a> working with a <em>lot</em> of trial and error with the timing, but I wasn't quite ready to go full-on with MIDI because there was just so much about the hardware interface I needed to figure out.</p>
 <p>I decided to try a really simple <a href="http://vgmrips.net/wiki/VGM_Specification">VGM</a> to playback on the Arduino to test the chip interface. Since the Uno has really limited memory and I didn't have any SD sheilds around, I wrote a really dumb Python script to convert a VGM into <a href="https://gist.github.com/theacodes/7e98e4d6e7337e451bf0213ea2086458">C code</a> so I could just compile it in - basically a static VGM player. This allowed me to get a very short, very simple VGM playing. In retrospect - this was dumb, I should've just waited for a better microcontroller and did a real VGM player.</p>
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Why yes, this *IS* and Arduino playing the Sonic continue theme using the actual sound chip from a Sega Genesis. <a href="https://t.co/H5VhOVR3Np">pic.twitter.com/H5VhOVR3Np</a></p>&mdash; Magic &amp; Technology in a Kiss (@theavalkyrie) <a href="https://twitter.com/theavalkyrie/status/1004228922060386305?ref_src=twsrc%5Etfw">June 6, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 <p>I consider this to be a pretty successful proof of concept. It was enough for me to continue researching and buy more hardware to make this happen.</p>
-<h2>Stepping up the hardware with Teensy</h2>
+<h2 id="stepping-up-the-hardware-with-teensy">Stepping up the hardware with Teensy</h2>
 <p>I decided to use a <a href="https://www.pjrc.com/store/teensy35.html">Teensy 3.5</a> for my microcontroller. I'd seen others use this chip to interact with old school sound chips and it's got several features that are <em>super</em> useful in this context: SD card, 5v tolerant, very fast, large program space, and an incredibly huge amount of I/O.</p>
 <p>I transferred my circuit over the the Teensy. After dealing with some more <a href="https://twitter.com/theavalkyrie/status/1004979142494859264">timing issues</a>, and fixing up the audio output a little, I managed to get a <a href="https://github.com/theacodes/genesynth/blob/master/vgm.cpp">VGM parser and player</a> working.</p>
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">PROGRESS!<br><br>My amp still has some weird low frequency noise that I can&#39;t figure out but it works! <a href="https://t.co/etBmsGoM2A">pic.twitter.com/etBmsGoM2A</a></p>&mdash; Magic &amp; Technology in a Kiss (@theavalkyrie) <a href="https://twitter.com/theavalkyrie/status/1005689259091623936?ref_src=twsrc%5Etfw">June 10, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<h2>Next time</h2>
-<p>In the next post, I'll cover creating a proper audio amplifier for the chip as well as getting the SN76489 hooked up. See you then. :)</p>
 
+<h2 id="next-time">Next time</h2>
+<p>In the next post, I'll cover creating a proper audio amplifier for the chip as well as getting the SN76489 hooked up. See you then. :)</p>
   </content>
  
   <aside class="support-me">

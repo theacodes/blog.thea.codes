@@ -52,14 +52,14 @@
   <h1>My Python testing style guide</h1>
   <content>
     <p>This post is an attempt to catalog some of my practices around testing Python projects. It's not meant to be treated as dogma- I anticipate I'll update this significantly over time.</p>
-<h3>Some terminology</h3>
+<h3 id="some-terminology">Some terminology</h3>
 <ul>
 <li>A <strong>target</strong> is a single that that you are currently testing. It can be a function, a method, or a behavior that's formed by a set of items.</li>
 <li>A <strong>collaborator</strong> is any object used by the <em>target</em> subject under test. Generally, collaborators should be inputs to the target (either function arguments or instance variables), but sometimes the collaborators are deeper objects like sockets.</li>
 <li>I do not make a distinction between <strong>unit tests</strong> and <strong>integration tests</strong>. I generally refer to these types of tests as unit tests. I do not go out of my way to isolate a single unit of code and test it without consideration of the rest of the project. I do try to isolate a single unit of <em>behavior</em>.</li>
 <li><strong>System tests</strong> are tests that interact with real external systems. This is in contrast to unit tests, which should not do anything that leaves the local machine.</li>
 </ul>
-<h3>Test names, functions, and classes</h3>
+<h3 id="test-names-functions-and-classes">Test names, functions, and classes</h3>
 <p>Follow <a href="https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery">pytest's recommendations here</a>. Test files should be named according to their module they test, for example, <code>transport.py</code> should be tested by <code>test_transport.py</code>.</p>
 <p>General rule of thumb is to match the name of the tests to the name of the test's target:</p>
 <pre class="lang-python3"><span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
@@ -93,7 +93,7 @@
     <span class="c1"># Scopes aren&#39;t required for these credentials</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="n">credentials</span><span class="o">.</span><span class="n">requires_scopes</span>
 </pre>
-<h3>Assert results and outcome, not the steps needed to get there</h3>
+<h3 id="assert-results-and-outcome-not-the-steps-needed-to-get-there">Assert results and outcome, not the steps needed to get there</h3>
 <p>Aim to test a <em>single thing</em> at a time. Tests should follow the same rule of thumb as functions: it should do (in this case <em>test</em>) one thing and one thing well. Don't obsess over only calling one function at at time or only calling it once. Sometimes testing the outcome involves issuing multiple invocations. Your assertions should test that the state of the world matches the outcome you expected, not that the code took any particular path to get there.</p>
 <p>For example, this test knows too much about how the outcome is obtained and is brittle in the face of implementation changes:</p>
 <pre class="lang-python3"><span class="n">test_payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}</span>
@@ -110,7 +110,7 @@
 <span class="k">assert</span> <span class="n">header</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;typ&#39;</span><span class="p">:</span> <span class="s1">&#39;JWT&#39;</span><span class="p">,</span> <span class="s1">&#39;alg&#39;</span><span class="p">:</span> <span class="s1">&#39;RS256&#39;</span><span class="p">,</span> <span class="s1">&#39;kid&#39;</span><span class="p">:</span> <span class="n">signer</span><span class="o">.</span><span class="n">key_id</span><span class="p">}</span>
 </pre>
 <p>In general, I see an abundance of <code>assert_call*</code> invocations as a code smell that the tests are doing too much mocking or demonstrating too much knowledge about the internals. Unless the point of the test to is to make sure that the target calls a collaborator a specific way, ask yourself if you need the assertion to confirm the target worked as expected. It's also useful to pretend you can't look at the implementation of the target (so called <em>black-box testing</em>).</p>
-<h3>Use real objects for collaborators whenever possible</h3>
+<h3 id="use-real-objects-for-collaborators-whenever-possible">Use real objects for collaborators whenever possible</h3>
 <p>Sure, unit test purists may balk at this, but being able to use a collaborator directly catches bugs and encourages you to implement functions and classes in a way that their logic can be used without unintended side-effects. If you're having a really hard time using collaborators without side-effects, it might be useful to consider how you can refactor and simplify it.</p>
 <p>Here's an example of making a mock of a collaborator (re-using a previous example):</p>
 <pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">make_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -132,7 +132,7 @@
 <span class="k">assert</span> <span class="n">header</span> <span class="o">==</span> <span class="p">{</span><span class="s1">&#39;typ&#39;</span><span class="p">:</span> <span class="s1">&#39;JWT&#39;</span><span class="p">,</span> <span class="s1">&#39;alg&#39;</span><span class="p">:</span> <span class="s1">&#39;RS256&#39;</span><span class="p">,</span> <span class="s1">&#39;kid&#39;</span><span class="p">:</span> <span class="n">signer</span><span class="o">.</span><span class="n">key_id</span><span class="p">}</span>
 </pre>
 <p>If you notice your tests are essentially re-implementing a target's logic, it might be useful to re-think how you're testing.</p>
-<h3>A mock must always have a spec</h3>
+<h3 id="a-mock-must-always-have-a-spec">A mock must always have a spec</h3>
 <p>When you have to mock avoiding using the <code>Mock</code> object directly. Either use <a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.create_autospec"><code>mock.create_autospec()</code></a> or <a href="https://docs.python.org/3/library/unittest.mock.html#autospeccing"><code>mock.patch(autospec=True)</code></a> if at all possible. Autospeccing from the real collaborator means that if the collaborator's interface changes, your tests will fail. Manually speccing or not speccing at all means that changes in the collaborator's interface will not break your tests that use the collaborator: you could have 100% test coverage and your library would fall over when used!</p>
 <p>For example, this is <strong>very bad</strong> as it allows your target to call pretty much any method on the collaborator, whether it exists or not:</p>
 <pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
@@ -156,7 +156,7 @@
 <span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>In some cases it's just not feasible to use autospec, such as if you're mocking a import module that is otherwise unavailable in your environment. This rule can be relaxed in those circumstances.</p>
-<h3>Consider using a stub or fake</h3>
+<h3 id="consider-using-a-stub-or-fake">Consider using a stub or fake</h3>
 <p>Mock is extremely powerful, but if you find yourself bending over backwards to get a mock to behave how you expect, consider creating a stub. A <strong>stub</strong> has a few canned responses or behavior useful for unit tests and a <strong>fake</strong> has essentially a working implementation but takes shortcuts that wouldn't happen with a real collaborator (like an in-memory database).</p>
 <p>Here's a simple stub that implements an abstract class for the purposes of testing:</p>
 <pre class="lang-python3"><span class="k">class</span> <span class="nc">CredentialsStub</span><span class="p">(</span><span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">credentials</span><span class="o">.</span><span class="n">Credentials</span><span class="p">):</span>
@@ -185,13 +185,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 </pre>
 <p>Whenever possible the stub or fake should subclass the collaborator. This allows tools like pylint to check if you're implementing the interface correctly and helps catch bugs when the collaborator's interface changes.</p>
-<h3>Consider using a spy</h3>
+<h3 id="consider-using-a-spy">Consider using a spy</h3>
 <p>If you find yourself using a mock just so you can make assertions about calls, consider using a spy. A <strong>spy</strong> is an object that forwards and records interactions. Mock has built-in support for spying using <code>wraps</code>:</p>
 <pre class="lang-python3"><span class="n">credentials</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">(</span><span class="n">wraps</span><span class="o">=</span><span class="n">CredentialsStub</span><span class="p">())</span>
 <span class="o">...</span>
 <span class="k">assert</span> <span class="n">credentials</span><span class="o">.</span><span class="n">refresh</span><span class="o">.</span><span class="n">called</span>
 </pre>
-<h3>Don't give mock/stubs/fakes special names</h3>
+<h3 id="dont-give-mockstubsfakes-special-names">Don't give mock/stubs/fakes special names</h3>
 <p>Mocks should be named just the same as if they were a real collaborator. Don't use <code>mock_x</code>, <code>x_mock</code>, <code>mocked_x</code>, <code>fake_x</code>, etc., just use <code>x</code>. The reasoning for this is that it encourages you to think of the mocks as the same as real collaborators and makes the intent of the test clearer. For example, this is unnecessary:</p>
 <pre class="lang-python3"><span class="n">mock_signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre>
@@ -222,7 +222,7 @@
 <span class="k">def</span> <span class="nf">test_refresh_success</span><span class="p">(</span><span class="n">unused_utcnow</span><span class="p">):</span>
     <span class="o">...</span>
 </pre>
-<h3>Use factory helpers to create complex collaborators</h3>
+<h3 id="use-factory-helpers-to-create-complex-collaborators">Use factory helpers to create complex collaborators</h3>
 <p>Tests sometimes need complex setup. In general, favor helper methods and factories to create collaborators. For example, this factory creates a mock http object that returns a specific response:</p>
 <pre class="lang-python3"><span class="k">def</span> <span class="nf">make_http</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">http_client</span><span class="o">.</span><span class="n">OK</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -245,7 +245,7 @@
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">TransportError</span><span class="p">):</span>
         <span class="n">refresh</span><span class="p">(</span><span class="n">http</span><span class="p">)</span>
 </pre>
-<h3>Use fixtures sparingly</h3>
+<h3 id="use-fixtures-sparingly">Use fixtures sparingly</h3>
 <p><a href="https://docs.pytest.org/en/latest/fixture.html">pytest's fixtures</a> are a great feature for re-using setup and teardown logic. In general, prefer factory and helper methods over fixtures as it's easier to reason about and pass arguments into helper methods. Fixtures are great for things that are largely identical across tests and require both setup and teardown logic, for example, this is a fixture that starts a web server in the background for each test and shuts it down after the test is complete:</p>
 <pre class="lang-python3"><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">server</span><span class="p">():</span>
@@ -269,7 +269,6 @@
     <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;requests&#39;</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">REQUESTS_SESSION</span><span class="p">)</span>
 </pre>
-
   </content>
  
   <aside class="support-me">

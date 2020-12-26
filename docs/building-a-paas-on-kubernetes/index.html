@@ -54,10 +54,10 @@
     <p><em>Note: This post expects you to be familiar with <a href="kubernetes.io">Kubernetes</a> concepts.</em></p>
 <p><strong>You should be building on top of Kubernetes</strong>. Seriously.</p>
 <p>To me, a large shift in my understanding of Kubernetes came when I started thinking about the things that it provides, such as replication controllers, services, pods, etc., as building blocks. Sure, you can write a few yaml files and deploy a wide variety of things. However, in some situations it's more useful to approach things at a higher level.</p>
-<p>Consider the usual process of deploying an application to a Platform-as-a-Service. For Heroku, you run <code>git push</code>. For Google App Engine, you run <code>appcfg.py update</code>. The platform handles creating and configuring an opinionated set of resources to run your application. You don't have to think about &quot;well, I need a replication controller, a service, etc.&quot;. You simply deploy your code in one step. In a Platform-as-a-Service, you're no longer concerned with the individual resources needed to run your app.</p>
+<p>Consider the usual process of deploying an application to a Platform-as-a-Service. For Heroku, you run <code>git push</code>. For Google App Engine, you run <code>appcfg.py update</code>. The platform handles creating and configuring an opinionated set of resources to run your application. You don't have to think about "well, I need a replication controller, a service, etc.". You simply deploy your code in one step. In a Platform-as-a-Service, you're no longer concerned with the individual resources needed to run your app.</p>
 <p>I feel that building this sort of workflow on Kubernetes is critical when bridging the gap from Development to DevOps. Developers typically aren't overly concerned without how the platform handles deploying the app. They write code and they need a way to say 'this is ready to deploy'. DevOps should enable this.</p>
 <p>Kubernetes gives us the tools to build a Platform-as-a-Service experience. In fact, it's a great idea! The good folks over at <a href="https://deis.io">Deis</a> are currently rebuilding Deis v2 on Kubernetes. Although you can explicitly define every Kubernetes resource required to deploy your app, you don’t necessarily need to, in fact, it may be an anti-pattern.</p>
-<h2>Noel: A minimal cluster-native PaaS</h2>
+<h2 id="noel-a-minimal-cluster-native-paas">Noel: A minimal cluster-native PaaS</h2>
 <p>I decided to see just how difficult it would be to create a tool that enables a 'minimal' PaaS workflow on Kubernetes. A 'minimal' PaaS would need to provide:</p>
 <ol>
 <li><strong>Zero-config deployment</strong>: A Dockerfile should be the only requirement for deploying code.</li>
@@ -73,7 +73,8 @@
 <p>Both of these present a much more straightforward workflow to developers over interacting directly with the Kubernetes cluster. As a bonus, they're both trivial to integrate into a continuous integration pipeline.</p>
 <p><a href="https://github.com/theacodes/noel">Noel</a> is available on github. Here's a demonstration of using the remote build workflow to deploy a simple application. Once deployed, you can see it takes only a few seconds for the application to come up and serve traffic:</p>
 <script type="text/javascript" src="https://asciinema.org/a/4r2lhzq9tq63qmk0xv4wtlvng.js" id="asciicast-4r2lhzq9tq63qmk0xv4wtlvng" async></script>
-<h2>Putting the pieces together</h2>
+
+<h2 id="putting-the-pieces-together">Putting the pieces together</h2>
 <p>Noel uses the following Kubernetes resources to deploy applications onto the cluster:</p>
 <ul>
 <li><strong>Replication Controller</strong>: Noel creates a unique replication controller for every <em>version</em> of a deployed application. In the future, the Kubernetes Deployment API can be used to do rolling updates to avoid downtime.</li>
@@ -81,14 +82,13 @@
 <li><strong>Service</strong>: Each application has a service that routes cluster-internal traffic to its pods. This allows applications/microservices to talk directly to each other within the cluster.</li>
 </ul>
 <p>Noel runs two services itself on the cluster:</p>
-<ol start="2">
+<ol>
 <li><strong>Remote Builder</strong>: Handles <code>git push</code> requests and runs <code>noel build-and-deploy</code> to build and deploy applications.</li>
 <li><strong>Nginx Frontend</strong>: Handles proxying external traffic from <code>app.example.com</code> to the appropriate application's service.</li>
 </ol>
-<h2>A multi-mode cluster</h2>
+<h2 id="a-multi-mode-cluster">A multi-mode cluster</h2>
 <p>Noel, along with applications developed with Noel, are able to run alongside anything else that is deployed on the cluster. This is a truly powerful aspect of Kubernetes. Consider an application that consists of three microservices and requires Redis and PostgreSQL. The microservices are stateless and can be easily deployed via something like Noel or Deis v2. The Redis and PostgreSQL resources can be maintained directly by the cluster administrator or via something like <a href="https://helm.sh">helm</a>. You can connect them all together using the Kubernetes DNS service and Secrets.</p>
 <p>In short, you do not need to stick with a particular way of Kubernetes deployment. You should choose what's right for each subset of what you need to deploy and build tools to support that. Noel is a very small tool, and proof-positive that it is possible to build your own tools to handle <strong>opinionated workflows</strong> on top of Kubernetes.</p>
-
   </content>
  
   <aside class="support-me">

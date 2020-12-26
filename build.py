@@ -1,7 +1,9 @@
 import pathlib
 from typing import Iterator, Sequence
 
-import cmarkgfm
+import markdown
+import markdown.extensions.fenced_code
+import pymdownx.magiclink
 import frontmatter
 import jinja2
 
@@ -10,6 +12,20 @@ import witchhazel
 
 jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader('templates'),
+)
+
+markdown_ = markdown.Markdown(
+    extensions=[
+        "toc",
+        "admonition",
+        "tables",
+        "abbr",
+        "attr_list",
+        "footnotes",
+        "pymdownx.smartsymbols",
+        markdown.extensions.fenced_code.FencedCodeExtension(lang_prefix="language-"),
+        pymdownx.magiclink.MagiclinkExtension(hide_protocol=False,)
+    ]
 )
 
 
@@ -28,9 +44,8 @@ def fixup_styles(content: str) -> str:
 
 
 def render_markdown(content: str) -> str:
-    content = cmarkgfm.markdown_to_html_with_extensions(
-        content,
-        extensions=['table', 'autolink', 'strikethrough'])
+    markdown_.reset()
+    content = markdown_.convert(content)
     content = highlighting.highlight(content)
     content = fixup_styles(content)
     return content
