@@ -549,10 +549,10 @@ And that's about it! ✨
 
 Thank you for reading through this *very long* post. I sincerely hope it was useful and educational. Here are some resources you might want to take a look at for further reading:
 
-* [The Juno 106 service manual, including schematic](TODO)
-* [The Juno 60 service manual, including schematic](TODO)
-* [Circuit.js simulation for the 106 design](TODO)
-* [Circuit.js simulation for the 6 & 60 design](TODO)
+* [The Juno 106 service manual, including schematics](https://storage.googleapis.com/files.thea.codes/juno-106-service-manual.pdf)
+* [The Juno 6 service manual, including schematics](https://storage.googleapis.com/files.thea.codes/juno-6-service-manual.pdf)
+* [Circuit.js simulation for the 106 design](https://tinyurl.com/y7jwu75x)
+* [Circuit.js simulation for the 6 & 60 design](https://tinyurl.com/yadohf8d)
 * Electric druid - [Roland Juno DCOs](https://electricdruid.net/roland-juno-dcos/)
 * synthnerd - [Roland Juno 6: the DCO](https://synthnerd.wordpress.com/2015/10/31/roland-juno-6-the-dco/)
 * Golt! - [How DCOs work, differences in Juno 6/60/106, Korg Poly-61/800, Akai AX80, Kawaii SX240](https://www.youtube.com/watch?v=mqY6cVJS9fo)
