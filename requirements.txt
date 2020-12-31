@@ -2,3 +2,4 @@ markdown
 jinja2
 python-frontmatter
 pygments
+pymdown-extensions
