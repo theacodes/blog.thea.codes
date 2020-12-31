@@ -1,4 +1,6 @@
-(function animations() {
+
+
+function start_animations() {
     "use strict";
     const padding_x = 30;
     const padding_y = 30;
@@ -6,12 +8,6 @@
     const primary_font = `italic 25px ${font_name}`;
     const alt_font = `25px ${font_name}`;
     const info_font = `italic 30px ${font_name}`;
-
-    if(!document.fonts.check(primary_font)) {
-        console.log(`Font ${primary_font} not ready`);
-        window.setTimeout(animations, 100);
-        return;
-    }
 
     class Grapher {
         constructor(canvas_elem_id) {
@@ -587,4 +583,14 @@
 
         form_driven_canvas("pulse-form", draw);
     })();
-})();
+}
+
+
+
+WebFont.load({
+    classes: false,
+    google: {
+        families: ['IBM Plex Mono:regular,italic']
+    },
+    active: start_animations
+});

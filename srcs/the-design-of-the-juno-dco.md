@@ -560,8 +560,7 @@ Thank you for reading through this *very long* post. I sincerely hope it was use
 
 ///Footnotes Go Here///
 
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital@0;1&display=swap"> 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital@0;1&display=swap">
+
 <link rel="stylesheet" href="/static/juno/styles.css">
+<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
 <script type="text/javascript" src="/static/juno/animations.js"></script>
