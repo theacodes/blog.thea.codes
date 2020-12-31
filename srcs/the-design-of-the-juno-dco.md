@@ -34,9 +34,9 @@ The Juno has six voices. Each voice has a single oscillator that can generate th
 
 ![A block diagram of a DCO-based synth](/static/juno/dco-block.png)
 
-Sound generation starts with a *square* wave controlled by the microntroller and then goes through a series of *waveshapers* which generates a *ramp/sawtooth* waveform, a *sub* waveform (which is a square wave at half the frequency), and a *pulse* waveform. The frequency of the square wave controlled by the microcontroller determines the frequency/note that the oscillator plays.
+Sound generation starts with a *square* wave controlled by the microntroller and then goes through a series of *waveshapers* which generates a *ramp/sawtooth* waveform, a *sub* waveform (which is a square wave at half the frequency), and a *pulse* waveform. The frequency of the clock determines the frequency/note that the oscillator plays.
 
-This is in contrast to a common design for a voltage-controlled oscillator (*VCO*) where a CPU isn't necessarily required, instead it uses analog circuitry to create a *control voltage* which determines the oscillator's frequency:
+This is in contrast to a common design for a voltage-controlled oscillator (*VCO*) where a CPU isn't required. Instead, it uses analog circuitry to create a *control voltage* which determines the oscillator's frequency:
 
 ![A block diagram of a VCO-based synth](/static/juno/vco-block.png)
 
@@ -45,30 +45,32 @@ Now that you've got a high-level overview of the sound generation inside of thes
 
 ## The ramp generator
 
-Before jumping into the difference between DCOs and VCOs, it's useful to discuss the similarities. As shown in the block diagrams above, several designs for VCOs **and** the Juno DCOs are designed around a **ramp generator** (sometimes referred to as a *ramp core*) which creates a *sawtooth* (ramp) waveform:
+Before jumping into the difference between DCOs and VCOs it's useful to discuss the similarities. As shown in the block diagrams above several designs for VCOs **and** the Juno DCOs are designed around a **ramp generator** (sometimes referred to as a *ramp core*) which creates a *sawtooth* (ramp) waveform:
 
 ![A sawtooth waveform](/static/juno/ramp.png)
 
-The ramp generator is the beginning of how an oscillator turns a *frequency input signal* into the various useful waveforms that are used to make musical sounds. For a VCO, the frequency input signal is in the form of a *control voltage*, hence "voltage-controlled". For a DCO, the frequency input signal is in the form of a *digital clock*, hence "digitally-controlled".
+The ramp generator is the beginning of how an oscillator turns a *frequency input signal* into the various useful waveforms that are used to make musical sounds. For a VCO, the frequency input signal is a **control voltage**, hence "voltage-controlled". For a DCO, the frequency input signal is a **digital clock**, hence "digitally-controlled".
 
 The difference in the type of input signal has a significant impact on the circuit design. Before getting into those differences, let's look at the heart of the ramp generator that's shared between both designs: the **integrator**.
 
 
 ## The integrator
 
-An integrator is a electronic circuit that performs the mathematical operation of [*Integration*](https://en.wikipedia.org/wiki/Integral). This is a fancy word from calculus but don't be afraid, it's actually pretty straightforward in practice.
+An integrator is a electronic circuit that performs the mathematical operation of [*Integration*](https://en.wikipedia.org/wiki/Integral). This is a fancy word from calculus but don't be afraid- it's actually pretty straightforward in practice.
 
-The purpose of an integrator is to produce an output signal that changes (increase or decreases) at a rate corresponds to the magnitude and duration of the input signal. In this case the input and output signals are both voltage. If you apply a **constant** voltage to an integrator, it will create a consistent increase or decrease in the output voltage (a *ramp*):
+The purpose of an integrator is to produce an output signal that changes (increase or decreases) at a rate corresponds to the magnitude and duration of the input signal. In this case the input and output signals are both voltage. If you apply a **constant** voltage to an integrator, it will create a consistent increase or decrease in the output voltage over time (a *ramp*):
 
 ![An ideal integrator](../static/juno/integrator-ramp.png)
 
 More voltage means that the ramp will have a steeper slope. This is going to be helpful in generating a sawtooth waveform- the integrator ramp produces exactly one cycle of a sawtooth waveform. The trick is getting it to restart so that it creates a repeating (or *periodic*) sawtooth waveform.
 
-The way that an integrator is implemented is using an [op-amp integrator circuit](https://www.electronics-tutorials.ws/opamp/opamp_6.html):
+You can create an integrator using an [op-amp integrator circuit](https://www.electronics-tutorials.ws/opamp/opamp_6.html):
 
 ![A basic op-amp integrator circuit](../static/juno/op-amp-integrator.png)
 
-The op-amp integrator is based on the idea that if you apply a voltage to a capacitor it [takes some time to charge](http://hyperphysics.phy-astr.gsu.edu/hbase/electric/capchg.html), in fact, it will charge at a rate that is proportional to the input voltage which sounds a *lot* like integration! Without going into too much op-amp theory, you can just assume that the integrator circuit will produce a voltage that increases or decreases at a rate determined by the input voltage and the values of `R` and `C` (these determine the [*RC constant*]() of the integrator - or put more simply, *how long it takes the circuit to charge up*). You can play around this with interactive illustration to see how the voltage, resistance, and capacitance changes the behavior of the integrator:
+The op-amp integrator is based on the idea that if you apply a voltage to a capacitor it [takes some time to charge](http://hyperphysics.phy-astr.gsu.edu/hbase/electric/capchg.html), in fact, it will charge at a rate that is proportional to the input voltage which sounds a *lot* like integration! Without going into too much op-amp theory, you can just assume that the integrator circuit will produce a voltage that increases or decreases at a rate determined by the input voltage and the values of `R` and `C`. The values of `R` and `C` determine the [**RC constant**](https://www.electronics-tutorials.ws/rc/rc_1.html) of the integrator - or put more simply, *how long it takes the circuit to charge up*. Remember this concept because it comes into play a *lot* in this article.
+
+You can play around this with interactive illustration to see how changing the voltage, resistance, or capacitance changes the output of the integrator:
 
 <canvas id="integrator" width="1000" height="600"></canvas>
 <form class="canvas-controls" id="integrator-form">
@@ -94,17 +96,17 @@ Vout = -(Vin / (R * C)) * time
 
 Before going further, there are some interesting and noteworthy properties of the integrator's behavior to be aware of:
 
-- First, notice that there are three ways of changing the slope of the output: changing the capacitance, changing the resistance, or changing the voltage. Making the voltage higher will charge the capacitor more quickly and increase the steepness of the slope. Making the resistance or capacitance lower will also cause the capacitor to charge more quickly and increase the steepness of the slope.
-- Second, the output is "inverted" - a positive input voltage creates a downward slope and a negative input voltage creates an upward slope. This will come into play when we look at the difference between the Juno 6/60 design and the Juno 160 design.
+- First, notice that there are three ways of changing the steepness of the output's slope: changing the capacitance, changing the resistance, or changing the voltage. Making the voltage higher will charge the capacitor more quickly and increase the steepness of the slope. Making the resistance or capacitance lower will also cause the capacitor to charge more quickly and will increase the steepness of the slope.
+- Second, the output is **inverted** - a positive input voltage creates a downward slope and a negative input voltage creates an upward slope. This will come into play when we look at the difference between the Juno-6/60 design and the Juno-160 design.
 - Third, notice that with steeper slopes the output will *saturate* (stop increasing or decreasing). This is because a real op amp doesn't have an infinite amount of voltage to output and the capacitor can't hold an infinite amount of charge, so when either the output voltage is beyond the op amp's power supply or the capacitor can't hold any more charge the output voltage will saturate.
 
-At this point you should hopefully have a good grasp on how an op-amp integrator forms a ramp from a constant input voltage. So now the question is how to change this circuit so that it generates a repeating (periodic) sawtooth waveform?
+At this point you should hopefully have a good grasp on how an op-amp integrator forms a ramp from a constant input voltage. So now we'll see how to change the circuit so that instead of a single slope it generates a repeating (periodic) sawtooth waveform.
 
-Well, a straightforward solution is to just start the circuit over - **reset** it. That'll start the ramp back at zero and let it start rising (or falling) again. You can keep repeating that reset to keep generating cycles of the sawtooth waveform.
+A straightforward solution is to just start the circuit over - **reset** it. That'll start the ramp back at zero and let it start rising (or falling) again. If you keep resetting at regular intervals the circuit will keep generating ramps and which form cycles of the sawtooth waveform.
 
-But what does it mean to reset a circuit? Well, it means to put it back into its initial state. Think about what that means for a second - what *changes* in the integrator circuit over time? Well, it's the **charge** of the capacitor. When the circuit first starts, the capacitor has no charge and the output voltage is zero, but, as time goes on the capacitor charges more and more. So resetting the circuit means *discharging* the capacitor.
+But what does it mean to reset a circuit? Well, it means to put it back into its initial state. Think about what *changes* in the integrator circuit over time: the **charge** of the capacitor. When the circuit first starts the capacitor has no charge and the output voltage is zero, but, as time goes on the capacitor charges more and more. So resetting the circuit means *discharging* the capacitor.
 
-The easiest way to discharge a capacitor is to *short* it- that is, connect its two leads together so there's nothing blocking it from discharging. You can do that by putting a little switch in the circuit:
+The easiest way to discharge a capacitor is to *short* it: connect its two leads together so there's nothing blocking it from discharging. You can do that by putting a little switch in the circuit:
 
 ![An op-amp integrator with a switch to discharge the capacitor](../static/juno/integrator-with-switch.png)
 
@@ -124,9 +126,9 @@ Try out the little simulation below - press `start` to let the capacitor charge 
   </div>
 </form>
 
-Take notice that when you press the button periodically the output is a sawtooth waveform and its frequency is determined by how often you press the button and reset the capacitor.
+Take notice that when you press the button at consistent intervals the output is a sawtooth waveform and its frequency is determined by how often you press the button and reset the capacitor.
 
-Obviously there isn't any synthesizers out there that require you to manually tap a switch at the desired note's frequency[^fast] ! Instead of requiring a person to press a switch, this circuit should take some form of **frequency input signal** and use it to electronically close the switch.
+Obviously there isn't any synthesizers out there that require you to manually tap a switch at the desired note's frequency![^fast] So instead of requiring a person to press a switch this circuit should take some form of **frequency input signal** and use it to electronically close the switch.
 
 The switch is the easy part - there's a well-known component that can act as an *electronically-controlled switch*: the [transistor](https://learn.sparkfun.com/tutorials/transistors/all). So, the ramp generator will use a transistor in place of the switch:
 
@@ -134,14 +136,14 @@ The switch is the easy part - there's a well-known component that can act as an 
 
 Note that I am explicitly not specifying which kind of transistor (PNP, NPN etc)- which one you choose depends on a few other factors so for now I'll keep it abstract. Notice that there's also a new resistor there between the capacitor and the transistor. This is generally a low-value resistor and it's just there to limit the current that goes through the transistor when the capacitor discharges as too much current could damage the transistor.
 
-That leaves the question of how to take a frequency input signal and turn it into a reset signal to control the transistor. This is the point where VCOs and DCOs diverge- up until now their theory has been the same but the form of the frequency input signal and the way the it's used is vastly different between the two. The next two sections will explore the difference approaches taken by VCO and DCO designs to control the transistor and the capacitor, and therefore, the frequency of the sawtooth waveform.
+So now the circuit has a means of electronically resetting the capacitor. The next step is to create a circuit that takes a frequency input signal and turns it into a *reset signal* to control the transistor. This is the point where VCOs and DCOs diverge, as up until now their theory has been the same but the form of the frequency input signal and the way the it's used is vastly different between the two. The next few sections will explore the different approaches taken by VCO and DCO designs to control the transistor and the capacitor, and therefore, the frequency of the sawtooth waveform.
 
 [^fast]: Truthfully it would be fun to watch someone [try to press a button 440 times per second](https://xkcd.com/730/)
 
 
 ## The analog voltage-controlled oscillator
 
-Although the point of this article is to explore DCO design, it's worthwhile to spend some time examining the operating principles behind a VCO as it can provide some insight into what the DCO was designed to overcome.
+Although the point of this article is to explore DCO design, it's worthwhile to spend some time examining the operating principles behind a VCO. This analysis will provide some insight into certain aspects of the DCO's design.
 
 The analog VCO design uses a **control voltage** as its frequency input signal. Creating this control voltage is pretty complicated[^expo] and it's a bit too much to discuss here, but you should know that the control voltage generation circuitry is *temperature sensitive*- once the instrument warms up the oscillators will be out of tune! This is one of the motivating factors behind the DCO's design.
 
@@ -151,13 +153,13 @@ The VCO routes the control voltage right into the ramp generator's input voltage
 
 The idea is that increasing the ramp generator's input voltage will cause the capacitor to charge more quickly- something you have already experienced with the [interactive integrator animation](#integrator).
 
-Now there's just the question of resetting the ramp generator using the transistor. There isn't an immediately obvious way to use the control voltage to drive the transistor. However, increasing the control voltage increases the slope of the ramp, so if the circuit were to reset the integrator when the ramp's output reaches a certain voltage then that could work:
+The next step is resetting the ramp generator using the transistor. There isn't an immediately obvious way to use the control voltage to drive the transistor. However, increasing the control voltage increases the slope of the ramp. We could add a circuit that watches the output of the ramp generator and resets it using the transistor once it gets to a specific output level:
 
 ![An illustration of resetting at a specific output level](../static/juno/reset-at-level.png)
 
 A higher control voltage would mean the ramp reaches the target voltage faster and therefore gets reset more often and leads to a higher frequency.
 
-To implement this the circuit uses a [**comparator**](https://en.wikipedia.org/wiki/Comparator):
+You can implement that kind of circuit using a [**comparator**](https://en.wikipedia.org/wiki/Comparator):
 
 ![A comparator](../static/juno/comparator.png)
 
@@ -177,9 +179,9 @@ A comparator, well, compares! It takes two voltages: an input voltage and a thre
   </div>
 </form>
 
-Note that this is a high-level ideal comparator, real ones[^schmitt] require a little more work to use.
+Note that this is a high-level ideal comparator and real ones[^schmitt] require a little more work to use.
 
-The circuit can use a comparator to watch the output voltage of ramp generator and reset the circuit by turning on the transistor once the output is beyond the desired amplitude voltage. As the capacitor discharges, the output voltage will fall below the comparator's threshold voltage and it'll turn the transistor off- allowing the cycle to start over. Take a look at this circuit and animation:
+You can add a comparator to watch the output voltage of ramp generator and reset the circuit by turning on the transistor once the output is beyond the desired amplitude voltage. When the transistor turns on, the capacitor discharges and the ramp generator's output voltage will eventually fall below the comparator's threshold voltage and it'll turn the transistor back off- allowing the cycle to start over. Take a look at this circuit and animation:
 
 ![A complete VCO](../static/juno/vco.png)
 
@@ -197,7 +199,7 @@ This is now a working voltage-controlled oscillator circuit. Play around with th
 
 But *why* is that the case? And how do you determine the exact frequency that a control voltage will produce? And inversely, how do you determine the appropriate control voltage for a given frequency?
 
-Remember that the control voltage is used directly to charge the capacitor. Think about what happens as the control voltage increases:
+Remember that the control voltage is used to directly charge the capacitor. Think about what happens as the control voltage increases:
 
 1. The capacitor will change faster,
 2. Which causes the integrator's ramp to rise faster,
@@ -212,7 +214,7 @@ So now you know *how* the control voltage increases the frequency but you still 
 Vout = -(Vin / (R * C)) * time
 ```
 
-This can be re-arranged to solve for charge time and therefore the frequency (since change time is the *period* and frequency is the reciprocal of the period):
+This can be re-arranged to solve for charge time and therefore the frequency. Since charge time is considered the *period* of the waveform and frequency is the reciprocal of a period:
 
 ```python
 time = -(C * R * Vout) / Vin
@@ -276,11 +278,11 @@ def control_voltage_for_frequency(frequency):
   </div>
 </form>
 
-Okay, at this point that's all you really need to know about VCOs before taking a look at DCOs. Of course, there's a lot more to VCOs and this article has left out the hairy details of practical VCOs so consider this a *very* simplified VCO that's really just here to help illustrate the differences between a VCO and a DCO. If you want to learn more about building VCOs you can take a look at [this tutorial](https://www.allaboutcircuits.com/projects/diy-synth-series-vco/), [this great series of videos](https://www.youtube.com/watch?app=desktop&v=QBatvo8bCa4&feature=youtu.be), or [this excellent book](https://www.oreilly.com/library/view/make-analog-synthesizers/9781449356200/).
+Okay, at this point that's all you really need to know about VCOs before taking a look at DCOs. Of course, this article has left out all of the hairy details of practical VCOs so consider this a *very* simplified VCO that's really just here to help illustrate the differences between a VCO and a DCO. If you want to learn more about building VCOs you can take a look at [this tutorial](https://www.allaboutcircuits.com/projects/diy-synth-series-vco/), [this great series of videos](https://www.youtube.com/watch?app=desktop&v=QBatvo8bCa4&feature=youtu.be), or [this excellent book](https://www.oreilly.com/library/view/make-analog-synthesizers/9781449356200/).
 
 Alright, let's review. The key takeaways from VCOs are:
 
-1. The VCO's *frequency input signal* is a *control voltage*. The control voltage determines how quickly the integrator's capacitor charges, and therefore, the frequency.
+1. The VCO's **frequency input signal** is a **control voltage**. The control voltage determines how quickly the integrator's capacitor charges, and therefore, the frequency.
 2. The VCO's amplitude is always constant because the ramp's output level is used to determine when to reset the circuit.
 
 [^schmitt]: The [Schmitt trigger](https://en.wikipedia.org/wiki/Schmitt_trigger) is a common, simple to use type of comparator that will work in a practical circuit.
@@ -290,7 +292,7 @@ Alright, let's review. The key takeaways from VCOs are:
 
 ## The digitally-controlled analog oscillator
 
-The biggest problem with the VCO design is that the control voltage that determines the frequency is generated by a complex circuit that is very sensitive to temperature drift and manufacturing tolerances. This means that the generated control voltage might not match up to exactly to what it should be for the desired note and end up sounding out of tune. What's worse is that even if you adjust for this you'll need to re-adjust as the instrument gets warmer.
+The biggest problem with the VCO design is that the control voltage that determines the frequency is generated by a complex circuit that is very sensitive to temperature drift and manufacturing tolerances. This means that the generated control voltage might not match up to exactly to what it should be for the desired note and it'll end up sounding out of tune. What's worse is that even if you adjust for this you'll need to re-adjust as the instrument gets warmer!
 
 With DCOs a different scheme is used to control the frequency. Unlike the analog VCO approach where a control voltage determines the frequency, a DCO's frequency is controlled by a **digital clock signal**. A digital clock signal is a square wave that operates at a specific frequency. In order to play different notes a microcontroller is used to change the frequency of the clock signal.
 
@@ -302,22 +304,22 @@ With DCOs a different scheme is used to control the frequency. Unlike the analog
   </div>
 </form>
 
-So how does this incoming clock signal connect to the ramp core to control the frequency? If you remember back to the ramp generator schematic, the transistor is the key component in controlling the frequency:
+So how can you connect this incoming clock signal to the ramp core and control the frequency? Remember back to the basic ramp generator schematic:
 
 ![An op-amp integrator with a transistor to discharge the capacitor](../static/juno/integrator-with-transistor.png)
 
-So to make the ramp core output a sawtooth that's the correct frequency the transistor should be turned on once for every cycle of the clock. So the clock needs to be wired up to control the transistor.
+For now, assume that the input voltage to the comparator is some constant voltage. The transistor is really the key component in determining the frequency - how often it turns on and resets the circuit determines the frequency. The clock signal is a series of on/off periods so you could use that to turn the transistor on and off for each cycle of the clock.
 
-For now, assume that the input voltage to the comparator is some constant voltage. If you were to connect the clock straight to the transistor then things wouldn't work quite right. Since the clock stays high for half of its cycle, that means that the transistor would stay on for half of its cycle! The capacitor wouldn't be able to charge for half of the time:
+If you were to connect the clock straight to the transistor then things wouldn't work quite right. Since the clock stays high for half of its cycle, that means that the transistor would stay on for half as cycle as well and the capacitor wouldn't be able to charge for half of the time:
 
 ![A dco with the clock directly connected, showing an output that's flat for half of the time](../static/juno/dco-no-diff.png)
 
-So there has to be something between the clock and the transistor. Think about what should happen - the transistor should only be turned on for a *very short* period of time to let the capacitor discharge and then it should turn off so the capacitor can start charging back up. That's what the VCO circuit did - the comparator was only on for the brief moment where the output voltage was above its threshold. What's needed in the DCO circuit is a *filter*.
+So there has to be some circuit between between the clock and the transistor that makes sure the transistor is only turned on for a *very short* period of time during the clock cycle to let the capacitor discharge.
 
 
 ## The RC differentiator
 
-A DCO can accomplish briefly turning on the transistor by filtering the clock using an [*RC differentiator*](https://www.electronics-tutorials.ws/rc/rc-differentiator.html)[^high-pass]. That's a fancy word but it's a really simple circuit. Check out the circuit below and the animation to see how it transforms the square wave:
+You can build a circuit that detects sharp changes in an input signal- like the rising or falling edge of a clock- and outputs short voltage spikes. This circuit is called an [*RC differentiator*](https://www.electronics-tutorials.ws/rc/rc-differentiator.html)[^high-pass]. That's a fancy word but it's a really simple circuit. Check out the circuit below and the animation to see its effect on the clock input:
 
 ![A schematic showing an RC differentiator transforming a clock signal into spikes](../static/juno/rcdiff.png)
 
@@ -337,15 +339,15 @@ A DCO can accomplish briefly turning on the transistor by filtering the clock us
   </div>
 </form>
 
-The differentiator turns the clock's square wave (in *purple*) into a series of voltage spikes (in *teal*) when there is a rising or falling edge on the clock signal. Notice that if you change the resistance or capacitance the spikes last a shorter or longer amount of time. While I won't discuss exact values just yet, the general idea is that the spikes should last *just* long enough to discharge the capacitor. If the spikes last too long, then transistor will be on for too long and the output would distort the begging of each waveform cycle. If the pulse is too short, the capacitor won't completely discharge which will cause an unwanted inconsistences and offsets in the resulting waveform:
+The differentiator turns the clock's square wave (in *purple*) into a series of voltage spikes (in *teal*) when there is a rising or falling edge on the clock signal. Notice that if you change the resistance or capacitance the spikes last a shorter or longer amount of time. While I won't discuss exact values just yet, the general idea is that the spikes should last *just* long enough to discharge the capacitor. If the spikes last too long, then transistor will be on for too long and the output would distort the start of each waveform cycle. If the pulse is too short, the capacitor won't completely discharge which will cause an unwanted inconsistences and offsets in the resulting waveform:
 
 ![Illustration of two bad waveforms from an incorrect differentiator](/static/juno/badrcdiff.png)
 
-In practice, the RC constant of the differentiator is slightly greater than the RC constant of the ramp generator's *discharge* circuit:
+In practice, the *RC constant* of the differentiator should slightly greater than the RC constant of the ramp generator's *discharge* circuit:
 
 ![Illustration highlighting the discharge circuit](/static/juno/discharge-circuit.png)
 
-So <code>RC<sub>differentiator</sub> &gt; RC<sub>discharge</sub></code>. There are two reasons for this. The first is that, as mentioned above, the circuit needs to completely discharge the capacitor in order for the waveshape to be correct. Having the differentiator's RC constant slightly higher gives a bit more room for error because real-world component values vary. The second reason is that the transistor doesn't turn on until the base-to-emitter voltage, <code>V<sub>BE</sub></code> is greater than its rated base-to-emitter saturation voltage, <code>V<sub>BE(sat)</sub></code>. For most common transistors, <code>V<sub>BE(sat)</sub></code> is somewhere between `0.6 Volts` and `0.7 Volts`. Since the spikes from the differentiator quickly rise and then decrease exponentially there is some time during the spike where the transistor isn't turned on. This visualization of the differentiator's output shows where the transistor would be on in red:
+So <code>RC<sub>differentiator</sub> &gt; RC<sub>discharge</sub></code>. There are two reasons for this. The first is that the circuit needs to completely discharge the capacitor in order for the waveshape to be correct. Having the differentiator's RC constant slightly higher gives a bit more room for error because real-world component values vary. The second reason is that the transistor doesn't turn on until the base-to-emitter voltage, <code>V<sub>BE</sub></code> is greater than its rated base-to-emitter saturation voltage, <code>V<sub>BE(sat)</sub></code>. For most common transistors, <code>V<sub>BE(sat)</sub></code> is somewhere between `0.6 Volts` and `0.7 Volts`. Since the spikes from the differentiator quickly rise and then decrease exponentially there is some time during the spike where its voltage is too low to turn the transistor on. This visualization of the differentiator's output shows when the transistor would be on in red:
 
 <canvas id="rcdiff2" width="1000" height="600"></canvas>
 <form class="canvas-controls" id="rcdiff2-form">
@@ -363,15 +365,13 @@ So <code>RC<sub>differentiator</sub> &gt; RC<sub>discharge</sub></code>. There a
   </div>
 </form>
 
-Okay, that's enough differentiator theory to be able to apply it to the DCO circuit.
-
 ## A basic DCO
 
 The following schematic adds the clock input through the differentiator to control the transistor. Remember to assume that the integrator's input voltage is some constant voltage:
 
 ![Schematic of the DCO with the RC differentiator added](/static/juno/dco.png)
 
-Finally, there is a sawtooth waveform on the output! Note that there is also a resistor between the differentiator and the transistor - it's there to limit the current so that the capacitor doesn't dump all of its energy and overload the transistor[^transistors].
+Finally, there is a sawtooth waveform on the output! Note that there is also a resistor between the differentiator and the transistor - it's there to limit the current so that the capacitor doesn't discharge all of its energy at once and overload the transistor[^transistors].
 
 Here's an interactive animation of the DCO's output:
 
@@ -384,7 +384,7 @@ Here's an interactive animation of the DCO's output:
 </form>
 
 
-There is an **obvious** difference between DCO's output and the [VCO's](#vco): The DCO's amplitude varies across its frequency range. Lower frequencies have a higher amplitude (and are therefore louder) and higher frequencies have a lower amplitude (and are therefore quieter). In the extreme cases the lower frequencies **clip** (*saturate* the op-amp's output) leading to distortion, and the higher frequencies become inaudible. The next section will cover why this happens and how to accomplish an even amplitude across the DCO's range.
+There is an **obvious** difference between DCO's output and the [VCO's output](#vco): The DCO's amplitude varies across its frequency range. Lower frequencies have a higher amplitude (and are therefore louder) and higher frequencies have a lower amplitude (and are therefore quieter). In the extreme cases the lower frequencies **clip** (*saturate* the op-amp's output) leading to distortion, and the higher frequencies become inaudible. The next section will cover why this happens and how to accomplish an even amplitude across the DCO's range.
 
 But before that, take a moment to review. You've now learned the theory behind both VCOs and DCOs. The key takeaways from DCOs are:
 
@@ -399,9 +399,9 @@ But before that, take a moment to review. You've now learned the theory behind b
 
 ## Amplitude compensation
 
-The last section demonstrated a working DCO but with a critical flaw: its volume gets lower as frequencies get higher. This isn't very useful for a musical oscillator, so there needs to be some scheme that increases the amplitude (volume) as the frequency gets higher. This is called **amplitude compensation**[^made-up].
+The last section demonstrated a working DCO but with a critical flaw: its volume gets lower as frequencies get higher. This isn't very useful for a musical oscillator, so there needs to be some scheme that increases the amplitude as the frequency gets higher. This is called **amplitude compensation**[^made-up].
 
-Remember that throughout the DCO section I said to assume that the integrator's input voltage was constant. This is the reason why the amplitude problem exists. Because the input voltage is constant, the integrator's capacitor is ramping at a constant rate regardless of the clock frequency. At lower frequencies it charges too quickly and the waveform gets clipped. At higher frequencies it charges too slowly and therefore doesn't have enough time to get up to the desired amplitude before the clock causes the transistor to close.
+Remember that throughout the DCO section I said to assume that the integrator's input voltage was constant. This is the reason why the amplitude problem exists. Because the input voltage is constant, the integrator's capacitor is ramping at a constant rate regardless of the clock frequency. At lower frequencies it charges too quickly and the waveform gets clipped. At higher frequencies it charges too slowly and therefore doesn't have enough time to get up to the desired amplitude before the clock resets the circuit.
 
 In a practical DCO the integrator's input voltage can't be constant because the circuit needs to increase the voltage to increase the rate of the capacitor's charge. In the [VCO](#vco) design, a **control voltage** was connected to the integrator's input voltage and was used to increase how fast the capacitor charges. The DCO can use the same idea, however, instead of the control voltage being created by complicated analog circuitry it will be generated by the microcontroller using a [digital-to-analog converter](https://en.wikipedia.org/wiki/Digital-to-analog_converter) (*DAC*). Here's the schematic with the DAC added:
 
@@ -417,7 +417,7 @@ target_voltage = 12V
 charge_voltage = target_voltage * note_frequency / max_frequency
 ```
 
-The DCO design is now quite different from the VCO in terms of the way it's controlled. The microcontroller has to send *two* separate inputs into the oscillator to control its frequency and amplitude. While this might seem complicated, remember that the VCO has to be fed by complicated and temperature-sensitive circuitry. The microcontroller is capable of controlling the frequency of a DCO with a much higher degree of accuracy compared to the VCO and the requirement to control the amplitude as well is a reasonable trade-off.
+The DCO design is now quite different from the VCO in terms of the way it's controlled. The microcontroller has to send *two* separate inputs into the oscillator to control its frequency and amplitude. While this might seem complicated, remember that the VCO has to be fed by complicated and temperature-sensitive circuitry. The microcontroller is capable of controlling the frequency of a DCO with a much higher degree of accuracy compared to the VCO and the requirement to control the amplitude as well is a reasonable trade-off. It also matters that the amplitude doesn't need to be very accurate because our ears are more sensitive to differences in pitch than differences in volume.
 
 
 [^made-up]: I don't know if it has a "real" name, but I call it amplitude compensation. 🤷‍♀️
@@ -425,34 +425,9 @@ The DCO design is now quite different from the VCO in terms of the way it's cont
 
 ## A practical DCO - The Juno 160 design
 
-Now that we've covered the theory of operation for a DCO let's take a look at and analyze an actual DCO look. The DCO schematic developed in the last section isn't far off from the Juno-160's design. Here's the schematic for the Juno-160's DCO:
+Now that we've covered the theory of operation for a DCO let's take a look at and analyze an actual DCO. The DCO schematic developed in the last section isn't far off from the Juno-160's design, so let's take a look at that:
 
 ![Schematic of a DCO with values added](/static/juno/dco-with-values.png)
-
-Let's break down the component values and what they mean for how this DCO will behave:
-
-* The RC differentiator has an RC constant of `10kΩ × 270pF = 2.7μs`. The clock signal is `5 Volts`. This means the transistor will remain on for about `5.3μs` out of each waveform cycle[^discharge].
-* The transistor is a **NPN** transistor so it will turn on during the *rising edge* of the clock. This is because an NPN transistor needs a positive base voltage and the RC differentiator will create a positive voltage spike when the clock changes from low to high.
-* The integrator's *discharge circuit* has an RC constant of `2.2kΩ * 1nF = 2.2μs`. Notice that this follows the rule of thumb mentioned earlier - the differentiator's RC constant is slightly higher than the discharge circuit's. If taken in isolation the discharge circuit will leave just 9%[^discharge] of the voltage on the integrator capacitor when the differentiator circuit turns the transistor on for `5.3μs`. However, since the op amp's output and the DAC's output create a voltage across the capacitor while it is discharging it will discharge a little more quickly[^ow-my-brain].
-* The integrator's RC constant is `200kΩ × 1nF = 0.2ms`. That's equivalent to `5 kHz`. This effectively sets the **maximum operating frequency** of the oscillator. `5 kHz` is a great choice considering the highest note on a piano, C8, is `4,186 Hz`.
-* At the maximum operating frequency of `5 kHz` the transistor will only be on for `2.7μs / 0.2ms = 1.35%` of the waveform's cycle, so there won't be any issues with the transistor being on too long and causing distortion.
-* The voltage coming out of the DAC is **inverted**, so there is a *negative* charge voltage being fed into the integrator. If you remember back to the [integrator](#integrator), it also inverts - a positive input voltage creates a falling slope and a negative input voltage makes a rising slope. So the Juno 160 uses negative charge voltage to create a rising sawtooth waveform[^negative-nancy].
-
-With this analysis you can reverse it and know how to pick these component values for a new DCO design. If you start with the maximum operating frequency you can determine the integrator's RC constant:
-
-```python
-RCintegrator = 1 / 5kHz
-RCintegrator = 0.2ms
-```
-
-Any combination of resistance and capacitance that leads to that RC constant will work. The values used here, `200kΩ` and `1nF`, are perfectly fine. Now that you have the integrator's RC constant you can work out the differentiator's RC constant by applying the rule of thumb of having it be slightly more than the integrator's:
-
-```python
-RCdifferentiator = RCintegrator * 1.2
-RCdifferentiator = 2.7μs
-```
-
-Again the values shown in the Juno-106 circuit, `10kΩ` and `270pF`, are perfectly fine. The remainder of the components can largely be determined through deduction or empirically through experimentation. While it's unlikely that you'll arrive at the perfect component values on the first try, this can at least give you a good idea of how you'd begin to pick these components from scratch.
 
 Here's an interactive animation of the Juno-106 oscillator's output:
 
@@ -466,12 +441,37 @@ Here's an interactive animation of the Juno-106 oscillator's output:
 
 That's a good looking sawtooth waveform! Of course, this little animation is not an accurate simulation of the circuit- the real waveform has some nice analog oddities.
 
+Using the understanding of the operating principles learned so far let's break down the component values in the circuit and figure out what they mean for how this DCO will behave:
+
+* The RC differentiator has an RC constant of `10kΩ × 270pF = 2.7μs`. The clock signal is `5 Volts`. This means the transistor will remain on for about `5.3μs` out of each waveform cycle[^discharge].
+* The transistor is a **NPN** transistor so it will turn on during the *rising edge* of the clock. This is because an NPN transistor needs a positive base voltage and the RC differentiator will create a positive voltage spike when the clock changes from low to high.
+* The integrator's *discharge circuit* has an RC constant of `2.2kΩ * 1nF = 2.2μs`. Notice that this follows the rule of thumb mentioned earlier - the differentiator's RC constant is slightly higher than the discharge circuit's. If taken in isolation the discharge circuit will leave just 9%[^discharge] of the voltage on the integrator's capacitor when the differentiator circuit turns the transistor on for `5.3μs`. However, since the op amp's output and the DAC's output create a voltage across the capacitor while it is discharging it will discharge a little more quickly[^ow-my-brain].
+* The integrator's RC constant is `200kΩ × 1nF = 0.2ms`. That's equivalent to `5 kHz`. This effectively sets the **maximum operating frequency** of the oscillator. `5 kHz` is a great choice considering the highest note on a piano, C8, is `4,186 Hz`.
+* At the maximum operating frequency of `5 kHz` the transistor will only be on for `2.7μs / 0.2ms = 1.35%` of the waveform's cycle, so there won't be any issues with the transistor being on for too long and causing distortion.
+* The voltage coming out of the DAC is **inverted**, so there is a *negative* charge voltage being fed into the integrator. If you remember back to the [integrator](#integrator), it also inverts - a positive input voltage creates a falling slope and a negative input voltage makes a rising slope. So the Juno-160 uses negative charge voltage to create a **rising** sawtooth waveform[^negative-nancy].
+
+The information covered so far should also allow you to do this in reverse- that is you should be able to pick component values for a new DCO design. If you start by picking a maximum operating frequency (say, `5kHz`) then you can use that to determine the integrator's RC constant:
+
+```python
+RCintegrator = 1 / 5kHz
+RCintegrator = 0.2ms
+```
+
+Any combination of resistance and capacitance that leads to that RC constant will work. The values used by the Juno-106, `200kΩ` and `1nF`, are perfectly fine. Now that you have the integrator's RC constant you can work out the differentiator's RC constant by applying the rule of thumb that is should be slightly more than the integrator's RC constant:
+
+```python
+RCdifferentiator = RCintegrator * 1.2
+RCdifferentiator = 2.7μs
+```
+
+Again the values used in the Juno-106, `10kΩ` and `270pF`, are perfectly fine. The remainder of the components can largely be determined through deduction or empirically through experimentation. While it's unlikely that you'll arrive at the perfect component values on the first try, this can at least give you a good idea of how you'd begin to pick these components from scratch.
+
 That's pretty much the Juno-106 design. Here's a few more things that might be interesting to you:
 
 * The output voltage across the range can vary as much as `1 Volt`, but that's fine- your ear won't really be able to tell the difference.
-* Because the Juno's DAC doesn't have a lot of resolution, the microcontroller can switch the integrator's resistor between `200kΩ`, `200kΩ`, and `399kΩ` so that it has more control over the amplitude for lower frequencies.
-* The component values chosen here are actually picked from the Juno-60's service manual with the exception of the integrator's resistor and capacitor. The Juno-106's oscillators is on a voice card and the service manual doesn't list all of the values for the passives. While I'm not 100% sure on the values I picked here, I'm fairly certain I'm at least very close.
-* The microcontroller doesn't generate the clock signal directly, instead, it configures a set of [programmable interval timers](https://en.wikipedia.org/wiki/Programmable_interval_timer). The timers are clocked by an `8 MHz` crystal.
+* Because the Juno's DAC doesn't have a lot of resolution, the microcontroller can switch the integrator's resistor between `100kΩ`, `200kΩ`, and `399kΩ` so that it has more control over the amplitude for lower frequencies.
+* The component values chosen here are actually picked from the Juno-60's service manual with the exception of the integrator's resistor and capacitor. The Juno-106's oscillators are on seperate voice card boards and the service manual doesn't list all of the values for the passives. While I'm not 100% sure on the values I picked here, I'm fairly certain I'm at least very close.
+* The microcontroller doesn't generate the clock signal directly, instead, it configures a set of [programmable interval timers](https://en.wikipedia.org/wiki/Programmable_interval_timer). The timers are clocked by an `8 MHz` [crystal oscillator](https://en.wikipedia.org/wiki/Crystal_oscillator).
 
 [^discharge]: This is calculated from the [capacitor discharge formula](http://hyperphysics.phy-astr.gsu.edu/hbase/electric/capdis.html).
 [^rc-rule-of-thumb]: It takes [just about 5 times longer](https://www.electronics-tutorials.ws/rc/rc_2.html) than the RC constant for a capacitor to fully charge or discharge.
@@ -485,7 +485,7 @@ The Juno-6 & 60 share the same oscillator design. Here's what it looks like:
 
 ![Schematic of the Juno 6 & 60 DCO](/static/juno/dco-pnp.png)
 
-It's *extremely* similar to the Juno-106's design with one key difference: it outputs *falling* sawtooth waveform. This has some impact on the circuit:
+It's *extremely* similar to the Juno-106's design with one key difference: it outputs **falling** sawtooth waveform. This has some impact on the circuit:
 
 * The charge voltage is now positive. This is what leads to the falling waveform - the integrator creates a downward slope when given a positive input.
 * The transistor is now a PNP transistor. This is because the falling sawtooth output is from `0V` to `-12V`, so the collector side of the transistor will be more negative than the emitter side. A PNP transistor is used so that the transistor can be *forward biased* with a negative collector-to-emitter voltage. This also means that the switch turns on during the *falling* edge of the clock signal because the PNP transistor requires that the base be more negative than the emitter and the differentiator produces a negative voltage spike on falling clock edges.
@@ -525,7 +525,7 @@ A clever way to generate a pulse wave with variable pulse width is to use the sa
 
 ![The circuit for creating a variable-pulse waveform from a sawtooth waveform](/static/juno/pulse-circuit.png)
 
-The Juno uses a standard TL08x op-amp for the comparator[^better-compare]. The comparator compares the sawtooth wave against an adjustable voltage and switches its output from on to off when the sawtooth rises above that voltage. If the voltage is at 50% of the range, then the pulse-width will be 50% because the comparator will switch halfway through the waveform. If the voltage is higher, then the comparator will remain on for a longer period of time and therefore the pulse width will be higher. This is a little easier to understand with an animation:
+The Juno uses a standard TL08x op-amp as an **inverting** comparator[^better-compare]. The comparator compares the sawtooth wave against an adjustable voltage and switches its output from on to off when the sawtooth rises above that voltage. If the voltage is at 50% of the range, then the pulse-width will be 50% because the comparator will switch halfway through the waveform. If the voltage is higher, then the comparator will remain on for a longer period of time and therefore the pulse width will be higher. If the voltage is lower, the comparator will remain on for a shorted period of time and the pulse width will be lower. This is a little easier to understand with an animation:
 
 <canvas id="pulse" width="1000" height="600"></canvas>
 <form class="canvas-controls" id="pulse-form">
@@ -539,6 +539,7 @@ The Juno uses a standard TL08x op-amp for the comparator[^better-compare]. The c
   </div>
 </form>
 
+And that's about it! ✨
 
 [^better-compare]: Using an op amp as a comparator works in some cases, but there are also [dedicated comparator components](https://www.ti.com/lit/ds/symlink/lm397.pdf) that generally perform much better. 
 
