@@ -1,7 +1,17 @@
-(function() {
+(function animations() {
     "use strict";
     const padding_x = 30;
     const padding_y = 30;
+    const font_name = "'IBM Plex Mono'"
+    const primary_font = `italic 25px ${font_name}`;
+    const alt_font = `25px ${font_name}`;
+    const info_font = `italic 30px ${font_name}`;
+
+    if(!document.fonts.check(primary_font)) {
+        console.log(`Font ${primary_font} not ready`);
+        window.setTimeout(animations, 100);
+        return;
+    }
 
     class Grapher {
         constructor(canvas_elem_id) {
@@ -39,18 +49,12 @@
             ctx.strokeStyle = "#333333";
             ctx.fillStyle = "#333333";
             ctx.lineWidth = 2;
-            ctx.font = "italic 30px sans";
+            ctx.font = primary_font;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
     
             ctx.beginPath();
             ctx.moveTo(this.bottom_left_x, this.bottom_left_y)
-            ctx.lineTo(this.bottom_left_x + this.width * 0.40, this.bottom_right_y);
-            ctx.closePath();
-            ctx.stroke();
-    
-            ctx.beginPath();
-            ctx.moveTo(this.bottom_left_x + this.width * 0.60, this.bottom_left_y)
             ctx.lineTo(this.bottom_right_x, this.bottom_right_y);
             ctx.closePath();
             ctx.stroke();
@@ -64,17 +68,11 @@
             ctx.closePath();
             ctx.fill();
     
-            this.mask_out(this.bottom_left_x + this.width / 2, this.bottom_left_y);
+            this.clear_text_area(this.bottom_left_x + this.width / 2, this.bottom_left_y, x_label);
             ctx.fillText(x_label, this.bottom_left_x + this.width / 2, this.bottom_left_y);
             
             ctx.beginPath();
             ctx.moveTo(this.bottom_left_x, this.bottom_left_y)
-            ctx.lineTo(this.bottom_left_x, this.bottom_right_y - this.height * 0.40);
-            ctx.closePath();
-            ctx.stroke();
-    
-            ctx.beginPath();
-            ctx.moveTo(this.top_left_x, this.bottom_left_y - this.height * 0.60)
             ctx.lineTo(this.top_left_x, this.top_left_y);
             ctx.closePath();
             ctx.stroke();
@@ -87,12 +85,7 @@
             ctx.lineTo(this.top_left_x, this.top_left_y + 20);
             ctx.closePath();
             ctx.fill();
-    
-            ctx.translate(this.top_left_x - 5, this.top_left_y + this.height / 2);
-            ctx.rotate(-Math.PI / 2);
-            this.mask_out(0, 0);
-            ctx.fillText(y_label, 0, 0);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+
 
             if(this.centered) {
                 ctx.strokeStyle = "#AAAAAA";
@@ -102,12 +95,28 @@
                 ctx.lineTo(this.bottom_right_x, this.top_left_y + this.height / 2);
                 ctx.closePath();
                 ctx.stroke();
+                ctx.setLineDash([]);
+
+                this.mask_out(this.top_right_x - padding_x / 2, this.top_right_y + this.height / 2, 30);
+                ctx.fillStyle = "#888888";
+                ctx.font = alt_font;
+                ctx.fillText("+", this.top_right_x - padding_x / 2, this.top_right_y + this.height / 2 - 60);
+                ctx.fillText("0", this.top_right_x - padding_x / 2, this.top_right_y + this.height / 2);
+                ctx.fillText("-", this.top_right_x - padding_x / 2, this.top_right_y + this.height / 2 + 60);
+                ctx.font = primary_font;
             }
+    
+            ctx.fillStyle = "#333333";
+            ctx.translate(this.top_left_x - 2, this.top_left_y + this.height / 2 + 5);
+            ctx.rotate(-Math.PI / 2);
+            this.clear_text_area(0, 0, y_label, 20, 0.8, 100, 1.5, 1);
+            ctx.fillText(y_label, 0, 0);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
     
             ctx.restore();
         }
 
-        mask_out(x, y, size=30, extent=100) {
+        mask_out(x, y, size=50, extent=80) {
             const ctx = this.ctx;
             ctx.save();
             ctx.globalCompositeOperation = "destination-out";
@@ -154,21 +163,21 @@
             this.ctx.stroke();
         }
 
-        clear_text_area(x, y, text) {
+        clear_text_area(x, y, text, line_width=20, alpha=0.8, blur=100, x_mult = 2, y_mult = 1) {
             let extents = this.ctx.measureText(text);
             this.ctx.save();
             this.ctx.globalCompositeOperation = "destination-out";
-            this.ctx.lineWidth = 20;
-            this.ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+            this.ctx.lineWidth = line_width;
+            this.ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
             this.ctx.fillStyle = "black";
             this.ctx.shadowColor = "black";
-            this.ctx.shadowBlur = 30;
+            this.ctx.shadowBlur = blur;
             this.ctx.beginPath();
             this.ctx.rect(
-                x,
-                y,
-                Math.abs(extents.actualBoundingBoxLeft) + Math.abs(extents.actualBoundingBoxRight),
-                extents.actualBoundingBoxAscent + extents.actualBoundingBoxDescent);
+                x - extents.actualBoundingBoxLeft * x_mult,
+                y - extents.actualBoundingBoxAscent * y_mult,
+                (Math.abs(extents.actualBoundingBoxLeft) + Math.abs(extents.actualBoundingBoxRight)) * x_mult,
+                (extents.actualBoundingBoxAscent + extents.actualBoundingBoxDescent) * y_mult);
             
             this.ctx.fill();
             this.ctx.stroke();
@@ -178,10 +187,10 @@
         }
 
         draw_info(text) {
-            this.ctx.font = "italic 40px sans";
+            this.ctx.font = info_font;
             this.ctx.textBaseline = "top";
             this.ctx.textAlign = "left"
-            this.clear_text_area(this.top_left_x + padding_x, this.top_left_y, text);
+            this.clear_text_area(this.top_left_x + padding_x, this.top_left_y, text, 20, 0.8, 100, 1, 1);
             this.ctx.fillStyle = "black";
             this.ctx.fillText(text, this.top_left_x + padding_x, this.top_left_y);
         }

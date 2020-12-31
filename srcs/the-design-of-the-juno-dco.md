@@ -1,5 +1,5 @@
 ---
-title: "The Design of the Roland Juno Oscillators"
+title: "The Design of the Roland Juno oscillators"
 date: 2020-12-31
 legacy_url: yes
 description: A comprehensive deep dive into the design of Roland's legendary DCO
@@ -560,6 +560,8 @@ Thank you for reading through this *very long* post. I sincerely hope it was use
 
 ///Footnotes Go Here///
 
-<script type="text/javascript" src="/static/juno/animations.js"></script>
-
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital@0;1&display=swap"> 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital@0;1&display=swap">
 <link rel="stylesheet" href="/static/juno/styles.css">
+<script type="text/javascript" src="/static/juno/animations.js"></script>
