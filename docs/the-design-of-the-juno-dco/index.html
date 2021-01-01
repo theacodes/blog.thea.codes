@@ -117,7 +117,7 @@
 <p><img alt="An op-amp integrator with a switch to discharge the capacitor" src="../static/juno/integrator-with-switch.png" /></p>
 <p>When the switch is open the integrator behaves the same as before - its output goes up or down depending on the input voltage. When the switch is closed, it creates a circuit that connects the capacitor's leads and allows it to discharge:</p>
 <p><img alt="An op-amp integrator with a switch to discharge the capacitor" src="../static/juno/integrator-with-switch-closed.png" /></p>
-<p>Once the switch is opened again the integrator starts over and beings ramping its output again.</p>
+<p>Once the switch is opened again the integrator starts over and begins ramping its output again.</p>
 <p>Try out the little simulation below - press <code>start</code> to let the capacitor charge for a little bit and then press <code>close switch</code> to reset it:</p>
 <canvas id="discharge" width="1000" height="600"></canvas>
 <form class="canvas-controls" id="discharge-form">
@@ -128,7 +128,7 @@
 </form>
 
 <p>Take notice that when you press the button at consistent intervals the output is a sawtooth waveform and its frequency is determined by how often you press the button and reset the capacitor.</p>
-<p>Obviously there isn't any synthesizers out there that require you to manually tap a switch at the desired note's frequency!<sup id="fnref:fast"><a class="footnote-ref" href="#fn:fast">1</a></sup> So instead of requiring a person to press a switch this circuit should take some form of <strong>frequency input signal</strong> and use it to electronically close the switch.</p>
+<p>Obviously there aren't any synthesizers out there that require you to manually tap a switch at the desired note's frequency!<sup id="fnref:fast"><a class="footnote-ref" href="#fn:fast">1</a></sup> So instead of requiring a person to press a switch this circuit should take some form of <strong>frequency input signal</strong> and use it to electronically close the switch.</p>
 <p>The switch is the easy part - there's a well-known component that can act as an <em>electronically-controlled switch</em>: the <a href="https://learn.sparkfun.com/tutorials/transistors/all">transistor</a>. So, the ramp generator will use a transistor in place of the switch:</p>
 <p><img alt="An op-amp integrator with a transistor to discharge the capacitor" src="../static/juno/integrator-with-transistor.png" /></p>
 <p>Note that I am explicitly not specifying which kind of transistor (PNP, NPN etc)- which one you choose depends on a few other factors so for now I'll keep it abstract. Notice that there's also a new resistor there between the capacitor and the transistor. This is generally a low-value resistor and it's just there to limit the current that goes through the transistor when the capacitor discharges as too much current could damage the transistor.</p>
@@ -400,7 +400,7 @@
 <p><img alt="A pulse waveform with various pulse widths" src="/static/juno/pulse-width.png" /></p>
 <p>A clever way to generate a pulse wave with variable pulse width is to use the sawtooth output and our old friend the <a href="#comparator-form">comparator</a>:</p>
 <p><img alt="The circuit for creating a variable-pulse waveform from a sawtooth waveform" src="/static/juno/pulse-circuit.png" /></p>
-<p>The Juno uses a standard TL08x op-amp as an <strong>inverting</strong> comparator<sup id="fnref:better-compare"><a class="footnote-ref" href="#fn:better-compare">12</a></sup>. The comparator compares the sawtooth wave against an adjustable voltage and switches its output from on to off when the sawtooth rises above that voltage. If the voltage is at 50% of the range, then the pulse-width will be 50% because the comparator will switch halfway through the waveform. If the voltage is higher, then the comparator will remain on for a longer period of time and therefore the pulse width will be higher. If the voltage is lower, the comparator will remain on for a shorted period of time and the pulse width will be lower. This is a little easier to understand with an animation:</p>
+<p>The Juno uses a standard TL08x op-amp as an <strong>inverting</strong> comparator<sup id="fnref:better-compare"><a class="footnote-ref" href="#fn:better-compare">12</a></sup>. The comparator compares the sawtooth wave against an adjustable voltage and switches its output from on to off when the sawtooth rises above that voltage. If the voltage is at 50% of the range, then the pulse-width will be 50% because the comparator will switch halfway through the waveform. If the voltage is higher, then the comparator will remain on for a longer period of time and therefore the pulse width will be higher. If the voltage is lower, the comparator will remain on for a shorter period of time and the pulse width will be lower. This is a little easier to understand with an animation:</p>
 <canvas id="pulse" width="1000" height="600"></canvas>
 <form class="canvas-controls" id="pulse-form">
   <div class="input-group">
