@@ -20,7 +20,7 @@ Roland introduced the incredible [Juno-6](http://www.vintagesynth.com/roland/jun
 
 ![A photo of the Juno-60](/static/juno/juno-60.jpg)
 
-The Juno notably featured [*digitally-controlled analog oscillators*](https://en.wikipedia.org/wiki/Digitally_controlled_oscillator). The DCO was designed to overcome them the tuning instability of the usual **voltage-controlled oscillators** (*VCOs*) in contemporary polyphonic synthesizers. The DCOs operate with the same fundamental analog circuitry but differ in that they are controlled by a microcontroller. This imparted a unique sound to the Juno series and one that's become a favorite of many musicians.
+The Juno notably featured [*digitally-controlled analog oscillators*](https://en.wikipedia.org/wiki/Digitally_controlled_oscillator). The DCO was designed to overcome the tuning instability of the usual **voltage-controlled oscillators** (*VCOs*) in contemporary polyphonic synthesizers. The DCOs operate with the same fundamental analog circuitry but differ in that they are controlled by a microcontroller. This imparted a unique sound to the Juno series and one that's become a favorite of many musicians.
 
 ![A photo of the Juno 160](/static/juno/juno-106.jpg)
 
@@ -505,7 +505,7 @@ Some other interesting things about the Juno-6 & 60 implementation are:
 
 * The Juno-6 & 60 don't use a crystal oscillator to drive the clock used for the oscillators. It instead uses an analog [LC oscillator](https://www.electronics-tutorials.ws/oscillator/oscillators.html) that generates a `1 MHz` to `3.5 MHz` master clock and is divided down by the same programmable interrupt timers that the Juno-106 uses. The reason it's variable is because the Juno-6 & 60 apply pitch bend and LFO by modifying the frequency of the master clock. The Juno-106 has the CPU calculate that instead.
 * The exact transistor used is the [2SA1015](https://xtronics.com/uploads/2SA1015.pdf). It's a pretty unexceptional transistor and was likely just chosen for cost - most of the transistors in the Juno are this transistor or the complementary NPN [2SC1815](https://www.mouser.com/datasheet/2/68/2sc1815-1149989.pdf). Basically any general-purpose BJT can be used here - I used a [2N3906](https://en.wikipedia.org/wiki/2N3906) for my experiments.
-* The op-amps used are [TL08x](https://www.ti.com/product/TL082), a very common general-purpose op-amp. Back in the day, the TL08x series had higher noise than the TL07x series. That's no longer true and the modern amps are practically identical. If you were designing a new DCO and wanted to select a fancier, modern op-omp you might consider something like the the [OPA164x](https://www.ti.com/product/OPA1641).
+* The op-amps used are [TL08x](https://www.ti.com/product/TL082), a very common general-purpose op-amp. Back in the day, the TL08x series had higher noise than the TL07x series. That's no longer true and the modern amps are practically identical. If you were designing a new DCO and wanted to select a fancier, modern op-amp you might consider something like the the [OPA164x](https://www.ti.com/product/OPA1641).
 
 
 ## Waveshapers
