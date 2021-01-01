@@ -190,8 +190,8 @@
 <span class="n">frequency</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">time</span>
 </pre>
 <p>If you select the component values for <code>R</code> and <code>C</code> and pick a desired output amplitude then you can plug those into the equation and you'll have the formula for determining frequency given a control voltage. In this case, I chose <code>200kΩ</code>, <code>1nF</code>, and <code>-12V</code> (don't worry about these values too much, I'll cover how to pick these values later):</p>
-<pre class="lang-python3"><span class="n">C</span> <span class="o">=</span> <span class="mi">200</span><span class="n">kΩ</span>
-<span class="n">R</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span> 
+<pre class="lang-python3"><span class="n">R</span> <span class="o">=</span> <span class="mi">200</span><span class="n">kΩ</span>
+<span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span> 
 <span class="n">Vout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">12</span><span class="n">V</span>
 
 <span class="k">def</span> <span class="nf">frequency_for_control_voltage</span><span class="p">(</span><span class="n">Vin</span><span class="p">):</span>
@@ -215,8 +215,8 @@
 <span class="n">Vin</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">C</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">Vout</span><span class="p">)</span> <span class="o">/</span> <span class="n">time</span>
 </pre>
 <p>&amp; plugging in the same values gives you the function:</p>
-<pre class="lang-python3"><span class="n">C</span> <span class="o">=</span> <span class="mi">200</span><span class="n">kΩ</span>
-<span class="n">R</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span> 
+<pre class="lang-python3"><span class="n">R</span> <span class="o">=</span> <span class="mi">200</span><span class="n">kΩ</span>
+<span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span> 
 <span class="n">Vout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">12</span><span class="n">V</span>
 
 <span class="k">def</span> <span class="nf">control_voltage_for_frequency</span><span class="p">(</span><span class="n">frequency</span><span class="p">):</span>

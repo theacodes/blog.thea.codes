@@ -225,8 +225,8 @@ frequency = 1 / time
 If you select the component values for `R` and `C` and pick a desired output amplitude then you can plug those into the equation and you'll have the formula for determining frequency given a control voltage. In this case, I chose `200kΩ`, `1nF`, and `-12V` (don't worry about these values too much, I'll cover how to pick these values later):
 
 ```python
-C = 200kΩ
-R = 1nF 
+R = 200kΩ
+C = 1nF 
 Vout = -12V
 
 def frequency_for_control_voltage(Vin):
@@ -257,8 +257,8 @@ Vin = -(C * R * Vout) / time
 & plugging in the same values gives you the function:
 
 ```python
-C = 200kΩ
-R = 1nF 
+R = 200kΩ
+C = 1nF 
 Vout = -12V
 
 def control_voltage_for_frequency(frequency):
