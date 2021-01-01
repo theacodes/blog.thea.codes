@@ -22,7 +22,7 @@ Roland introduced the incredible [Juno-6](http://www.vintagesynth.com/roland/jun
 
 The Juno notably featured [*digitally-controlled analog oscillators*](https://en.wikipedia.org/wiki/Digitally_controlled_oscillator). The DCO was designed to overcome the tuning instability of the usual **voltage-controlled oscillators** (*VCOs*) in contemporary polyphonic synthesizers. The DCOs operate with the same fundamental analog circuitry but differ in that they are controlled by a microcontroller. This imparted a unique sound to the Juno series and one that's become a favorite of many musicians.
 
-![A photo of the Juno 160](/static/juno/juno-106.jpg)
+![A photo of the Juno 106](/static/juno/juno-106.jpg)
 
 Roland followed with the [Juno-106](https://en.wikipedia.org/wiki/Roland_Juno-106) in 1984. It offered some feature upgrades over its predecessor such as pitch bend, modulation, and support for a new thing called [MIDI](https://en.wikipedia.org/wiki/MIDI). It still used the same digitally-controlled oscillator concept from the 6 & 60, but its implementation is a little bit different.
 
@@ -98,7 +98,7 @@ Vout = -(Vin / (R * C)) * time
 Before going further, there are some interesting and noteworthy properties of the integrator's behavior to be aware of:
 
 - First, notice that there are three ways of changing the steepness of the output's slope: changing the capacitance, changing the resistance, or changing the voltage. Making the voltage higher will charge the capacitor more quickly and increase the steepness of the slope. Making the resistance or capacitance lower will also cause the capacitor to charge more quickly and will increase the steepness of the slope.
-- Second, the output is **inverted** - a positive input voltage creates a downward slope and a negative input voltage creates an upward slope. This will come into play when we look at the difference between the Juno-6/60 design and the Juno-160 design.
+- Second, the output is **inverted** - a positive input voltage creates a downward slope and a negative input voltage creates an upward slope. This will come into play when we look at the difference between the Juno-6/60 design and the Juno-106 design.
 - Third, notice that with steeper slopes the output will *saturate* (stop increasing or decreasing). This is because a real op amp doesn't have an infinite amount of voltage to output and the capacitor can't hold an infinite amount of charge, so when either the output voltage is beyond the op amp's power supply or the capacitor can't hold any more charge the output voltage will saturate.
 
 At this point you should hopefully have a good grasp on how an op-amp integrator forms a ramp from a constant input voltage. So now we'll see how to change the circuit so that instead of a single slope it generates a repeating (periodic) sawtooth waveform.
@@ -424,9 +424,9 @@ The DCO design is now quite different from the VCO in terms of the way it's cont
 [^made-up]: I don't know if it has a "real" name, but I call it amplitude compensation. 🤷‍♀️
 
 
-## A practical DCO - The Juno 160 design
+## A practical DCO - The Juno 106 design
 
-Now that we've covered the theory of operation for a DCO let's take a look at and analyze an actual DCO. The DCO schematic developed in the last section isn't far off from the Juno-160's design, so let's take a look at that:
+Now that we've covered the theory of operation for a DCO let's take a look at and analyze an actual DCO. The DCO schematic developed in the last section isn't far off from the Juno-106's design, so let's take a look at that:
 
 ![Schematic of a DCO with values added](/static/juno/dco-with-values.png)
 
@@ -449,7 +449,7 @@ Using the understanding of the operating principles learned so far let's break d
 * The integrator's *discharge circuit* has an RC constant of `2.2kΩ * 1nF = 2.2μs`. Notice that this follows the rule of thumb mentioned earlier - the differentiator's RC constant is slightly higher than the discharge circuit's. If taken in isolation the discharge circuit will leave just 9%[^discharge] of the voltage on the integrator's capacitor when the differentiator circuit turns the transistor on for `5.3μs`. However, since the op amp's output and the DAC's output create a voltage across the capacitor while it is discharging it will discharge a little more quickly[^ow-my-brain].
 * The integrator's RC constant is `200kΩ × 1nF = 0.2ms`. That's equivalent to `5 kHz`. This effectively sets the **maximum operating frequency** of the oscillator. `5 kHz` is a great choice considering the highest note on a piano, C8, is `4,186 Hz`.
 * At the maximum operating frequency of `5 kHz` the transistor will only be on for `2.7μs / 0.2ms = 1.35%` of the waveform's cycle, so there won't be any issues with the transistor being on for too long and causing distortion.
-* The voltage coming out of the DAC is **inverted**, so there is a *negative* charge voltage being fed into the integrator. If you remember back to the [integrator](#integrator), it also inverts - a positive input voltage creates a falling slope and a negative input voltage makes a rising slope. So the Juno-160 uses negative charge voltage to create a **rising** sawtooth waveform[^negative-nancy].
+* The voltage coming out of the DAC is **inverted**, so there is a *negative* charge voltage being fed into the integrator. If you remember back to the [integrator](#integrator), it also inverts - a positive input voltage creates a falling slope and a negative input voltage makes a rising slope. So the Juno-106 uses negative charge voltage to create a **rising** sawtooth waveform[^negative-nancy].
 
 The information covered so far should also allow you to do this in reverse- that is you should be able to pick component values for a new DCO design. If you start by picking a maximum operating frequency (say, `5kHz`) then you can use that to determine the integrator's RC constant:
 
@@ -514,7 +514,7 @@ The Juno's oscillators can can output more than just a sawtooth waveform- they c
 
 ![Illustration of the various Juno waveforms](/static/juno/waveforms.png)
 
-The Juno 6, 60, & 160 all generate these waveforms the same way. The sub waveform is the easiest. Since it's a square waveform that's half the clock frequency, the clock input is sent through a [D-type Flip-Flop](https://en.wikipedia.org/wiki/Flip-flop_(electronics)#D_flip-flop) configured as a simple [divide-by-two circuit](https://www.electronics-tutorials.ws/counter/count_1.html):
+The Juno 6, 60, & 106 all generate these waveforms the same way. The sub waveform is the easiest. Since it's a square waveform that's half the clock frequency, the clock input is sent through a [D-type Flip-Flop](https://en.wikipedia.org/wiki/Flip-flop_(electronics)#D_flip-flop) configured as a simple [divide-by-two circuit](https://www.electronics-tutorials.ws/counter/count_1.html):
 
 ![The schematic for the sub waveform using a divide-by-two circuit](/static/juno/divide-by-two.png)
 
