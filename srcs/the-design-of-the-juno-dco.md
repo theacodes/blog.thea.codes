@@ -59,7 +59,7 @@ The difference in the type of input signal has a significant impact on the circu
 
 An integrator is a electronic circuit that performs the mathematical operation of [*Integration*](https://en.wikipedia.org/wiki/Integral). This is a fancy word from calculus but don't be afraid- it's actually pretty straightforward in practice.
 
-The purpose of an integrator is to produce an output signal that changes (increase or decreases) at a rate corresponds to the magnitude and duration of the input signal. In this case the input and output signals are both voltage. If you apply a **constant** voltage to an integrator, it will create a consistent increase or decrease in the output voltage over time (a *ramp*):
+The purpose of an integrator is to produce an output signal that changes (increase or decreases) at a rate that corresponds to the magnitude and duration of the input signal. In this case the input and output signals are both voltage. If you apply a **constant** voltage to an integrator, it will create a consistent increase or decrease in the output voltage over time (a *ramp*):
 
 ![An ideal integrator](../static/juno/integrator-ramp.png)
 
