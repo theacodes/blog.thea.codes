@@ -344,7 +344,7 @@ The differentiator turns the clock's square wave (in *purple*) into a series of 
 
 ![Illustration of two bad waveforms from an incorrect differentiator](/static/juno/badrcdiff.png)
 
-In practice, the *RC constant* of the differentiator should slightly greater than the RC constant of the ramp generator's *discharge* circuit:
+In practice, the *RC constant* of the differentiator should be slightly greater than the RC constant of the ramp generator's *discharge* circuit:
 
 ![Illustration highlighting the discharge circuit](/static/juno/discharge-circuit.png)
 
