@@ -458,10 +458,11 @@ RCintegrator = 1 / 5kHz
 RCintegrator = 0.2ms
 ```
 
-Any combination of resistance and capacitance that leads to that RC constant will work. The values used by the Juno-106, `200kΩ` and `1nF`, are perfectly fine. Now that you have the integrator's RC constant you can work out the differentiator's RC constant by applying the rule of thumb that is should be slightly more than the integrator's RC constant:
+Any combination of resistance and capacitance that leads to that RC constant will work. The values used by the Juno-106, `200kΩ` and `1nF`, are perfectly fine. Now that you have the integrator's RC constant you can work out the differentiator's RC constant by applying the rule of thumb that is should be slightly more than the integrator's *discharge* RC constant:
 
 ```python
-RCdifferentiator = RCintegrator * 1.2
+RCdifferentiator = RCdischarge * 1.2
+RCdifferentiator = 10kΩ × 270pF * 1.2
 RCdifferentiator = 2.7μs
 ```
 

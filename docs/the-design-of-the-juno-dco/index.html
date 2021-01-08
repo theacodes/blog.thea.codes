@@ -356,8 +356,9 @@
 <pre class="lang-python3"><span class="n">RCintegrator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">5</span><span class="n">kHz</span>
 <span class="n">RCintegrator</span> <span class="o">=</span> <span class="mf">0.2</span><span class="n">ms</span>
 </pre>
-<p>Any combination of resistance and capacitance that leads to that RC constant will work. The values used by the Juno-106, <code>200kΩ</code> and <code>1nF</code>, are perfectly fine. Now that you have the integrator's RC constant you can work out the differentiator's RC constant by applying the rule of thumb that is should be slightly more than the integrator's RC constant:</p>
-<pre class="lang-python3"><span class="n">RCdifferentiator</span> <span class="o">=</span> <span class="n">RCintegrator</span> <span class="o">*</span> <span class="mf">1.2</span>
+<p>Any combination of resistance and capacitance that leads to that RC constant will work. The values used by the Juno-106, <code>200kΩ</code> and <code>1nF</code>, are perfectly fine. Now that you have the integrator's RC constant you can work out the differentiator's RC constant by applying the rule of thumb that is should be slightly more than the integrator's <em>discharge</em> RC constant:</p>
+<pre class="lang-python3"><span class="n">RCdifferentiator</span> <span class="o">=</span> <span class="n">RCdischarge</span> <span class="o">*</span> <span class="mf">1.2</span>
+<span class="n">RCdifferentiator</span> <span class="o">=</span> <span class="mi">10</span><span class="n">kΩ</span> <span class="err">×</span> <span class="mi">270</span><span class="n">pF</span> <span class="o">*</span> <span class="mf">1.2</span>
 <span class="n">RCdifferentiator</span> <span class="o">=</span> <span class="mf">2.7</span><span class="n">μs</span>
 </pre>
 <p>Again the values used in the Juno-106, <code>10kΩ</code> and <code>270pF</code>, are perfectly fine. The remainder of the components can largely be determined through deduction or empirically through experimentation. While it's unlikely that you'll arrive at the perfect component values on the first try, this can at least give you a good idea of how you'd begin to pick these components from scratch.</p>
