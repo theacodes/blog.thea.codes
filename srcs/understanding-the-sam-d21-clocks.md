@@ -383,6 +383,7 @@ GCLK->GENCTRL.reg =
     GCLK_GENCTRL_ID(2) |
     GCLK_GENCTRL_SRC_OSC8M |
     /* Improve the duty cycle. */
+    GCLK_GENCTRL_IDC |
     GCLK_GENCTRL_GENEN;
 
 /* Wait for the write to complete */
@@ -394,8 +395,8 @@ The second step is to tell the clock multiplexer to connect `GCLK2` to `SERCOM0`
 ```c
 /* Connect GCLK2 to SERCOM0 */
 GCLK->CLKCTRL.reg =
+    GCLK_CLKCTRL_CLKEN |
     GCLK_CLKCTRL_GEN_GCLK2 |
-    GEM_SPI_GCLK_CLKCTRL_ID |
     GCLK_CLKCTRL_ID_SERCOM0_CORE;
 
 /* Wait for the write to complete. */

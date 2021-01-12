@@ -446,7 +446,7 @@ Using the understanding of the operating principles learned so far let's break d
 
 * The RC differentiator has an RC constant of `10kΩ × 270pF = 2.7μs`. The clock signal is `5 Volts`. This means the transistor will remain on for about `5.3μs` out of each waveform cycle[^discharge].
 * The transistor is a **NPN** transistor so it will turn on during the *rising edge* of the clock. This is because an NPN transistor needs a positive base voltage and the RC differentiator will create a positive voltage spike when the clock changes from low to high.
-* The integrator's *discharge circuit* has an RC constant of `2.2kΩ * 1nF = 2.2μs`. Notice that this follows the rule of thumb mentioned earlier - the differentiator's RC constant is slightly higher than the discharge circuit's. If taken in isolation the discharge circuit will leave just 9%[^discharge] of the voltage on the integrator's capacitor when the differentiator circuit turns the transistor on for `5.3μs`. However, since the op amp's output and the DAC's output create a voltage across the capacitor while it is discharging it will discharge a little more quickly[^ow-my-brain].
+* The integrator's *discharge circuit* has an RC constant of `2.2kΩ × 1nF = 2.2μs`. Notice that this follows the rule of thumb mentioned earlier - the differentiator's RC constant is slightly higher than the discharge circuit's. If taken in isolation the discharge circuit will leave just 9%[^discharge] of the voltage on the integrator's capacitor when the differentiator circuit turns the transistor on for `5.3μs`. However, since the op amp's output and the DAC's output create a voltage across the capacitor while it is discharging it will discharge a little more quickly[^ow-my-brain].
 * The integrator's RC constant is `200kΩ × 1nF = 0.2ms`. That's equivalent to `5 kHz`. This effectively sets the **maximum operating frequency** of the oscillator. `5 kHz` is a great choice considering the highest note on a piano, C8, is `4,186 Hz`.
 * At the maximum operating frequency of `5 kHz` the transistor will only be on for `2.7μs / 0.2ms = 1.35%` of the waveform's cycle, so there won't be any issues with the transistor being on for too long and causing distortion.
 * The voltage coming out of the DAC is **inverted**, so there is a *negative* charge voltage being fed into the integrator. If you remember back to the [integrator](#integrator), it also inverts - a positive input voltage creates a falling slope and a negative input voltage makes a rising slope. So the Juno-106 uses negative charge voltage to create a **rising** sawtooth waveform[^negative-nancy].
@@ -462,7 +462,7 @@ Any combination of resistance and capacitance that leads to that RC constant wil
 
 ```python
 RCdifferentiator = RCdischarge * 1.2
-RCdifferentiator = 10kΩ × 270pF * 1.2
+RCdifferentiator = 10kΩ * 270pF * 1.2
 RCdifferentiator = 2.7μs
 ```
 

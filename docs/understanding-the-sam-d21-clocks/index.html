@@ -346,6 +346,7 @@
     <span class="n">GCLK_GENCTRL_ID</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span>
     <span class="n">GCLK_GENCTRL_SRC_OSC8M</span> <span class="o">|</span>
     <span class="cm">/* Improve the duty cycle. */</span>
+    <span class="n">GCLK_GENCTRL_IDC</span> <span class="o">|</span>
     <span class="n">GCLK_GENCTRL_GENEN</span><span class="p">;</span>
 
 <span class="cm">/* Wait for the write to complete */</span>
@@ -354,8 +355,8 @@
 <p>The second step is to tell the clock multiplexer to connect <code>GCLK2</code> to <code>SERCOM0</code>:</p>
 <pre class="lang-c"><span class="cm">/* Connect GCLK2 to SERCOM0 */</span>
 <span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">CLKCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span>
+    <span class="n">GCLK_CLKCTRL_CLKEN</span> <span class="o">|</span>
     <span class="n">GCLK_CLKCTRL_GEN_GCLK2</span> <span class="o">|</span>
-    <span class="n">GEM_SPI_GCLK_CLKCTRL_ID</span> <span class="o">|</span>
     <span class="n">GCLK_CLKCTRL_ID_SERCOM0_CORE</span><span class="p">;</span>
 
 <span class="cm">/* Wait for the write to complete. */</span>
