@@ -422,9 +422,9 @@ References:
    } > rom
 
    .ARM.exidx : {
-      PROVIDE_HIDDEN (__exidx_start = .);
+      PROVIDE (__exidx_start = .);
       *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-      PROVIDE_HIDDEN (__exidx_end = .);
+      PROVIDE (__exidx_end = .);
    } > rom
 ```
 

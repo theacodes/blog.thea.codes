@@ -366,9 +366,9 @@ have entries in the exidx and extab sections.</p>
    <span class="p">}</span> <span class="o">&gt;</span> <span class="n">rom</span>
 
    <span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">exidx</span> <span class="p">:</span> <span class="p">{</span>
-      <span class="n">PROVIDE_HIDDEN</span> <span class="p">(</span><span class="n">__exidx_start</span> <span class="o">=</span> <span class="p">.);</span>
+      <span class="n">PROVIDE</span> <span class="p">(</span><span class="n">__exidx_start</span> <span class="o">=</span> <span class="p">.);</span>
       <span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">exidx</span><span class="o">*</span> <span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armexidx</span><span class="p">.</span><span class="o">*</span><span class="p">)</span>
-      <span class="n">PROVIDE_HIDDEN</span> <span class="p">(</span><span class="n">__exidx_end</span> <span class="o">=</span> <span class="p">.);</span>
+      <span class="n">PROVIDE</span> <span class="p">(</span><span class="n">__exidx_end</span> <span class="o">=</span> <span class="p">.);</span>
    <span class="p">}</span> <span class="o">&gt;</span> <span class="n">rom</span>
 </pre>
 <h2 id="relocate">Relocate</h2>
