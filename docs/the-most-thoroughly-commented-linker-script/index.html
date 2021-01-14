@@ -51,12 +51,12 @@
   </aside>
   <h1>The most thoroughly commented linker script (probably)</h1>
   <content>
-    <p>While developing the firmware for Winterbloom's <a href="">Castor &amp; Pollux</a>, I got very curious as to just what the Microchip/Atmel-provided linker script was doing.</p>
+    <p>While developing the firmware for Winterbloom's <a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux">Castor &amp; Pollux</a>, I got very curious as to just what the Microchip/Atmel-provided linker script was doing.</p>
 <p>If you've never heard of or seen a linker script before you're not alone. Most of us never even have to think about them, however, on memory constained embedded devices it's not uncommon to need to modify the default linker script.</p>
 <p>The linker script controls how <code>ld</code> combines all of your <code>.o</code> files into a single <code>.elf</code> and how that resulting <code>.elf</code> file gets loaded by the target processor.</p>
 <p>So I was staring at this script that made absolutely no sense to me. It's filled with incantations and mysterious symbols and there's no indication of what they're for or where they come from.</p>
 <p>So I did a <strong>lot</strong> of research and now I can present to you <strong>the most thoroughly commented linker script</strong><sup id="fnref:probably"><a class="footnote-ref" href="#fn:probably">1</a></sup>.</p>
-<p>You can see this script in its entirety, comments and all, on <a href="">GitHub</a>. But if you'd like to read it here instead it's transcribed below.</p>
+<p>You can see this script in its entirety, comments and all, on <a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/blob/master/firmware/scripts/samd21g18a.ld">GitHub</a>. But if you'd like to read it here instead it's transcribed below.</p>
 <h2 id="output-format">Output format</h2>
 <p>Output format sets the ELF output format to use a specific BFD backend.</p>
 <p>The first is the default BFD. The second and third arguments are used

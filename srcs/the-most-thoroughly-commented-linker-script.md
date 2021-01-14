@@ -6,7 +6,7 @@ description: A deep look into the black magic that is linker scripts.
 ---
 
 
-While developing the firmware for Winterbloom's [Castor & Pollux](), I got very curious as to just what the Microchip/Atmel-provided linker script was doing.
+While developing the firmware for Winterbloom's [Castor & Pollux](https://github.com/theacodes/Winterbloom_Castor_and_Pollux), I got very curious as to just what the Microchip/Atmel-provided linker script was doing.
 
 If you've never heard of or seen a linker script before you're not alone. Most of us never even have to think about them, however, on memory constained embedded devices it's not uncommon to need to modify the default linker script.
 
@@ -16,7 +16,7 @@ So I was staring at this script that made absolutely no sense to me. It's filled
 
 So I did a **lot** of research and now I can present to you **the most thoroughly commented linker script**[^probably].
 
-You can see this script in its entirety, comments and all, on [GitHub](). But if you'd like to read it here instead it's transcribed below.
+You can see this script in its entirety, comments and all, on [GitHub](https://github.com/theacodes/Winterbloom_Castor_and_Pollux/blob/master/firmware/scripts/samd21g18a.ld). But if you'd like to read it here instead it's transcribed below.
 
 [^probably]: Probably.
 
