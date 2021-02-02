@@ -1,6 +1,6 @@
 """Highlights code blocks using Pygments."""
 
-import html.parser
+import html
 import re
 
 import pygments.formatters
@@ -39,7 +39,7 @@ def highlight(content: str) -> str:
         # Decode html entities in the code. cmark tries to be helpful and
         # translate '"' to '&quot;', but it confuses pygments. Pygments will
         # escape any html entities when re-writing the code.
-        code = html.parser.HTMLParser().unescape(code)
+        code = html.unescape(code)
 
         highlighted = pygments.highlight(code, lexer, formatter)
 

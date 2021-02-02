@@ -1,5 +1,10 @@
+pre { line-height: 125%; }
+td.linenos pre { color: #000000; background-color: #f0f0f0; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #000000; background-color: #f0f0f0; padding-left: 5px; padding-right: 5px; }
+td.linenos pre.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre .hll { background-color: #716799 }
-pre  { background: #433e56; color: #F8F8F2 }
+pre { background: #433e56; color: #F8F8F2 }
 pre .c { color: #b0bec5 } /* Comment */
 pre .err { color: #960050; background-color: #1e0010 } /* Error */
 pre .k { color: #C2FFDF } /* Keyword */
