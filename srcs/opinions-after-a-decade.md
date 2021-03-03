@@ -16,7 +16,7 @@ I started programming when I was very young, so by the time I'd entered the indu
 
 - There isn't just one right way to do things. There are all sorts of valid solutions to any given problem.
 - Relatedly, there isn't a *"right tool for the job"* there's just *"the best tool you have for the job"*.
-- Code isn't even close to most important thing about software engineering.
+- Code isn't even close to the most important thing about software engineering.
 - Software and software engineering are inherently political.
 - People who don't write code are just as important, and sometimes more important, to the success of a project.
 - There's no such thing as *perfect* code or absolutely "good" or "bad" code, but there is a difference between *high-quality* code and *low-quality* code.
