@@ -120,7 +120,7 @@ If you notice your tests are essentially re-implementing a target's logic, it mi
 
 ### A mock must always have a spec
 
-When you have to mock avoiding using the `Mock` object directly. Either use [`mock.create_autospec()`](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.create_autospec) or [`mock.patch(autospec=True)`](https://docs.python.org/3/library/unittest.mock.html#autospeccing) if at all possible. Autospeccing from the real collaborator means that if the collaborator's interface changes, your tests will fail. Manually speccing or not speccing at all means that changes in the collaborator's interface will not break your tests that use the collaborator: you could have 100% test coverage and your library would fall over when used!
+When you have to mock a collaborator, avoid using the `Mock` object directly. Either use [`mock.create_autospec()`](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.create_autospec) or [`mock.patch(autospec=True)`](https://docs.python.org/3/library/unittest.mock.html#autospeccing) if at all possible. Autospeccing from the real collaborator means that if the collaborator's interface changes, your tests will fail. Manually speccing or not speccing at all means that changes in the collaborator's interface will not break your tests that use the collaborator: you could have 100% test coverage and your library would fall over when used!
 
 For example, this is **very bad** as it allows your target to call pretty much any method on the collaborator, whether it exists or not:
 
