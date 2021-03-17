@@ -22,9 +22,6 @@ def build(session):
     session.install("-r", "requirements.txt")
 
     if sys.stderr.isatty():
-        #start_server()
-        while True:
-            session.run("python", "build.py")
-            time.sleep(5)
+        session.run("python", "serve.py")
     else:
         session.run("python", "build.py")
