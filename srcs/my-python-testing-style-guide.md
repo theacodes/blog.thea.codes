@@ -40,11 +40,11 @@ def test_refresh_with_timeout():
 In general, functions should be tested with a test suite containing just functions whereas classes can be tested with either a suite of functions or those functions can be organized into a class. Organizing into a test class can be useful for modules that have more than one class:
 
 ```python
-def Thing(object):
+class Thing(object):
    ...
 
-def TestThing(object):
-   test_something(self):
+class TestThing(object):
+    def test_something(self):
        ...
 ```
 
