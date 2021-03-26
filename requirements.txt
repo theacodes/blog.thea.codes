@@ -1,5 +1,6 @@
 markdown
 jinja2
+livereload
 python-frontmatter
 pygments
 pymdown-extensions
