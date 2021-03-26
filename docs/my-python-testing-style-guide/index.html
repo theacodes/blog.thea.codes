@@ -97,7 +97,7 @@
 <span class="n">encoded</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">signer</span><span class="p">,</span> <span class="n">test_payload</span><span class="p">)</span>
 <span class="n">expected_header</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;typ&#39;</span><span class="p">:</span> <span class="s1">&#39;JWT&#39;</span><span class="p">,</span> <span class="s1">&#39;alg&#39;</span><span class="p">:</span> <span class="s1">&#39;RS256&#39;</span><span class="p">,</span> <span class="s1">&#39;kid&#39;</span><span class="p">:</span> <span class="n">signer</span><span class="o">.</span><span class="n">key_id</span><span class="p">}</span>
 <span class="n">expected_call</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">expected_header</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">test_payload</span><span class="p">)</span>
-<span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
+<span class="n">signer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>This test is much better, it just checks that the outcome was as anticipated:</p>
 <pre class="lang-python3"><span class="n">test_payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}</span>
@@ -118,7 +118,7 @@
 
 <span class="n">expected_header</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;typ&#39;</span><span class="p">:</span> <span class="s1">&#39;JWT&#39;</span><span class="p">,</span> <span class="s1">&#39;alg&#39;</span><span class="p">:</span> <span class="s1">&#39;RS256&#39;</span><span class="p">,</span> <span class="s1">&#39;kid&#39;</span><span class="p">:</span> <span class="n">signer</span><span class="o">.</span><span class="n">key_id</span><span class="p">}</span>
 <span class="n">expected_call</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">expected_header</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">test_payload</span><span class="p">)</span>
-<span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
+<span class="n">signer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>When using the real thing allows you to verify the outcome instead of the steps:</p>
 <pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">crypt</span><span class="o">.</span><span class="n">RSASigner</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">PRIVATE_KEY_BYTES</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">)</span>
@@ -136,21 +136,21 @@
 
 <span class="n">encoded</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">signer</span><span class="p">,</span> <span class="n">test_payload</span><span class="p">)</span>
 <span class="o">...</span>
-<span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
+<span class="n">signer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>Manually specifying a <code>spec</code> is slightly better but still bad because it's disconnected from the real collaborator's interface. This opens the door to a refactor breaking your library but not your tests:</p>
 <pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sign&#39;</span><span class="p">,</span> <span class="s1">&#39;key_id&#39;</span><span class="p">])</span>
 
 <span class="n">encoded</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">signer</span><span class="p">,</span> <span class="n">test_payload</span><span class="p">)</span>
 <span class="o">...</span>
-<span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
+<span class="n">signer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>The <em>right</em> way to do this is to use <code>mock.create_autospec()</code> or <code>mock.patch(..., autospec=True)</code>. This ensures there's some connection between your mock and the real collaborator's interface. If you change the collaborator's interface in a way that breaks downstream targets, those targets tests will rightfully fail:</p>
 <pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">encoded</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">signer</span><span class="p">,</span> <span class="n">test_payload</span><span class="p">)</span>
 <span class="o">...</span>
-<span class="n">singer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
+<span class="n">signer</span><span class="o">.</span><span class="n">sign</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="n">expected_call</span><span class="p">)</span>
 </pre>
 <p>In some cases it's just not feasible to use autospec, such as if you're mocking a import module that is otherwise unavailable in your environment. This rule can be relaxed in those circumstances.</p>
 <h3 id="consider-using-a-stub-or-fake">Consider using a stub or fake</h3>

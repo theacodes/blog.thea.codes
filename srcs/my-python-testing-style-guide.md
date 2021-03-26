@@ -72,7 +72,7 @@ test_payload = {'test': 'value'}
 encoded = jwt.encode(signer, test_payload)
 expected_header = {'typ': 'JWT', 'alg': 'RS256', 'kid': signer.key_id}
 expected_call = json.dumps(expected_header) + '.' + json.dumps(test_payload)
-singer.sign.assert_called_once_with(expected_call)
+signer.sign.assert_called_once_with(expected_call)
 ```
 
 This test is much better, it just checks that the outcome was as anticipated:
@@ -102,7 +102,7 @@ encoded = jwt.encode(signer, test_payload)
 
 expected_header = {'typ': 'JWT', 'alg': 'RS256', 'kid': signer.key_id}
 expected_call = json.dumps(expected_header) + '.' + json.dumps(test_payload)
-singer.sign.assert_called_once_with(expected_call)
+signer.sign.assert_called_once_with(expected_call)
 ```
 
 When using the real thing allows you to verify the outcome instead of the steps:
@@ -129,7 +129,7 @@ signer = mock.Mock()
 
 encoded = jwt.encode(signer, test_payload)
 ...
-singer.sign.assert_called_once_with(expected_call)
+signer.sign.assert_called_once_with(expected_call)
 ```
 
 Manually specifying a `spec` is slightly better but still bad because it's disconnected from the real collaborator's interface. This opens the door to a refactor breaking your library but not your tests:
@@ -139,7 +139,7 @@ signer = mock.Mock(spec=['sign', 'key_id'])
 
 encoded = jwt.encode(signer, test_payload)
 ...
-singer.sign.assert_called_once_with(expected_call)
+signer.sign.assert_called_once_with(expected_call)
 ```
 
 The *right* way to do this is to use `mock.create_autospec()` or `mock.patch(..., autospec=True)`. This ensures there's some connection between your mock and the real collaborator's interface. If you change the collaborator's interface in a way that breaks downstream targets, those targets tests will rightfully fail:
@@ -149,7 +149,7 @@ signer = mock.create_autospec(crypt.Signer, instance=True)
 
 encoded = jwt.encode(signer, test_payload)
 ...
-singer.sign.assert_called_once_with(expected_call)
+signer.sign.assert_called_once_with(expected_call)
 ```
 
 In some cases it's just not feasible to use autospec, such as if you're mocking a import module that is otherwise unavailable in your environment. This rule can be relaxed in those circumstances.
