@@ -8,7 +8,7 @@ This post is an attempt to catalog some of my practices around testing Python pr
 
 ### Some terminology
 
-* A **target** is a single thing that that you are currently testing. It can be a function, a method, or a behavior that's formed by a set of items.
+* A **target** is a single thing that you are currently testing. It can be a function, a method, or a behavior that's formed by a set of items.
 * A **collaborator** is any object used by the *target* subject under test. Generally, collaborators should be inputs to the target (either function arguments or instance variables), but sometimes the collaborators are deeper objects like sockets.
 * I do not make a distinction between **unit tests** and **integration tests**. I generally refer to these types of tests as unit tests. I do not go out of my way to isolate a single unit of code and test it without consideration of the rest of the project. I do try to isolate a single unit of *behavior*.
 * **System tests** are tests that interact with real external systems. This is in contrast to unit tests, which should not do anything that leaves the local machine.
