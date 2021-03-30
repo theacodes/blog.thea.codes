@@ -51,7 +51,7 @@
     <p>This post is an attempt to catalog some of my practices around testing Python projects. It's not meant to be treated as dogma- I anticipate I'll update this significantly over time.</p>
 <h3 id="some-terminology">Some terminology</h3>
 <ul>
-<li>A <strong>target</strong> is a single that that you are currently testing. It can be a function, a method, or a behavior that's formed by a set of items.</li>
+<li>A <strong>target</strong> is a single thing that that you are currently testing. It can be a function, a method, or a behavior that's formed by a set of items.</li>
 <li>A <strong>collaborator</strong> is any object used by the <em>target</em> subject under test. Generally, collaborators should be inputs to the target (either function arguments or instance variables), but sometimes the collaborators are deeper objects like sockets.</li>
 <li>I do not make a distinction between <strong>unit tests</strong> and <strong>integration tests</strong>. I generally refer to these types of tests as unit tests. I do not go out of my way to isolate a single unit of code and test it without consideration of the rest of the project. I do try to isolate a single unit of <em>behavior</em>.</li>
 <li><strong>System tests</strong> are tests that interact with real external systems. This is in contrast to unit tests, which should not do anything that leaves the local machine.</li>
@@ -214,7 +214,7 @@
     <span class="o">...</span>
 </pre>
 <p>Note the <code>utcnow_patch as utcnow:</code> makes it even clearer why this recommendation makes sense: you are creating a substitute, a stand-in, call it the same name.</p>
-<p>Also, if you using a patch decorator and not using the mock it's fine to name it <code>unused_x</code>:</p>
+<p>Also, if you are using a patch decorator and not using the mock it's fine to name it <code>unused_x</code>:</p>
 <pre class="lang-python3"><span class="nd">@mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;google.auth._helpers.utcnow&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">test_refresh_success</span><span class="p">(</span><span class="n">unused_utcnow</span><span class="p">):</span>
     <span class="o">...</span>
