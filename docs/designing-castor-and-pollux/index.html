@@ -118,8 +118,8 @@
 <p>Overall, the microcontroller needs to:</p>
 <ol>
 <li>Read the interface inputs such as the pitch input jacks and knobs.</li>
-<li>Generate a source square wave for each oscillator at the proper note frequency.</li>
-<li>Each oscillator needs two separate control voltages: one to charge the oscillator's integrator and another to control the oscillator's pulse width (I'll cover that a bit more in a later section).</li>
+<li>Generate the initial square wave for each oscillator at the proper note frequency.</li>
+<li>Generate two control voltages for each oscillator: one to charge the oscillator's integrator and another to control the oscillator's pulse width (I'll cover both of these a bit more in a later section).</li>
 </ol>
 <p>Castor &amp; Pollux's schematic is about as bare-bones as it gets for the SAM D21- it's largely just the chip itself and some bypass capacitors. To help with programming, testing, configuration, and firmware updates, I also added a USB port. This is all largely covered in the <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet's <em>Schematic Checklist</em> (section 44)</a>:</p>
 <p><img alt="SAM D21 schematic" src="/static/castor/samd21.svg" /></p>
