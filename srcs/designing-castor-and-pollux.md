@@ -3,7 +3,7 @@ title: "Designing Winterbloom's Castor & Pollux"
 date: 2021-03-29
 legacy_url: yes
 description: A comprehensive exploration of Castor & Pollux's design.
-preview_image: juno/juno-logo.png
+preview_image: castor/cp-hand.jpg
 ---
 
 Back in July of 2020 I began working on [*Castor & Pollux*](https://winterbloom.com/store/winterbloom-castor-and-pollux), a [Roland Juno](https://en.wikipedia.org/wiki/Roland_Juno-106)-inspired oscillator. Since opening pre-orders in October it's become an incredible success for Winterbloom. This post will focus on the hardware design of Castor & Pollux- including the schematics, layout, and component selection. My hope is that this will be relatively accessible to anyone with a little bit of electronics knowledge, but, if you find something confusing or unclear please feel free to [reach out](https://thea.codes).
