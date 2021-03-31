@@ -1,6 +1,6 @@
 ---
 title: "Designing Winterbloom's Castor & Pollux"
-date: 2021-03-29
+date: 2021-03-31
 legacy_url: yes
 description: A comprehensive exploration of Castor & Pollux's design.
 preview_image: castor/cp-hand.jpg
@@ -42,7 +42,7 @@ If you want to get a really in-depth guide on Castor & Pollux and all of its fea
 
 ## Getting started
 
-I often get a lot of questions like "How do you start a project like this?". For Castor & Pollux, I generally start with inspiration - the Roland Juno - and go from there. I generally write down a *vision*, and my vision for Castor & Pollux was:
+I often get a lot of questions like "How do you start a project like this?". For Castor & Pollux, I started with inspiration - the Roland Juno - and went from there. I generally like to write down a *vision* for each project, and my vision for Castor & Pollux was:
 
 > Create a spiritual successor to the Roland Juno's voice for Eurorack
 
@@ -63,7 +63,7 @@ In order to bring my idea to life, I initially did a lot of research and experim
 
 <div class="image-caption">Juno 106 Service Notes - Roland</div>
 
-This starts with the schematics from the Juno and goes all the way to building out the oscillator on a breadboard and onwards to designing a printed circuit board for it. During that time I did a lot of just *learning* - I learned a lot about op-amp integrators & comparators, flip-flops, and more. This knowledge culminated with a deep understanding the Juno's oscillator- enough to write an [in-depth analysis](/the-design-of-the-juno-dco) of it and begin designing my own. I very much recommend reading through the analysis - it provides some really great insight into how all of these components fit together.
+This starts with the schematics from the Juno and goes all the way to building out the oscillator on a breadboard and onwards to designing a printed circuit board for it. During that time I did a lot of just *learning* - I learned a lot about op amp integrators & comparators, flip-flops, and more. This knowledge culminated with a deep understanding the Juno's oscillator- enough to write an [in-depth analysis](/the-design-of-the-juno-dco) of it and begin designing my own. I very much recommend reading through the analysis - it provides some really great insight into how all of these components fit together.
 
 At the end of all this I'd taken that high-level block diagram and broken it down into a more concrete system outline:
 
@@ -217,7 +217,7 @@ The basic idea is that this configuration *inverts* the input, then *scales* it 
 
 Notice that the range gets inverted, but that's a simple task for the microcontroller to deal with. For example, when using a 12-bit ADC the microcontroller can figure out the input voltage using the formula `Vin = (1.0 - (ADCin / (2^12 - 1)) * 6.0`.
 
-THe last trick is that the op amp used here, the [MCP6004](https://www.microchip.com/wwwproducts/en/MCP6004), is a rail-to-rail op amp that's powered from `0v` and `3.3v`. Since it can't output a voltage beyond its power rails it effectively limits the voltage the microcontroller sees.
+The last trick is that the op amp used here, the [MCP6004](https://www.microchip.com/wwwproducts/en/MCP6004), is a rail-to-rail op amp that's powered from `0v` and `3.3v`. Since it can't output a voltage beyond its power rails it effectively limits the voltage the microcontroller sees.
 
 ## User interface
 

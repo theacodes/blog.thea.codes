@@ -49,7 +49,7 @@
     
 <article>
   <aside class="timestamp">
-    <time>Posted by Stargirl Flowers on March 29, 2021</time>
+    <time>Posted by Stargirl Flowers on March 31, 2021</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>Designing Winterbloom's Castor & Pollux</h1>
@@ -73,7 +73,7 @@
 <p>Finally, there's a knob for controlling the internal <a href="https://en.wikipedia.org/wiki/Low-frequency_oscillation">low-frequency oscillator (LFO)</a> and a button to enable <a href="https://en.wikipedia.org/wiki/Oscillator_sync#Hard_Sync">hard sync</a>.</p>
 <p>If you want to get a really in-depth guide on Castor &amp; Pollux and all of its features you should check out the <a href="https://gemini.wntr.dev">user guide</a>.</p>
 <h2 id="getting-started">Getting started</h2>
-<p>I often get a lot of questions like "How do you start a project like this?". For Castor &amp; Pollux, I generally start with inspiration - the Roland Juno - and go from there. I generally write down a <em>vision</em>, and my vision for Castor &amp; Pollux was:</p>
+<p>I often get a lot of questions like "How do you start a project like this?". For Castor &amp; Pollux, I started with inspiration - the Roland Juno - and went from there. I generally like to write down a <em>vision</em> for each project, and my vision for Castor &amp; Pollux was:</p>
 <blockquote>
 <p>Create a spiritual successor to the Roland Juno's voice for Eurorack</p>
 </blockquote>
@@ -86,7 +86,7 @@
 <p><img alt="Juno schematics" src="/static/castor/juno-schem.png" /></p>
 <div class="image-caption">Juno 106 Service Notes - Roland</div>
 
-<p>This starts with the schematics from the Juno and goes all the way to building out the oscillator on a breadboard and onwards to designing a printed circuit board for it. During that time I did a lot of just <em>learning</em> - I learned a lot about op-amp integrators &amp; comparators, flip-flops, and more. This knowledge culminated with a deep understanding the Juno's oscillator- enough to write an <a href="/the-design-of-the-juno-dco">in-depth analysis</a> of it and begin designing my own. I very much recommend reading through the analysis - it provides some really great insight into how all of these components fit together.</p>
+<p>This starts with the schematics from the Juno and goes all the way to building out the oscillator on a breadboard and onwards to designing a printed circuit board for it. During that time I did a lot of just <em>learning</em> - I learned a lot about op amp integrators &amp; comparators, flip-flops, and more. This knowledge culminated with a deep understanding the Juno's oscillator- enough to write an <a href="/the-design-of-the-juno-dco">in-depth analysis</a> of it and begin designing my own. I very much recommend reading through the analysis - it provides some really great insight into how all of these components fit together.</p>
 <p>At the end of all this I'd taken that high-level block diagram and broken it down into a more concrete system outline:</p>
 <p><img alt="Full block diagram for the system" src="/static/castor/full-block.svg" /></p>
 <p>And I'd also created some prototype circuits and boards:</p>
@@ -180,7 +180,7 @@
 <li>Maximum <code>Vin</code>: <code>-(6v * 0.56 + -10v * 0.33) ≈ 0v</code></li>
 </ul>
 <p>Notice that the range gets inverted, but that's a simple task for the microcontroller to deal with. For example, when using a 12-bit ADC the microcontroller can figure out the input voltage using the formula <code>Vin = (1.0 - (ADCin / (2^12 - 1)) * 6.0</code>.</p>
-<p>THe last trick is that the op amp used here, the <a href="https://www.microchip.com/wwwproducts/en/MCP6004">MCP6004</a>, is a rail-to-rail op amp that's powered from <code>0v</code> and <code>3.3v</code>. Since it can't output a voltage beyond its power rails it effectively limits the voltage the microcontroller sees.</p>
+<p>The last trick is that the op amp used here, the <a href="https://www.microchip.com/wwwproducts/en/MCP6004">MCP6004</a>, is a rail-to-rail op amp that's powered from <code>0v</code> and <code>3.3v</code>. Since it can't output a voltage beyond its power rails it effectively limits the voltage the microcontroller sees.</p>
 <h2 id="user-interface">User interface</h2>
 <p>Castor &amp; Pollux has twelve potentiometers and a push button to allow the user to set various parameters. Most of the potentiometers are used control the output circuitry - the mixers and the crossfader. However, five of them are used to set parameters in the microcontroller.</p>
 <p>Reading these potentiometers is significantly easier than dealing with control voltage. The potentiometer is connected so that fully counter-clockwise is <code>0v</code> and fully clockwise is <code>3.3v</code> and the output of the potentiometer is just sent straight to the microcontroller:</p>
