@@ -94,7 +94,7 @@ Sure, unit test purists may balk at this, but being able to use a collaborator d
 Here's an example of making a mock of a collaborator (re-using a previous example):
 
 ```python
-signer = mock.make_autospec(crypt.Signer, instance=True)
+signer = mock.create_autospec(crypt.Signer, instance=True)
 signer.key_id = 1
 
 test_payload = {'test': 'value'}

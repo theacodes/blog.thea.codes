@@ -110,7 +110,7 @@
 <h3 id="use-real-objects-for-collaborators-whenever-possible">Use real objects for collaborators whenever possible</h3>
 <p>Sure, unit test purists may balk at this, but being able to use a collaborator directly catches bugs and encourages you to implement functions and classes in a way that their logic can be used without unintended side-effects. If you're having a really hard time using collaborators without side-effects, it might be useful to consider how you can refactor and simplify it.</p>
 <p>Here's an example of making a mock of a collaborator (re-using a previous example):</p>
-<pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">make_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<pre class="lang-python3"><span class="n">signer</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">create_autospec</span><span class="p">(</span><span class="n">crypt</span><span class="o">.</span><span class="n">Signer</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">signer</span><span class="o">.</span><span class="n">key_id</span> <span class="o">=</span> <span class="mi">1</span>
 
 <span class="n">test_payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}</span>
