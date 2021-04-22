@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Thea Flowers">
+  <link rel="shortcut icon" href="https://blog.thea.codes/favicon.ico">
+
+  <title>Using the SAM D21's brown-out detector - Stargirl (Thea) Flowers</title>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" href="https://blog.thea.codes/feed.xml" />
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/static/style.css" rel="stylesheet">
+
+  <!-- Syntax highlighting css -->
+  <link href="/static/pygments.css" rel="stylesheet">
+
+  
+<meta property="og:title" content="Using the SAM D21's brown-out detector - Thea Flowers">
+<meta property="twitter:title" content="Using the SAM D21's brown-out detector - Thea Flowers">
+
+
+<meta property="og:description" content="A guide to using the SAM D21's brown-out detector to prevent strange behavior.">
+<meta property="twitter:description" content="A guide to using the SAM D21's brown-out detector to prevent strange behavior.">
+
+
+
+
+
+
+<meta property="og:url" content="https://blog.thea.codes/sam-d21-brown-out-detector">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theavalkyrie">
+
+</head>
+<body>
+  <div class="container">
+
+    
+<article>
+  <aside class="timestamp">
+    <time>Posted by Stargirl Flowers on April 21, 2021</time>
+    · <a href="/">view all posts</a>
+  </aside>
+  <h1>Using the SAM D21's brown-out detector</h1>
+  <content>
+    <p>Over the past year, I've been getting more and more acquainted with the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18">SAM D21</a> 32-bit ARM-Cortex M0+ microcontroller. It's a lovely little chip and you can find it all over the place - notably in the <a href="https://store.arduino.cc/usa/arduino-zero">Arduino Zero</a> and several of Adafruit's <a href="https://www.adafruit.com/product/3403">M0 boards</a>. I've written several articles about various aspects of the SAM D21 and I've even shipped two products that use it as their brain.</p>
+<p>In this post, I'll cover the basics of the SAM D21's <em>brown-out detector</em>, why it's not just useful but <strong>critical</strong>, and how it can help you make your SAM D21-based project more reliable and resilient. Even if you think your project will never be subjected to a brown-out event, I promise it's worth your time to learn about the brown-out detector and how it can save you from all kinds of unexpected behavior.</p>
+<h2 id="a-debugging-story">A debugging story</h2>
+<blockquote>
+<p>If you aren't interested in a fun debugging story and you just want to read the technical bits, <a href="#using-the-brown-out-detector">skip ahead</a>.</p>
+</blockquote>
+<p>Let me tell you a story about how I ended up becoming familiar with the brown-out detector. Just over a month ago, we started shipping <a href="https://winterbloom.com/store/winterbloom-castor-and-pollux">Castor &amp; Pollux</a> - a Eurorack module with a SAM D21 brain. While nearly all of our customers were happy, we got a couple of reports of modules spontaneously dying for no apparent reason. They would turn on their synthesizer and a previously fine Castor &amp; Pollux would now be lifeless.</p>
+<p>This is a difficult situation to debug- it's hard to reproduce (otherwise we would've seen it during factory setup), the affected units are far away, and the environments they're in are highly variable - Castor &amp; Pollux is a <em>module</em> that goes into a <a href="https://en.wikipedia.org/wiki/Modular_synthesizer">modular synthesizer</a>, so there's practically endless combinations of power supplies and other modules that could affect the overall system.</p>
+<p>I initially suspected a hardware issue. Since the whole power situation in a modular synthesizer can be pretty hostile, my hunch was that some unexpected voltage spike or drop was frying something. I subjected several units to pretty intense overvoltage, undervoltage, and output shorting conditions and turned up nothing.</p>
+<p>The last stress test I wanted to put the hardware through was <em>power cycling</em>. I connected five units up to my bench supply and switched the power on and off at various intervals.</p>
+<p><img alt="A cat turning a light switch off and on" class="small" src="/static/2021-4-21/cat.gif" /></p>
+<p>After about 50 cycles, one of the modules stopped working. It's a weird feeling when you're happy that something you made has died! I started investigating and found that the module physically seemed fine- it wasn't shorting out as if one of the ICs had suffered a terrible fate, nothing was getting hot, and no magic smoke had escaped. The voltage regulator was reading a steady <code>3.3v</code>. I connected my debug probe and to my surprise, the microcontroller was alive and well. <em>Almost</em>.</p>
+<p>The microprocessor was fine but it wasn't running the firmware, so, I tried to re-flash the bootloader and firmware and it immediately sprung back to life.</p>
+<p>What? Why did that work?</p>
+<p>I reproduced this again with another unit and instead of re-flashing it I dumped the contents of its flash. I opened it up in a hex editor and immediately saw the problem: the first page (<code>256</code> bytes) of flash had been erased. <strong>that's not supposed to happen</strong>!</p>
+<p><img alt="A screenshot of a hex editor comparing two files, the first one showing empty values for the first 256 bytes" src="/static/2021-4-21/corruption.png" />.</p>
+<p>These first <code>256</code> bytes are part of the bootloader and without them the module is bricked - users without a debug probe would be unable to rescue their module from this state. So that explains the way in which the modules are dead, but not the complete chain of events that got them into this state.</p>
+<p>So memory corruption during power cycling is the culprit- but how did that happen? The bootloader's code is supposed to be protected from being overwritten (<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a> section 22.6.2). This is where I discovered the first half of this mystery - none of these units had the bootloader protection enabled.</p>
+<p>I had assumed that the bootloader we use, <a href="https://github.com/adafruit/uf2-samdx1">uf2-samdx1</a>, would enable bootloader protection automatically. It turns out that isn't the whole story- it only enables bootloader protection in two cases:</p>
+<ol>
+<li>The bootloader protection configuration is invalid</li>
+<li>The bootloader has updated itself</li>
+</ol>
+<p>Since our units had valid configuration (valid, but <em>disabled</em>) and because we don't update the bootloader with itself during setup, neither of these cases ever occurred. This left the bootloader unprotected from spurious writes.</p>
+<p>Okay, so we should configure bootloader protection during factory setup. But that isn't the end of this mystery - the bootloader protection is supposed to be the last line of defense. Why did the first page of flash get erased in the first place? Nothing in the firmware or bootloader tries to write to flash during normal operation, so what gives?</p>
+<p>Well, it's complicated, and this is where brown-out detection comes into play.</p>
+<h2 id="brown-outs-slow-power-supply-rise-time-and-unfortunate-side-effects">Brown-outs, slow power supply rise time, and unfortunate side-effects</h2>
+<p>The brown-out detector's basically functionality is to measure the microcontroller's power (<code>VDDANA</code> in the SAM D21's case) and to take some action if it falls below a certain level.</p>
+<p>There's the obvious case of a <em>typical</em> brown-out: there's too little input voltage due to a battery that doesn't have enough charge or an invalid power supply. However, there's another case that isn't immediately obvious: power supply rise time.</p>
+<p>When you power on a device, the power isn't immediately available to all of the components at once. This is because of several factors such as <a href="https://en.wikipedia.org/wiki/Inrush_current">inrush current</a>, overall resistance of the circuit, capacitors needing to charge up, and stray inductance.</p>
+<p><img alt="A graph showing power supply voltage during start-up. It has a noticeable droop in response to the inrush current" src="/static/2021-4-21/inrush.png" /></p>
+<div class="image-caption">from <a href="ttps://www.ti.com/lit/an/slva670a/slva670a.pdf" target="_blank">Managing Inrush Current</a> by Texas Instruments</div>
+
+<p>Because of this, it's possible for the microcontroller to start <em>before</em> the power supply has reached its target voltage (this is sometimes called a "<em>brown-in</em>"). For the SAM D21, the power-on reset circuit will start the processor once the power supply voltage is above <code>1.45v</code> (<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a> section 37.11.2). The SAM D21 can operate at <code>1.45v</code> quite well, however, it can not operate correctly at <em>full speed</em> at that voltage without special considerations.</p>
+<p>Notably, the on-board flash (NVM) has to be configured differently if the microcontroller is running at lower voltages (<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a> table 37-42):</p>
+<p><img alt="A table showing the necessary configuration for the SAM D21's flash at various operating voltages and frequencies" src="/static/2021-4-21/flash-wait-states.png" /></p>
+<p>This is where I ran into trouble: it was possible for the module to startup, switch to 48 MHz, configure the NVM for <code>1</code> wait state, and try to run normally before the power supply reached the required minimum of <code>2.7v</code> to run at that frequency. This could and did lead to NVM corruption.</p>
+<p>The brown-out detector can help with this scenario as well. The firmware can use the brown-out detector to stay at a lower clock speed and wait until the supply voltage is high enough before continuing to normal execution.</p>
+<h2 id="using-the-brown-out-detector">Using the brown-out detector</h2>
+<p>Alright 👏, I've convinced you to use the brown-out detector- how do you do it? The <a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a> covers the brown-out detector (<code>BOD33</code>) in section <code>17.6.9</code>, but it's unfortunately pretty slim on details, so I'll show you how to use it in a practical application.</p>
+<p>This program will use <code>BOD33</code> for two separate steps:</p>
+<ol>
+<li>On startup, it will wait for the power supply to settle at the proper voltage.</li>
+<li>After the power supply settles, it will setup the brown-out detector to automatically reset the microcontroller if the voltage goes too low.</li>
+</ol>
+<p>Here's how to use the <code>BOD33</code> to wait for the power supply to settle:</p>
+<pre class="lang-c"><span class="cm">/* Disable the brown-out detector during configuration,</span>
+<span class="cm">   otherwise it might misbehave and reset the</span>
+<span class="cm">   microcontroller. */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">B33SRDY</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="cm">/* Configure the brown-out detector so that the</span>
+<span class="cm">   program can use it to watch the power supply</span>
+<span class="cm">   voltage */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="cm">/* This sets the minimum voltage level to 3.0v - 3.2v.</span>
+<span class="cm">       See datasheet table 37-21. */</span>
+    <span class="n">SYSCTRL_BOD33_LEVEL</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span> <span class="o">|</span>
+    <span class="cm">/* Since the program is waiting for the voltage to rise,</span>
+<span class="cm">       don&#39;t reset the microcontroller if the voltage is too</span>
+<span class="cm">       low. */</span>
+    <span class="n">SYSCTRL_BOD33_ACTION_NONE</span> <span class="o">|</span>
+    <span class="cm">/* Enable hysteresis to better deal with noisy power</span>
+<span class="cm">       supplies and voltage transients. */</span>
+    <span class="n">SYSCTRL_BOD33_HYST</span><span class="p">);</span>
+
+<span class="cm">/* Enable the brown-out detector and then wait for</span>
+<span class="cm">   the voltage level to settle. */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">BOD33RDY</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="cm">/* BOD33DET is set when the voltage is *too low*,</span>
+<span class="cm">   so wait for it to be cleared. */</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">BOD33DET</span><span class="p">)</span> <span class="p">{}</span>
+</pre>
+<p>It's important to run this code as early as possible. For our firmware, it's
+necessary to do this before we setup the clocks to run at 48 MHz since that
+will lead to corruption otherwise.</p>
+<p>The next step is to set up the brown-out detector to keep monitoring the
+voltage and automatically reset the microcontroller if it falls below the
+required voltage - this is what folks generally think of when they hear
+"brown-out".</p>
+<p>The code above actually did most of the setup for this step, all that's
+needed now is to change the <em>action</em> from <code>NONE</code> to <code>RESET</code>:</p>
+<pre class="lang-c"><span class="cm">/* Let the brown-out detector automatically reset the microcontroller</span>
+<span class="cm">   if the voltage drops too low. */</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">B33SRDY</span><span class="p">)</span> <span class="p">{};</span>
+
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">SYSCTRL_BOD33_ACTION_RESET</span><span class="p">;</span>
+
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</pre>
+<p>🎉 that's it! Now your project won't suffer from unexpected and dangerous
+behavior when the power supply gets wonky.</p>
+<h2 id="wrapping-up-futher-reading">Wrapping up &amp; futher reading</h2>
+<p>I highly recommend that you always use the brown-out detector unless you have a really, really good reason not to do so. It's a bit of a surprise that Microchip does not enable it by default.</p>
+<p>One last thing before you go: you can actually configure the brown-out detector to be automatically enabled at start-up through the special configuration bits in the <em>NVM User Row Mapping</em> (<a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">datasheet</a> section 10.3.1) (also sometimes referred to as <em>fuses</em>). I'll be writing another post about that so stay tuned!</p>
+<p>Further reading:</p>
+<ul>
+<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">The SAM D21 datasheet</a></li>
+<li><a href="https://www.ti.com/lit/an/slva670a/slva670a.pdf">Managing inrush current (SLVA670A)</a> by Texas Instruments</li>
+<li><a href="https://en.wikipedia.org/wiki/Inrush_current">Wikipedia article on inrush current</a></li>
+<li><a href="http://power-topics.blogspot.com/2013/02/power-supply-rise-and-fall-output.html">Power supply rise and fall output characteristics</a> by TDK-Lambda Americas</li>
+<li><a href="https://www.digikey.com/Web%20Export/Supplier%20Content/lattice-semiconductor-220/pdf/lattice-wp-flash-corruption.pdf">Flash Corruption: Software Bug or Supply Voltage Fault?</a> by Shyam Chandra of Lattice Semiconductor</li>
+<li><a href="https://www.allaboutcircuits.com/technical-articles/what-is-brown-out-reset-microcontroller-prevent-false-power-down">What Is Brown Out Reset in Microcontrollers? How to Prevent False Power-Downs</a> by Stephen Colley</li>
+<li><a href="https://electronics.stackexchange.com/questions/27241/what-is-flash-memory-wait-states">What is flash memory wait states?</a> on StackOverflow</li>
+</ul>
+  </content>
+ 
+  <aside class="support-me">
+    👋 Hey, if you found this post useful I would love to <a href="mailto:me@thea.codes">hear from you</a>.
+    If you loved it you can consider <a href="https://ko-fi.com/theacodes" target="_blank" rel="noopener">tipping me on Ko-fi</a> or <a href="https://github.com/sponsors/theacodes" target="_blank" rel="noopener">sponsoring me</a> on GitHub.
+    I don't get paid for this content, so kind words and support encourage me to create more!
+  </aside>
+</article>
+
+
+    <footer>
+      <div class="row">
+        <div class="col-md-1 d-none d-md-block img-me-container">
+          <img class="img-me img-fluid" src="/static/me.png">
+        </div>
+        <div class="col-md info">
+          <span class="name">Stargirl Flowers</span><br>
+          <a href="https://thea.codes"><i class="fa fa-link" aria-hidden="true"></i> thea.codes</a>
+          · <a href="https://github.com/theacodes" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> theacodes</a>
+          · <a href="https://twitter.com/theavalkyrie" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i> theavalkyrie</a>
+          <br>
+          <span class="location"><i class="fas fa-map-marker"></i> Atlanta, Georgia</span>
+        </div>
+        <div class="col-md">
+          <p class="disclaimer">
+            &copy; 2018 &mdash; 2020<br>
+            All text is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-SA 4.0</a> license<br>
+            All code is available under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license
+          </p>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- webfonts & icons-->
+  <link href="/static/fontawesome/css/fontawesome-all.min.css" rel="stylesheet">
+
+  <!-- Google Analytics (that's right, I'm tracking you) -->
+  <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-47725506-1', 'blog.thea.codes');
+    ga('send', 'pageview');
+
+  </script>
+
+</body>
+</html>

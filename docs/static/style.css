@@ -164,6 +164,10 @@ article img {
   padding: 2em 0;
 }
 
+article img.small {
+  width: 30%;
+}
+
 article iframe {
   margin: 2em auto;
   display: block;
