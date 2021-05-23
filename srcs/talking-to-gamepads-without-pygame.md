@@ -145,7 +145,7 @@ down = report[4] == 255
 
 For this controller, that's it! Easy peasy if you only need to support one controller. If you're trying to do this with multiple controllers, eh, I'd just suck it up and use PyGame / SDL.
 
-## What about other types controllers?
+## What about other types of controllers?
 
 My little Saturn controller is pretty simple, but this works with other, more complex controllers, too. For example, the PlayStation 4 controller is a USB (and Bluetooth) HID device, so you can talk to it a similar way. However, the report is **much** more complex:
 
@@ -159,7 +159,7 @@ My little Saturn controller is pretty simple, but this works with other, more co
  128, 0, 0, 0, 0, 128, 0]
 ```
 
-That's a lot stuff! It's not surprising- the PlayStation 4 controller has 12 buttons, two sticks, a D-pad, a touchpad, a gyroscope, and an accelerometer. Thankfully some nice people have [documented the report](https://web.archive.org/web/20210301230721/https://www.psdevwiki.com/ps4/DS4-USB) so if you want to use it that will give you a great head start.
+That's a lot of stuff! It's not surprising- the PlayStation 4 controller has 12 buttons, two sticks, a D-pad, a touchpad, a gyroscope, and an accelerometer. Thankfully some nice people have [documented the report](https://web.archive.org/web/20210301230721/https://www.psdevwiki.com/ps4/DS4-USB) so if you want to use it that will give you a great head start.
 
 A fun thing to note - the XBox controllers don't work with this approach. They don't use a standard HID protocol and instead use [a proprietary protocol](https://gist.github.com/devkid/4b3bd50760504d1b93ea684cfd3ed895). It's possible to talk to them using the higher-level APIs or with the even more low-level [libusb](https://libusb.info/) (if you're brave).
 
