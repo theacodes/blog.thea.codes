@@ -51,12 +51,12 @@
   </aside>
   <h1>Talking to gamepads from Python without PyGame</h1>
   <content>
-    <p>Alright, here's the scenario: I wanted to use a gamepad/controller from my code, but I didn't want to use PyGame (SDL) or anything like that. It's a "headless" terminal application and doesn't need a window or UI or anything - I just needed to talk to the controller. I also only needed to talk to <em>one kind</em> of controller. You might run into a use case like this if you're doing stuff with the Raspberry Pi without a screen.</p>
+    <p>Alright, here's the scenario: I wanted to use a gamepad/controller from my Python script so I could use it to control some hardware, but I didn't want to use <a href="https://www.pygame.org/">PyGame</a> / <a href="https://www.libsdl.org/">SDL</a> or anything like that. It's a "headless" terminal application and doesn't need a window or UI or anything - I just needed to talk to the controller. I also only needed to talk to <em>one kind</em> of controller. You might run into a use case like this if you're doing stuff with the <a href="https://www.raspberrypi.org/">Raspberry Pi</a> without a screen.</p>
 <p>This was harder to figure out that I expected, so, I thought I'd write up a short little guide for folks who might find themselves in a similar situation.</p>
 <h2 id="things-that-dont-work">Things that don't work</h2>
 <p>First, let me tell you some things that don't work:</p>
 <ol>
-<li>Trying to use PyGame / SDL without a window or screen. You can use SDL_Joystick without initializing SDL's video system, so there's no way to use it without a screen.</li>
+<li>Trying to use PyGame / SDL without a window or screen. You can't use <a href="https://wiki.libsdl.org/CategoryJoystick">SDL_Joystick</a> without initializing SDL's video system.</li>
 <li>Since I'm on macOS, I attempted to use <a href="https://pyobjc.readthedocs.io/en/latest/">pyobjc</a> with the <a href="https://developer.apple.com/documentation/gamecontroller">Game Controller framework</a>. Yeah - I don't know if I was holding it wrong but I didn't get anywhere with that.</li>
 <li>The seemingly useful <a href="https://pypi.org/project/inputs/">inputs</a> library. It just didn't detect my controller at all.</li>
 </ol>

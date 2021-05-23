@@ -5,7 +5,7 @@ legacy_url: yes
 description: How to use a game controller / gamepad without PyGame
 ---
 
-Alright, here's the scenario: I wanted to use a gamepad/controller from my code, but I didn't want to use PyGame (SDL) or anything like that. It's a "headless" terminal application and doesn't need a window or UI or anything - I just needed to talk to the controller. I also only needed to talk to *one kind* of controller. You might run into a use case like this if you're doing stuff with the Raspberry Pi without a screen.
+Alright, here's the scenario: I wanted to use a gamepad/controller from my Python script so I could use it to control some hardware, but I didn't want to use [PyGame](https://www.pygame.org/) / [SDL](https://www.libsdl.org/) or anything like that. It's a "headless" terminal application and doesn't need a window or UI or anything - I just needed to talk to the controller. I also only needed to talk to *one kind* of controller. You might run into a use case like this if you're doing stuff with the [Raspberry Pi](https://www.raspberrypi.org/) without a screen.
 
 This was harder to figure out that I expected, so, I thought I'd write up a short little guide for folks who might find themselves in a similar situation.
 
@@ -13,7 +13,7 @@ This was harder to figure out that I expected, so, I thought I'd write up a shor
 
 First, let me tell you some things that don't work:
 
-1. Trying to use PyGame / SDL without a window or screen. You can use SDL_Joystick without initializing SDL's video system, so there's no way to use it without a screen.
+1. Trying to use PyGame / SDL without a window or screen. You can't use [SDL_Joystick](https://wiki.libsdl.org/CategoryJoystick) without initializing SDL's video system.
 2. Since I'm on macOS, I attempted to use [pyobjc](https://pyobjc.readthedocs.io/en/latest/) with the [Game Controller framework](https://developer.apple.com/documentation/gamecontroller). Yeah - I don't know if I was holding it wrong but I didn't get anywhere with that.
 3. The seemingly useful [inputs](https://pypi.org/project/inputs/) library. It just didn't detect my controller at all.
 
