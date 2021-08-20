@@ -58,7 +58,7 @@ As mentioned, the SAM D21 is actually pretty easy to work with. It mostly requir
 
 ## Flash
 
-I wanted some flash memory to allow folks to store more samples on the Big Honking Button. Using the [list of supported flash memory chips](https://github.com/adafruit/circuitpython/blob/master/supervisor/shared/external_flash/devices.h) in CircuitPython and [Octopart](https://octopart.com/) I selected a chip with high availability and reasonable cost: The 2MB [GigaDevice GD25Q16C](https://www.gigadevice.com/flash-memory/gd25q16c/).
+I wanted some flash memory to allow folks to store more samples on the Big Honking Button. Using the [list of supported flash memory chips](https://github.com/adafruit/circuitpython/tree/main/supervisor/shared/external_flash) in CircuitPython and [Octopart](https://octopart.com/) I selected a chip with high availability and reasonable cost: The 2MB [GigaDevice GD25Q16C](https://www.gigadevice.com/flash-memory/gd25q16c/).
 
 Thankfully, most flash chips have the same pinouts. This is good to know if you ever need to swap them out due to limited availability or if you want to upgrade to a chip with more capacity.
 
