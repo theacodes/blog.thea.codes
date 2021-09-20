@@ -65,33 +65,33 @@
 <p><img alt="YM2612 Write Timing" src="../static/ym2612-write-timing.png" /></p>
 <p>However, the chip will not finish <em>processing</em> the write for several internal cycles. The number of cycles actually depends on which register you changed. Some folks on forums have done a little research and determined that there is a safe minimum that will cover you so that's what I've tried to do so far.</p>
 <p>The code for writing to the YM2612 looks a little like this:</p>
-<pre class="lang-c++"><span class="kt">void</span> <span class="nf">set_reg</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">address</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">port</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Write the register address first.</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A1</span><span class="p">,</span> <span class="n">port</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A0</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
-  <span class="n">set_data_lines</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>
-  <span class="c1">// technically we should give *some* time between setting the bytes and</span>
-  <span class="c1">// pulling the pins, but it seems to work fine without that.</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
-  <span class="c1">// We shouldn&#39;t raise the WR and CS until at least YM_WRITE_WAIT have passed.</span>
-  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_WRITE_WAIT</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
-  <span class="c1">// We must wait for the chip to finish reading our data before loading in the</span>
-  <span class="c1">// next byte.</span>
-  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_DATA_WAIT</span><span class="p">);</span>
+<pre class="lang-c++"><span class="kt">void</span><span class="w"> </span><span class="nf">set_reg</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">port</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// Write the register address first.</span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A1</span><span class="p">,</span><span class="w"> </span><span class="n">port</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A0</span><span class="p">,</span><span class="w"> </span><span class="n">LOW</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">set_data_lines</span><span class="p">(</span><span class="n">address</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// technically we should give *some* time between setting the bytes and</span>
+<span class="w">  </span><span class="c1">// pulling the pins, but it seems to work fine without that.</span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span><span class="w"> </span><span class="n">LOW</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span><span class="w"> </span><span class="n">LOW</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// We shouldn&#39;t raise the WR and CS until at least YM_WRITE_WAIT have passed.</span>
+<span class="w">  </span><span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_WRITE_WAIT</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span><span class="w"> </span><span class="n">HIGH</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span><span class="w"> </span><span class="n">HIGH</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// We must wait for the chip to finish reading our data before loading in the</span>
+<span class="w">  </span><span class="c1">// next byte.</span>
+<span class="w">  </span><span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_DATA_WAIT</span><span class="p">);</span><span class="w"></span>
 
-  <span class="c1">// Same as above, but with A0 high to write the register data.</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A0</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
-  <span class="n">set_data_lines</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
-  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_WRITE_WAIT</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
-  <span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
-  <span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_DATA_WAIT</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="c1">// Same as above, but with A0 high to write the register data.</span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_A0</span><span class="p">,</span><span class="w"> </span><span class="n">HIGH</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">set_data_lines</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span><span class="w"> </span><span class="n">LOW</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span><span class="w"> </span><span class="n">LOW</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_WRITE_WAIT</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_WR</span><span class="p">,</span><span class="w"> </span><span class="n">HIGH</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">digitalWriteFast</span><span class="p">(</span><span class="n">YM_CS</span><span class="p">,</span><span class="w"> </span><span class="n">HIGH</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">delay10ns</span><span class="p">(</span><span class="n">YM_DATA_WAIT</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre>
 <p>With a basic write command, I was ready to start experimenting with the hardware.</p>
 <h2 id="proof-of-concept-using-arduino">Proof of concept using Arduino</h2>

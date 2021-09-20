@@ -24,7 +24,7 @@ There's several configuration options for the SAM D21 ADC. Some of them impact s
     <form class="pure-form  pure-form-stacked">
         <legend of="zelda">Conversion time calculator</legend>
         <fieldset>
-            <label for="glck">GLCK frequency (including GLCK division)</label>
+            <label for="glck">GCLK frequency (including GCLK division)</label>
             <input name="glck" type="number" value="48" min="0" max="48"></input>
             <span class="pure-form-message">MHz</span>
             <label for="glck_div">ADC clock prescaler</label>

@@ -25,21 +25,21 @@ Second, there is the **Generic Clock Controller (`GCLK`)** peripheral. The gener
 For example, if you wanted to clock the `SERCOM0` peripheral from the 8 MHz internal oscillator you would:
 
 1. Enable the 8 MHz oscillator (`OSC8M`) using the `SYSCTRL` peripheral.
-2. Configure a generic clock, for example, `GLCK1` to use the `OSC8M` as its clock source.
-3. Tell the generic clock multiplexer to connect `GLCK1` to `SERCOM0`.
+2. Configure a generic clock, for example, `GCLK1` to use the `OSC8M` as its clock source.
+3. Tell the generic clock multiplexer to connect `GCLK1` to `SERCOM0`.
 
 Finally it's important to know the difference between **synchronous** and **asynchronous** clocks. The main system clock which is used to clock the CPU and the internal busses (AHB/APBx) is called **synchronous**. The generic clocks used to drive peripherals are called **asynchronous**. The reason for this distinction is because it's possible (and common) to drive the peripherals using a different clock source than the CPU. Since there are potentially two different clocks at play, **register synchronization** must sometimes be done. More on that later - trust me, it's much less scary than it sounds.
 
 ## Configuring the main (CPU) clock
 
-Let's dive into a concrete example: configuring the main clock and changing the CPU's frequency. The CPU (and the associated busses) are always driven from `GCLK0` (you'll sometimes see this referred to as `GCLK_MAIN`) - so you can kind of think of `GLCK0` as special in that way.
+Let's dive into a concrete example: configuring the main clock and changing the CPU's frequency. The CPU (and the associated busses) are always driven from `GCLK0` (you'll sometimes see this referred to as `GCLK_MAIN`) - so you can kind of think of `GCLK0` as special in that way.
 
 After reset, the SAM D21 runs at 1 MHz. The reason for this is that the default state for the clock system is:
 
 * The 8 MHz internal oscillator (`OSC8M`) is enabled and divided ("prescaled") by 8.
 * Generic clock 0 (`GCLK0`) is enabled and uses the 8 MHz internal oscillator as its source.
 
-Since the 8 MHz oscillator is divided by 8, `GLCK0` is generating a 1 MHz clock for the CPU.
+Since the 8 MHz oscillator is divided by 8, `GCLK0` is generating a 1 MHz clock for the CPU.
 
 This is equivalent to the hardware running this code on startup:
 
@@ -100,7 +100,7 @@ SYSCTRL->XOSC32K.bit.ENABLE = 1;
 while(!SYSCTRL->PCLKSR.bit.XOSC32KRDY);
 ```
 
-With the crystal oscillator setup, the next step is to wire it up the a generic clock. This is so it can be used as the reference for the DFLL. In this case it'll be `GLCK1`, but it can be any clock other than `GCLK0`. It might seem a little strange to go from a clock source (`XOSC32K`, 32.768 kHz) to a generic clock (`GCLK1`) and then back to clock source (`DFLL48M`, 48MHz) and finally to another generic clock (`GCLK0`, 48Mhz), but that's the way it works!
+With the crystal oscillator setup, the next step is to wire it up the a generic clock. This is so it can be used as the reference for the DFLL. In this case it'll be `GCLK1`, but it can be any clock other than `GCLK0`. It might seem a little strange to go from a clock source (`XOSC32K`, 32.768 kHz) to a generic clock (`GCLK1`) and then back to clock source (`DFLL48M`, 48MHz) and finally to another generic clock (`GCLK0`, 48Mhz), but that's the way it works!
 
 This code sets up `GCLK1` to use `XOSC32K` as the clock source:
 
@@ -111,7 +111,7 @@ GCLK->GENDIV.reg =
     GCLK_GENDIV_DIV(1);
 
 /* Setup GCLK1 using the external 32.768 kHz oscillator */
-GCLK->GENCTRL.reg = 
+GCLK->GENCTRL.reg =
     GCLK_GENCTRL_ID(1) |
     GCLK_GENCTRL_SRC_XOSC32K |
     /* Improve the duty cycle. */
@@ -173,7 +173,7 @@ while(!SYSCTRL->PCLKSR.bit.DFLLRDY);
 The final step in setting up the DFLL is to set it to closed loop mode and turn it on:
 
 ```c
-SYSCTRL->DFLLCTRL.reg |= 
+SYSCTRL->DFLLCTRL.reg |=
     /* Closed loop mode */
     SYSCTRL_DFLLCTRL_MODE |
     /* Wait for the frequency to be locked before outputting the clock */
@@ -379,7 +379,7 @@ GCLK->GENDIV.reg =
     GCLK_GENDIV_DIV(1);
 
 /* Setup GCLK2 using the internal 8 MHz oscillator */
-GCLK->GENCTRL.reg = 
+GCLK->GENCTRL.reg =
     GCLK_GENCTRL_ID(2) |
     GCLK_GENCTRL_SRC_OSC8M |
     /* Improve the duty cycle. */
@@ -443,7 +443,7 @@ If you have access to an oscilloscope you can take advantage of a nice feature o
 To enable clock output you need to set the `OE` bit when configuring a generic clock through `GCLK->GENCTRL`. For example, this configures `GCLK1` and enables I/O output:
 
 ```c
-GCLK->GENCTRL.reg = 
+GCLK->GENCTRL.reg =
     GCLK_GENCTRL_ID(1) |
     GCLK_GENCTRL_SRC_XOSC32K |
     GCLK_GENCTRL_IDC |

@@ -84,7 +84,7 @@ So this means to configure the PWM frequency and duty cycle you need to set the 
    The value of the PER register determines the frequency in the following
    way:
 
-    frequency = GLCK frequency / (TCC prescaler * (1 + PER))
+    frequency = GCLK frequency / (TCC prescaler * (1 + PER))
 
    So in this example frequency = 8Mhz / (16 * (1 + 512)) so the frequency
    is 947Hz.

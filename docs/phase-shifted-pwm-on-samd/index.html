@@ -72,35 +72,35 @@
 <h2 id="configuring-the-tccs">Configuring the TCCs</h2>
 <p>Since I want to output <em>two</em> waveforms, I need to configure two TCCs at once.</p>
 <p>Here's the code for enabling the bus clock - if you're on Arduino, it's likely that the Arduino libraries have already done this. If you're on ASF4 or something like that, you'll definitely need to do this.</p>
-<pre class="lang-c"><span class="cm">/* Enable the APB clock for TCC0 &amp; TCC1. */</span>
-<span class="n">PM</span><span class="o">-&gt;</span><span class="n">APBCMASK</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PM_APBCMASK_TCC0</span> <span class="o">|</span> <span class="n">PM_APBCMASK_TCC1</span><span class="p">;</span>
+<pre class="lang-c"><span class="cm">/* Enable the APB clock for TCC0 &amp; TCC1. */</span><span class="w"></span>
+<span class="n">PM</span><span class="o">-&gt;</span><span class="n">APBCMASK</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">PM_APBCMASK_TCC0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PM_APBCMASK_TCC1</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>Next, you need to wire up a peripheral clock. In my case, I have GCLK1 configured as an 8Mhz clock. Your setup might be a bit different. It doesn't matter much which GCLK you use or what its frequency is, but it will affect how you calculate the frequency and duty cycle values.</p>
-<pre class="lang-c"><span class="cm">/* Enable GCLK1 and wire it up to TCC0 and TCC1. */</span>
-<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">CLKCTRL</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">GCLK_CLKCTRL_CLKEN</span> <span class="o">|</span>
-                    <span class="n">GCLK_CLKCTRL_GEN_GCLK1</span> <span class="o">|</span>
-                    <span class="n">GCLK_CLKCTRL_ID_TCC0_TCC1</span><span class="p">;</span>
-<span class="cm">/* Wait until the clock bus is synchronized. */</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span> <span class="p">{};</span>
+<pre class="lang-c"><span class="cm">/* Enable GCLK1 and wire it up to TCC0 and TCC1. */</span><span class="w"></span>
+<span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">CLKCTRL</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GCLK_CLKCTRL_CLKEN</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">                    </span><span class="n">GCLK_CLKCTRL_GEN_GCLK1</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">                    </span><span class="n">GCLK_CLKCTRL_ID_TCC0_TCC1</span><span class="p">;</span><span class="w"></span>
+<span class="cm">/* Wait until the clock bus is synchronized. */</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">GCLK</span><span class="o">-&gt;</span><span class="n">STATUS</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">SYNCBUSY</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 
 <span class="cm">/* Configure the clock prescaler for each TCC.</span>
 <span class="cm">   This lets you divide up the clocks frequency to make the TCC count slower</span>
 <span class="cm">   than the clock. In this case, I&#39;m dividing the 8MHz clock by 16 making the</span>
 <span class="cm">   TCC operate at 500kHz. This means each count (or &quot;tick&quot;) is 2us.</span>
-<span class="cm">*/</span>
-<span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">TCC_CTRLA_PRESCALER</span><span class="p">(</span><span class="n">TCC_CTRLA_PRESCALER_DIV16_Val</span><span class="p">);</span>
-<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">TCC_CTRLA_PRESCALER</span><span class="p">(</span><span class="n">TCC_CTRLA_PRESCALER_DIV16_Val</span><span class="p">);</span>
+<span class="cm">*/</span><span class="w"></span>
+<span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">TCC_CTRLA_PRESCALER</span><span class="p">(</span><span class="n">TCC_CTRLA_PRESCALER_DIV16_Val</span><span class="p">);</span><span class="w"></span>
+<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">TCC_CTRLA_PRESCALER</span><span class="p">(</span><span class="n">TCC_CTRLA_PRESCALER_DIV16_Val</span><span class="p">);</span><span class="w"></span>
 </pre>
 <p>Next, you'll need to configure the waveform output for the TCCs. There's a handful of different waveform configurations you can use but in this case the simplest one, "Normal PWM", is the right one.</p>
-<pre class="lang-c"><span class="cm">/* Use &quot;Normal PWM&quot; */</span>
-<span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">WAVE</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">TCC_WAVE_WAVEGEN_NPWM</span><span class="p">;</span>
-<span class="cm">/* Wait for bus synchronization */</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">WAVE</span><span class="p">)</span> <span class="p">{};</span>
+<pre class="lang-c"><span class="cm">/* Use &quot;Normal PWM&quot; */</span><span class="w"></span>
+<span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">WAVE</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TCC_WAVE_WAVEGEN_NPWM</span><span class="p">;</span><span class="w"></span>
+<span class="cm">/* Wait for bus synchronization */</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">WAVE</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 
-<span class="cm">/* Use &quot;Normal PWM&quot; */</span>
-<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">WAVE</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">TCC_WAVE_WAVEGEN_NPWM</span><span class="p">;</span>
-<span class="cm">/* Wait for bus synchronization */</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">WAVE</span><span class="p">)</span> <span class="p">{};</span>
+<span class="cm">/* Use &quot;Normal PWM&quot; */</span><span class="w"></span>
+<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">WAVE</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TCC_WAVE_WAVEGEN_NPWM</span><span class="p">;</span><span class="w"></span>
+<span class="cm">/* Wait for bus synchronization */</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">WAVE</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 </pre>
 <p>The way that normal PWM mode works is that the TCC will increment its <code>COUNT</code>on each tick. At the start, the output is <strong>low</strong>. Once <code>COUNT</code> equals a compare value, <code>CC[n]</code>, it will switch the output to <strong>high</strong>. Finally, once <code>COUNT</code> is equal to the TCC's <code>PER</code>, it will reset <code>count</code> to zero and set the output to <strong>low</strong> again and repeat the cycle.</p>
 <p>So this means to configure the PWM frequency and duty cycle you need to set the <code>PER</code> value based on the frequency and the <code>CC[n]</code> value based on the duty cycle. Here's an example:</p>
@@ -108,59 +108,59 @@
 <span class="cm">   The value of the PER register determines the frequency in the following</span>
 <span class="cm">   way:</span>
 
-<span class="cm">    frequency = GLCK frequency / (TCC prescaler * (1 + PER))</span>
+<span class="cm">    frequency = GCLK frequency / (TCC prescaler * (1 + PER))</span>
 
 <span class="cm">   So in this example frequency = 8Mhz / (16 * (1 + 512)) so the frequency</span>
 <span class="cm">   is 947Hz.</span>
-<span class="cm">*/</span>
-<span class="kt">uint32_t</span> <span class="n">period</span> <span class="o">=</span> <span class="mi">512</span><span class="p">;</span>
+<span class="cm">*/</span><span class="w"></span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">period</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">512</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">PER</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">period</span><span class="p">;</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PER</span><span class="p">)</span> <span class="p">{};</span>
-<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">PER</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">period</span><span class="p">;</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PER</span><span class="p">)</span> <span class="p">{};</span>
+<span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">PER</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">period</span><span class="p">;</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PER</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
+<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">PER</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">period</span><span class="p">;</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">PER</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 </pre>
 <p>I wanted the duty cycle to just be 50%, so I set the <code>CC[n]</code> register to half of the period. Which <code>CC[n]</code> register you set depends on which output pin you're using - more on that in a second:</p>
 <pre class="lang-c"><span class="cm">/* n for CC[n] is determined by n = x % 4 where x is from WO[x]</span>
 <span class="cm">   WO[x] comes from the peripheral multiplexer - we&#39;ll get to that in a second.</span>
-<span class="cm">*/</span>
- <span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CC</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">reg</span> <span class="o">=</span> <span class="n">period</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
- <span class="k">while</span> <span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">CC2</span><span class="p">)</span> <span class="p">{};</span>
- <span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CC</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">reg</span> <span class="o">=</span> <span class="n">period</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
- <span class="k">while</span> <span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">CC2</span><span class="p">)</span> <span class="p">{};</span>
+<span class="cm">*/</span><span class="w"></span>
+<span class="w"> </span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CC</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">period</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">CC2</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
+<span class="w"> </span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CC</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">period</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">CC2</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 </pre>
 <p>Finally, you need to configure the output pins. This is relatively complex because of the whole pin multiplexing thing. In this case, I want to output TCC0's waveform to <code>PA18</code> (<code>D10</code> on the Arduino Zero and Feather M0) and TCC1's waveform to <code>PA07</code> (<code>D9</code> on the Arduino Zero and Feather M0).</p>
 <p>First the easy part- set the pins to be outputs:</p>
-<pre class="lang-c"><span class="cm">/* Configure PA18 and PA07 to be output. */</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">DIRSET</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PA18</span><span class="p">;</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">OUTCLR</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PA18</span><span class="p">;</span>
+<pre class="lang-c"><span class="cm">/* Configure PA18 and PA07 to be output. */</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">DIRSET</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PA18</span><span class="p">;</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">OUTCLR</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PA18</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">DIRSET</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PA07</span><span class="p">;</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">OUTCLR</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PA07</span><span class="p">;</span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">DIRSET</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PA07</span><span class="p">;</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">OUTCLR</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PA07</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>Next is more complicated and requires some consulting with the datasheet. You have to configure the pin multiplexer for the pins to connect them to the TCC instances. Which pins can be assigned to which TCC instances is limited so you'll have to consult the scary pin multiplexing table datasheet to figure out the right stuff to put here.</p>
-<pre class="lang-c"><span class="cm">/* Enable the peripheral multiplexer for the pins. */</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PINCFG</span><span class="p">[</span><span class="mi">18</span><span class="p">].</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PORT_PINCFG_PMUXEN</span><span class="p">;</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PINCFG</span><span class="p">[</span><span class="mi">7</span><span class="p">].</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">PORT_PINCFG_PMUXEN</span><span class="p">;</span>
+<pre class="lang-c"><span class="cm">/* Enable the peripheral multiplexer for the pins. */</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PINCFG</span><span class="p">[</span><span class="mi">18</span><span class="p">].</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">PORT_PINCFG_PMUXEN</span><span class="p">;</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PINCFG</span><span class="p">[</span><span class="mi">7</span><span class="p">].</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">PORT_PINCFG_PMUXEN</span><span class="p">;</span><span class="w"></span>
 
 <span class="cm">/* Set PA18&#39;s function to function F. Function F is TCC0/WO[2] for PA18.</span>
 <span class="cm">   Because it&#39;s an even numbered pin the PMUX is E (even) and the PMUX</span>
 <span class="cm">   index is pin number / 2, so 9.</span>
-<span class="cm">*/</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PMUX</span><span class="p">[</span><span class="mi">9</span><span class="p">].</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PMUX_PMUXE_F</span><span class="p">;</span>
+<span class="cm">*/</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PMUX</span><span class="p">[</span><span class="mi">9</span><span class="p">].</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PMUX_PMUXE_F</span><span class="p">;</span><span class="w"></span>
 
 <span class="cm">/* Set PA07&#39;s function to function E. Function E is TCC1/WO[1] for PA07.</span>
 <span class="cm">  Because this is an odd numbered pin the PMUX is O (odd) and the PMUX</span>
 <span class="cm">  index is pin number - 1 / 2, so 3.</span>
-<span class="cm">*/</span>
-<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PMUX</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">reg</span> <span class="o">=</span> <span class="n">PORT_PMUX_PMUXO_E</span><span class="p">;</span>
+<span class="cm">*/</span><span class="w"></span>
+<span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">PMUX</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PMUX_PMUXO_E</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>Whew, okay. So also note that the pin multiplexer function here determines the <code>WO[x]</code> and therefore determines which <code>CC[n]</code> to set for the TCC - <code>PA18</code> is <code>TCC0/WO[2]</code> so you set <code>CC[2]</code> for TCC0 and <code>PA07</code> is <code>TCC1/WO[1]</code> so you set <code>CC[1]</code> for TCC1.</p>
 <p>Finally, you gotta enable the TCCs - this actually starts them counting and begins outputting the PWMs:</p>
-<pre class="lang-c"><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="p">(</span><span class="n">TCC_CTRLA_ENABLE</span><span class="p">);</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="p">)</span> <span class="p">{};</span>
-<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="p">(</span><span class="n">TCC_CTRLA_ENABLE</span><span class="p">);</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="p">)</span> <span class="p">{};</span>
+<pre class="lang-c"><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="p">(</span><span class="n">TCC_CTRLA_ENABLE</span><span class="p">);</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
+<span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">CTRLA</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="p">(</span><span class="n">TCC_CTRLA_ENABLE</span><span class="p">);</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 </pre>
 <p>Alright, with all that there is now two perfectly synchronized square waves
 on the output:</p>
@@ -171,7 +171,7 @@ phase around.</p>
 <p>The idea is to manually set the second TCC's <code>COUNT</code> to a value other than <code>0</code>
 at the start. Setting this value will cause that TCC's output to be out of phase with the first TCC's by a factor of <code>n / PER</code>.</p>
 <p>So for example, if I wanted the second square wave to be 90 degrees out of phase I'd add this <em>before enabling the TCCs</em>:</p>
-<pre class="lang-c"><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">period</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
+<pre class="lang-c"><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">period</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>Now the waveforms are out of phase:</p>
 <p><img alt="PWM outputs with a phase offset" src="../static/pwm-offset.png" /></p>
@@ -183,11 +183,11 @@ at the start. Setting this value will cause that TCC's output to be out of phase
 <li>Set TCC1's <code>COUNT</code> to the read value plus a phase offset.</li>
 </ol>
 <p>Simple potatoes, right? Well, there's one trick here: you can't just read the <code>COUNT</code> register. You have to ask the hardware to update the value for you. The way to do this is to send a command to the TCC. Here's how to do it:</p>
-<pre class="lang-c"><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLBSET</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">TCC_CTRLBSET_CMD_READSYNC</span><span class="p">;</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">COUNT</span><span class="p">)</span> <span class="p">{};</span>
+<pre class="lang-c"><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">CTRLBSET</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TCC_CTRLBSET_CMD_READSYNC</span><span class="p">;</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">SYNCBUSY</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">COUNT</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 </pre>
 <p>Now that the <code>COUNT</code> register has been synchronized you can read it and offset it for TCC1:</p>
-<pre class="lang-c"><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span> <span class="o">+</span> <span class="n">phase_offset</span><span class="p">)</span> <span class="o">%</span> <span class="n">period</span><span class="p">;</span>
+<pre class="lang-c"><span class="n">TCC1</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">TCC0</span><span class="o">-&gt;</span><span class="n">COUNT</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">phase_offset</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">period</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>Note that I also perform a <code>% period</code>. This keeps the <code>COUNT</code> from being above the <code>PER</code> register which would cause the timer to have to overflow before restarting - not ideal as that could take quite a while!</p>
 <p>And that's it! With that you can actually change the phase dynamically! Check it out:</p>

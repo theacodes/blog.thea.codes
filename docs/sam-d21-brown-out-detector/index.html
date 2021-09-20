@@ -99,33 +99,33 @@
 <p>Here's how to use the <code>BOD33</code> to wait for the power supply to settle:</p>
 <pre class="lang-c"><span class="cm">/* Disable the brown-out detector during configuration,</span>
 <span class="cm">   otherwise it might misbehave and reset the</span>
-<span class="cm">   microcontroller. */</span>
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">B33SRDY</span><span class="p">)</span> <span class="p">{};</span>
+<span class="cm">   microcontroller. */</span><span class="w"></span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">B33SRDY</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 
 <span class="cm">/* Configure the brown-out detector so that the</span>
 <span class="cm">   program can use it to watch the power supply</span>
-<span class="cm">   voltage */</span>
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">reg</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="cm">/* This sets the minimum voltage level to 3.0v - 3.2v.</span>
-<span class="cm">       See datasheet table 37-21. */</span>
-    <span class="n">SYSCTRL_BOD33_LEVEL</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span> <span class="o">|</span>
-    <span class="cm">/* Since the program is waiting for the voltage to rise,</span>
+<span class="cm">   voltage */</span><span class="w"></span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* This sets the minimum voltage level to 3.0v - 3.2v.</span>
+<span class="cm">       See datasheet table 37-21. */</span><span class="w"></span>
+<span class="w">    </span><span class="n">SYSCTRL_BOD33_LEVEL</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Since the program is waiting for the voltage to rise,</span>
 <span class="cm">       don&#39;t reset the microcontroller if the voltage is too</span>
-<span class="cm">       low. */</span>
-    <span class="n">SYSCTRL_BOD33_ACTION_NONE</span> <span class="o">|</span>
-    <span class="cm">/* Enable hysteresis to better deal with noisy power</span>
-<span class="cm">       supplies and voltage transients. */</span>
-    <span class="n">SYSCTRL_BOD33_HYST</span><span class="p">);</span>
+<span class="cm">       low. */</span><span class="w"></span>
+<span class="w">    </span><span class="n">SYSCTRL_BOD33_ACTION_NONE</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Enable hysteresis to better deal with noisy power</span>
+<span class="cm">       supplies and voltage transients. */</span><span class="w"></span>
+<span class="w">    </span><span class="n">SYSCTRL_BOD33_HYST</span><span class="p">);</span><span class="w"></span>
 
 <span class="cm">/* Enable the brown-out detector and then wait for</span>
-<span class="cm">   the voltage level to settle. */</span>
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">BOD33RDY</span><span class="p">)</span> <span class="p">{}</span>
+<span class="cm">   the voltage level to settle. */</span><span class="w"></span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">BOD33RDY</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
 
 <span class="cm">/* BOD33DET is set when the voltage is *too low*,</span>
-<span class="cm">   so wait for it to be cleared. */</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">BOD33DET</span><span class="p">)</span> <span class="p">{}</span>
+<span class="cm">   so wait for it to be cleared. */</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">BOD33DET</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
 </pre>
 <p>It's important to run this code as early as possible. For our firmware, it's
 necessary to do this before we setup the clocks to run at 48 MHz since that
@@ -137,13 +137,13 @@ required voltage - this is what folks generally think of when they hear
 <p>The code above actually did most of the setup for this step, all that's
 needed now is to change the <em>action</em> from <code>NONE</code> to <code>RESET</code>:</p>
 <pre class="lang-c"><span class="cm">/* Let the brown-out detector automatically reset the microcontroller</span>
-<span class="cm">   if the voltage drops too low. */</span>
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">B33SRDY</span><span class="p">)</span> <span class="p">{};</span>
+<span class="cm">   if the voltage drops too low. */</span><span class="w"></span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">PCLKSR</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">B33SRDY</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w"></span>
 
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">reg</span> <span class="o">|=</span> <span class="n">SYSCTRL_BOD33_ACTION_RESET</span><span class="p">;</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">SYSCTRL_BOD33_ACTION_RESET</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">SYSCTRL</span><span class="o">-&gt;</span><span class="n">BOD33</span><span class="p">.</span><span class="n">bit</span><span class="p">.</span><span class="n">ENABLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>🎉 that's it! Now your project won't suffer from unexpected and dangerous
 behavior when the power supply gets wonky.</p>

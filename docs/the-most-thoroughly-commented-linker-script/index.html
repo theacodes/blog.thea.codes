@@ -74,7 +74,7 @@ default.</p>
 <li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
     Section 11.1.11, Cortex M0+ Configuration</li>
 </ul>
-<pre class="lang-c"><span class="n">OUTPUT_FORMAT</span><span class="p">(</span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">,</span> <span class="s">&quot;elf32-littlearm&quot;</span><span class="p">,</span> <span class="s">&quot;elf32-littlearm&quot;</span><span class="p">)</span>
+<pre class="lang-c"><span class="n">OUTPUT_FORMAT</span><span class="p">(</span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">)</span><span class="w"></span>
 </pre>
 <h2 id="cpu-memory-configuration-variables">CPU memory configuration variables</h2>
 <p>These variables are used by the following "MEMORY" command to define
@@ -89,10 +89,10 @@ to store calibration and user settings.</p>
 <li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
     Section 10.2, Physical Memory Map</li>
 </ul>
-<pre class="lang-c"><span class="n">FLASH_SIZE</span> <span class="o">=</span> <span class="mh">0x40000</span><span class="p">;</span>      <span class="cm">/* 256kB */</span>
-<span class="n">BOOTLOADER_SIZE</span> <span class="o">=</span> <span class="mh">0x2000</span><span class="p">;</span>  <span class="cm">/* 8kB */</span>
-<span class="n">NVM_SIZE</span> <span class="o">=</span> <span class="mh">0x400</span><span class="p">;</span>          <span class="cm">/* 1kbB */</span>
-<span class="n">SRAM_SIZE</span> <span class="o">=</span> <span class="mh">0x8000</span><span class="p">;</span>        <span class="cm">/* 32kB */</span>
+<pre class="lang-c"><span class="n">FLASH_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x40000</span><span class="p">;</span><span class="w">      </span><span class="cm">/* 256kB */</span><span class="w"></span>
+<span class="n">BOOTLOADER_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x2000</span><span class="p">;</span><span class="w">  </span><span class="cm">/* 8kB */</span><span class="w"></span>
+<span class="n">NVM_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x400</span><span class="p">;</span><span class="w">          </span><span class="cm">/* 1kbB */</span><span class="w"></span>
+<span class="n">SRAM_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x8000</span><span class="p">;</span><span class="w">        </span><span class="cm">/* 32kB */</span><span class="w"></span>
 </pre>
 <p>ARM Cortex-M processors use a descending stack and generally
 require stack space to be set aside in RAM.</p>
@@ -109,7 +109,7 @@ with <code>-Wstack-usage=STACK_SIZE</code>.</p>
 <li><a href="https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html">https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html</a></li>
 <li><a href="https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html</a></li>
 </ul>
-<pre class="lang-c"><span class="n">STACK_SIZE</span> <span class="o">=</span> <span class="n">DEFINED</span><span class="p">(</span><span class="n">__stack_size__</span><span class="p">)</span> <span class="o">?</span> <span class="nl">__stack_size__</span> <span class="p">:</span> <span class="mh">0x800</span><span class="p">;</span>
+<pre class="lang-c"><span class="n">STACK_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEFINED</span><span class="p">(</span><span class="n">__stack_size__</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nl">__stack_size__</span> <span class="p">:</span><span class="w"> </span><span class="mh">0x800</span><span class="p">;</span><span class="w"></span>
 </pre>
 <h2 id="memory-space-definition">Memory space definition</h2>
 <p>This section declare blocks of memories for specific purposes. Since an
@@ -123,8 +123,8 @@ types of data can go in the address space.</p>
 <li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
     Section 10.2, Physical Memory Map</li>
 </ul>
-<pre class="lang-c"><span class="n">MEMORY</span>
-<span class="p">{</span>
+<pre class="lang-c"><span class="n">MEMORY</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
 </pre>
 <p>Start with the Flash memory region. On the SAMD21, Flash starts at
 the beginning of the address space (<code>0x00000000</code>) and is contiguous
@@ -138,7 +138,7 @@ memory.</p>
 <ul>
 <li><a href="https://github.com/adafruit/uf2-samdx1#configuration">https://github.com/adafruit/uf2-samdx1#configuration</a></li>
 </ul>
-<pre class="lang-c">    <span class="n">bootloader</span> <span class="p">(</span><span class="n">rx</span><span class="p">)</span> <span class="o">:</span> <span class="n">ORIGIN</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span> <span class="n">LENGTH</span> <span class="o">=</span> <span class="n">BOOTLOADER_SIZE</span>
+<pre class="lang-c"><span class="w">    </span><span class="n">bootloader</span><span class="w"> </span><span class="p">(</span><span class="n">rx</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ORIGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000000</span><span class="p">,</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BOOTLOADER_SIZE</span><span class="w"></span>
 </pre>
 <p>Following the bootloader is the flash memory used by the application,
 called "rom" here - even though it's flash, the name is just a name
@@ -146,7 +146,7 @@ and doesn't carry special meaning.</p>
 <p>The total length of the rom block is the MCU's flash size minus the
 bootloader's size and any space reserved for "non-volatile memory"
 by the application.</p>
-<pre class="lang-c">   <span class="n">rom</span> <span class="p">(</span><span class="n">rx</span><span class="p">)</span> <span class="o">:</span> <span class="n">ORIGIN</span> <span class="o">=</span> <span class="mh">0x00002000</span><span class="p">,</span> <span class="n">LENGTH</span> <span class="o">=</span> <span class="n">FLASH_SIZE</span> <span class="o">-</span> <span class="n">BOOTLOADER_SIZE</span> <span class="o">-</span> <span class="n">NVM_SIZE</span>
+<pre class="lang-c"><span class="w">   </span><span class="n">rom</span><span class="w"> </span><span class="p">(</span><span class="n">rx</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ORIGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00002000</span><span class="p">,</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FLASH_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">BOOTLOADER_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">NVM_SIZE</span><span class="w"></span>
 </pre>
 <p>The "nvm" block is space set aside for the application to store
 user settings and calibration data in the MCU's flash.</p>
@@ -160,14 +160,14 @@ data in this region.</p>
 be written in the same way as normal memory, however, the
 application can use the SAMD's NVM peripheral to write data in
 this region.</p>
-<pre class="lang-c">   <span class="n">nvm</span> <span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">:</span> <span class="n">ORIGIN</span> <span class="o">=</span> <span class="n">FLASH_SIZE</span> <span class="o">-</span> <span class="n">NVM_SIZE</span><span class="p">,</span> <span class="n">LENGTH</span> <span class="o">=</span> <span class="n">NVM_SIZE</span>
+<pre class="lang-c"><span class="w">   </span><span class="n">nvm</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ORIGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FLASH_SIZE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">NVM_SIZE</span><span class="p">,</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NVM_SIZE</span><span class="w"></span>
 </pre>
 <p>The "ram" block is mapped to the CPU's SRAM and it's where
 the stack, heap, and all variables will go.</p>
 <p>For the SAMD21, SRAM starts at 0x20000000 and is contiguous
 for the size of the SRAM.</p>
-<pre class="lang-c">   <span class="n">ram</span> <span class="p">(</span><span class="n">rwx</span><span class="p">)</span> <span class="o">:</span> <span class="n">ORIGIN</span> <span class="o">=</span> <span class="mh">0x20000000</span><span class="p">,</span> <span class="n">LENGTH</span> <span class="o">=</span> <span class="n">SRAM_SIZE</span>
-<span class="p">}</span>
+<pre class="lang-c"><span class="w">   </span><span class="n">ram</span><span class="w"> </span><span class="p">(</span><span class="n">rwx</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ORIGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x20000000</span><span class="p">,</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SRAM_SIZE</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre>
 <h2 id="sections">Sections</h2>
 <p>The sections command tells the linker how to combine the
@@ -183,8 +183,8 @@ some sections are just placed in the output ELF for debugging.</p>
 <ul>
 <li><a href="https://sourceware.org/binutils/docs/ld/SECTIONS.html#SECTIONS">https://sourceware.org/binutils/docs/ld/SECTIONS.html#SECTIONS</a></li>
 </ul>
-<pre class="lang-c"><span class="n">SECTIONS</span>
-<span class="p">{</span>
+<pre class="lang-c"><span class="n">SECTIONS</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
 </pre>
 <p>The text segment contains program code and read-only data.</p>
 <p>References:</p>
@@ -193,12 +193,12 @@ some sections are just placed in the output ELF for debugging.</p>
 Page 5, Segments</li>
 <li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
 </ul>
-<pre class="lang-c">   <span class="p">.</span><span class="nl">text</span> <span class="p">:</span>
-   <span class="p">{</span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="nl">text</span> <span class="p">:</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
 </pre>
 <p>This segment must be 4-byte aligned as defined in ARM ELF
 File Format specification.</p>
-<pre class="lang-c">      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 </pre>
 <p>The vector table defines the initial stack pointer and
 interrupt/exception routines for the ARM CPU and device
@@ -229,8 +229,8 @@ Section B1.5.3, The vector table
 Section B3.2.5, Vector Table Offset Register, VTOR</li>
 <li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
 </ul>
-<pre class="lang-c">      <span class="n">_sfixed</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">vectors</span> <span class="p">.</span><span class="n">vectors</span><span class="p">.</span><span class="o">*</span><span class="p">))</span>
+<pre class="lang-c"><span class="w">      </span><span class="n">_sfixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">vectors</span><span class="w"> </span><span class="p">.</span><span class="n">vectors</span><span class="p">.</span><span class="o">*</span><span class="p">))</span><span class="w"></span>
 </pre>
 <p>Include code and read-only data sections from all
 input files.</p>
@@ -254,8 +254,8 @@ Vague Linking.</li>
 <li><a href="https://gcc.gnu.org/onlinedocs/gcc/Vague-Linkage.html">https://gcc.gnu.org/onlinedocs/gcc/Vague-Linkage.html</a></li>
 <li><a href="https://stackoverflow.com/questions/5518083/what-is-a-linkonce-section">https://stackoverflow.com/questions/5518083/what-is-a-linkonce-section</a></li>
 </ul>
-<pre class="lang-c">      <span class="o">*</span><span class="p">(.</span><span class="n">text</span> <span class="p">.</span><span class="n">text</span><span class="p">.</span><span class="o">*</span> <span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">t</span><span class="p">.</span><span class="o">*</span><span class="p">)</span>
-      <span class="o">*</span><span class="p">(.</span><span class="n">rodata</span> <span class="p">.</span><span class="n">rodata</span><span class="o">*</span> <span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="o">*</span><span class="p">)</span>
+<pre class="lang-c"><span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">text</span><span class="w"> </span><span class="p">.</span><span class="n">text</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">t</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">rodata</span><span class="w"> </span><span class="p">.</span><span class="n">rodata</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
 </pre>
 <h2 id="c-c-runtime-support">C &amp; C++ runtime support</h2>
 <p>The following sections are for the C/C++ runtime. These are generally used by crt0.</p>
@@ -269,7 +269,7 @@ Vague Linking.</li>
 <li>C Runtime: designated constructors</li>
 </ul>
 <p>For C++, handles variables at file scope like this:</p>
-<pre class="lang-c++"><span class="kt">int</span> <span class="n">f</span> <span class="o">=</span> <span class="n">some_func</span><span class="p">()</span>
+<pre class="lang-c++"><span class="kt">int</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">some_func</span><span class="p">()</span><span class="w"></span>
 </pre>
 <p>For C, handles functions designated as constructors:</p>
 <pre><code>void intialize_thing(void) __attribute__((constructor));
@@ -283,18 +283,18 @@ Vague Linking.</li>
 <li><a href="https://developer.arm.com/documentation/dui0475/h/the-arm-c-and-c---libraries/c---initialization--construction-and-destruction">https://developer.arm.com/documentation/dui0475/h/the-arm-c-and-c---libraries/c---initialization--construction-and-destruction</a></li>
 <li><a href="https://stackoverflow.com/questions/15265295/understanding-the-libc-init-array">https://stackoverflow.com/questions/15265295/understanding-the-libc-init-array</a></li>
 </ul>
-<pre class="lang-c">      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">init</span><span class="p">))</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">__preinit_array_start</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">preinit_array</span><span class="p">))</span>
-      <span class="n">__preinit_array_end</span> <span class="o">=</span> <span class="p">.;</span>
+<pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">init</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">__preinit_array_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">preinit_array</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">__preinit_array_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
 
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">__init_array_start</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">init_array</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">init_array</span><span class="p">))</span>
-      <span class="n">__init_array_end</span> <span class="o">=</span> <span class="p">.;</span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">__init_array_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">init_array</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">init_array</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">__init_array_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
 </pre>
 <h3 id="finalizers">Finalizers</h3>
 <ul>
@@ -302,20 +302,20 @@ Vague Linking.</li>
 <li>C runtime: designated finializers</li>
 </ul>
 <p>For C, handles functions designated as destructors:</p>
-<pre class="lang-c"><span class="kt">void</span> <span class="nf">destroy_thing</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">destructor</span><span class="p">));</span>
+<pre class="lang-c"><span class="kt">void</span><span class="w"> </span><span class="nf">destroy_thing</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">destructor</span><span class="p">));</span><span class="w"></span>
 </pre>
 <p>References:</p>
 <ul>
 <li><a href="https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/fini.c">https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/fini.c</a></li>
 </ul>
-<pre class="lang-c">      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">fini</span><span class="p">))</span>
+<pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">fini</span><span class="p">))</span><span class="w"></span>
 
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">__fini_array_start</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">fini_array</span><span class="p">))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">fini_array</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span>
-      <span class="n">__fini_array_end</span> <span class="o">=</span> <span class="p">.;</span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">__fini_array_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">fini_array</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">fini_array</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span><span class="w"></span>
+<span class="w">      </span><span class="n">__fini_array_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
 </pre>
 <h3 id="c-runtime-static-constructors">C++ runtime: static constructors</h3>
 <p>References:</p>
@@ -323,11 +323,11 @@ Vague Linking.</li>
 <li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
 <li><a href="https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c">https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c</a></li>
 </ul>
-<pre class="lang-c">      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="n">crtbegin</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">ctors</span><span class="p">))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">EXCLUDE_FILE</span> <span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">)</span> <span class="p">.</span><span class="n">ctors</span><span class="p">))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">ctors</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">ctors</span><span class="p">))</span>
+<pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtbegin</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">ctors</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">EXCLUDE_FILE</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="n">ctors</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">ctors</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">ctors</span><span class="p">))</span><span class="w"></span>
 </pre>
 <h3 id="c-runtime-static-destructors-and-atexit">C++ runtime: static destructors and atexit()</h3>
 <p>Note that in usual practice these aren't ever called because the program
@@ -336,15 +336,15 @@ doesn't exit - except when powered off or reset.</p>
 <ul>
 <li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
 </ul>
-<pre class="lang-c">      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="n">crtbegin</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">dtors</span><span class="p">))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">EXCLUDE_FILE</span> <span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">)</span> <span class="p">.</span><span class="n">dtors</span><span class="p">))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">dtors</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span>
-      <span class="n">KEEP</span> <span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">dtors</span><span class="p">))</span>
+<pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtbegin</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">dtors</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">EXCLUDE_FILE</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="n">dtors</span><span class="p">))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">SORT</span><span class="p">(.</span><span class="n">dtors</span><span class="p">.</span><span class="o">*</span><span class="p">)))</span><span class="w"></span>
+<span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtend</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">dtors</span><span class="p">))</span><span class="w"></span>
 
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">_efixed</span> <span class="o">=</span> <span class="p">.;</span>
-   <span class="p">}</span> <span class="o">&gt;</span> <span class="n">rom</span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_efixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rom</span><span class="w"></span>
 </pre>
 <h2 id="arm-exception-handling">ARM exception handling</h2>
 <p>ARM defines several special sections for exception handling.</p>
@@ -361,15 +361,15 @@ have entries in the exidx and extab sections.</p>
 <li><a href="https://developer.arm.com/documentation/ihi0038/b/">https://developer.arm.com/documentation/ihi0038/b/</a></li>
 <li><a href="https://stackoverflow.com/a/57463515">https://stackoverflow.com/a/57463515</a></li>
 </ul>
-<pre class="lang-c">   <span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">extab</span> <span class="p">:</span> <span class="p">{</span>
-      <span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">extab</span><span class="o">*</span> <span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armextab</span><span class="p">.</span><span class="o">*</span><span class="p">)</span>
-   <span class="p">}</span> <span class="o">&gt;</span> <span class="n">rom</span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">extab</span> <span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">extab</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armextab</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rom</span><span class="w"></span>
 
-   <span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">exidx</span> <span class="p">:</span> <span class="p">{</span>
-      <span class="n">PROVIDE</span> <span class="p">(</span><span class="n">__exidx_start</span> <span class="o">=</span> <span class="p">.);</span>
-      <span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">exidx</span><span class="o">*</span> <span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armexidx</span><span class="p">.</span><span class="o">*</span><span class="p">)</span>
-      <span class="n">PROVIDE</span> <span class="p">(</span><span class="n">__exidx_end</span> <span class="o">=</span> <span class="p">.);</span>
-   <span class="p">}</span> <span class="o">&gt;</span> <span class="n">rom</span>
+<span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">exidx</span> <span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">PROVIDE</span><span class="w"> </span><span class="p">(</span><span class="n">__exidx_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.);</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">exidx</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armexidx</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">PROVIDE</span><span class="w"> </span><span class="p">(</span><span class="n">__exidx_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.);</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rom</span><span class="w"></span>
 </pre>
 <h2 id="relocate">Relocate</h2>
 <p>The <code>.relocate</code> section includes mutable variables that have a
@@ -381,7 +381,7 @@ hence, "relocate".</p>
 <p>Performance sensitive/critical functions can also be placed in
 RAM using this section:</p>
 <pre class="lang-c"><span class="cp">#define RAMFUNC __attribute__((section(&quot;.ramfunc&quot;)))</span>
-<span class="kt">void</span> <span class="nf">fast_function</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">RAMFUNC</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">fast_function</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="n">RAMFUNC</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>In other linker scripts you might see this named as the <code>.data</code>
 section. That's what the ELF specification calls for, but the
@@ -399,17 +399,17 @@ named these symbols differently.</p>
 <li><a href="https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA">https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA</a></li>
 <li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
 </ul>
-<pre class="lang-c">   <span class="p">.</span><span class="nl">relocate</span> <span class="p">:</span>
-   <span class="p">{</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">_srelocate</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="o">*</span><span class="p">(.</span><span class="n">ramfunc</span> <span class="p">.</span><span class="n">ramfunc</span><span class="p">.</span><span class="o">*</span><span class="p">);</span>
-      <span class="o">*</span><span class="p">(.</span><span class="n">data</span> <span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="o">*</span><span class="p">);</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">_erelocate</span> <span class="o">=</span> <span class="p">.;</span>
-   <span class="p">}</span> <span class="o">&gt;</span> <span class="n">ram</span> <span class="n">AT</span><span class="o">&gt;</span> <span class="n">rom</span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="nl">relocate</span> <span class="p">:</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_srelocate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">ramfunc</span><span class="w"> </span><span class="p">.</span><span class="n">ramfunc</span><span class="p">.</span><span class="o">*</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">data</span><span class="w"> </span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="o">*</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_erelocate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">ram</span><span class="w"> </span><span class="n">AT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rom</span><span class="w"></span>
 
-   <span class="n">_etext</span> <span class="o">=</span> <span class="n">LOADADDR</span><span class="p">(.</span><span class="n">relocate</span><span class="p">);</span>
+<span class="w">   </span><span class="n">_etext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LOADADDR</span><span class="p">(.</span><span class="n">relocate</span><span class="p">);</span><span class="w"></span>
 </pre>
 <h2 id="bss">BSS</h2>
 <p>The BSS section reserves RAM space for declared but uninitialized
@@ -428,15 +428,15 @@ anything in there, but it's included for completeness.</p>
 Section -fcommon</li>
 <li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
 </ul>
-<pre class="lang-c">   <span class="p">.</span><span class="n">bss</span> <span class="p">(</span><span class="n">NOLOAD</span><span class="p">)</span> <span class="o">:</span>
-   <span class="p">{</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">_szero</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="o">*</span><span class="p">(.</span><span class="n">bss</span> <span class="p">.</span><span class="n">bss</span><span class="p">.</span><span class="o">*</span><span class="p">)</span>
-      <span class="o">*</span><span class="p">(</span><span class="n">COMMON</span><span class="p">)</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-      <span class="n">_ezero</span> <span class="o">=</span> <span class="p">.;</span>
-   <span class="p">}</span> <span class="o">&gt;</span> <span class="n">ram</span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">bss</span><span class="w"> </span><span class="p">(</span><span class="n">NOLOAD</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_szero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">bss</span><span class="w"> </span><span class="p">.</span><span class="n">bss</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="o">*</span><span class="p">(</span><span class="n">COMMON</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_ezero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">ram</span><span class="w"></span>
 </pre>
 <h2 id="stack-space">Stack space</h2>
 <p>Cortex-M stacks grow down, so the stack starts at <code>_estack</code> and
@@ -451,14 +451,14 @@ aligned on an eight byte boundary.</p>
 <li><a href="https://developer.arm.com/documentation/ihi0042/e/">https://developer.arm.com/documentation/ihi0042/e/</a>
 Section 5.2.1.2, Stack constraints at a public interface</li>
 </ul>
-<pre class="lang-c">   <span class="p">.</span><span class="n">stack</span> <span class="p">(</span><span class="n">NOLOAD</span><span class="p">)</span><span class="o">:</span>
-   <span class="p">{</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
-      <span class="n">_sstack</span> <span class="o">=</span> <span class="p">.;</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="p">.</span> <span class="o">+</span> <span class="n">STACK_SIZE</span><span class="p">;</span>
-      <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
-      <span class="n">_estack</span> <span class="o">=</span> <span class="p">.;</span>
-   <span class="p">}</span> <span class="o">&gt;</span> <span class="n">ram</span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">stack</span><span class="w"> </span><span class="p">(</span><span class="n">NOLOAD</span><span class="p">)</span><span class="o">:</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_sstack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">STACK_SIZE</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">_estack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">ram</span><span class="w"></span>
 </pre>
 <h2 id="heap-space">Heap space</h2>
 <p>If the program uses the malloc and the heap, then <code>_heap_start</code>
@@ -466,21 +466,21 @@ can be used as the start of the heap. If the program doesn't
 use the heap then the <code>_heap_start</code> symbol is unused and could
 be removed. With <code>-specs=nano.specs</code>, the <code>_sbrk</code> syscall has
 to be implemented for malloc to work:</p>
-<pre class="lang-c"><span class="k">extern</span> <span class="kt">int</span> <span class="n">_heap_start</span><span class="p">;</span>
+<pre class="lang-c"><span class="k">extern</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">_heap_start</span><span class="p">;</span><span class="w"></span>
 
-<span class="kt">void</span> <span class="o">*</span><span class="nf">_sbrk</span><span class="p">(</span><span class="kt">int</span> <span class="n">incr</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">heap</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">prev_heap</span><span class="p">;</span>
+<span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">_sbrk</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">incr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">heap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">prev_heap</span><span class="p">;</span><span class="w"></span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">heap</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">heap</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">_heap_start</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">heap</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">heap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">_heap_start</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="n">prev_heap</span> <span class="o">=</span> <span class="n">heap</span><span class="p">;</span>
-    <span class="n">heap</span> <span class="o">+=</span> <span class="n">incr</span><span class="p">;</span>
+<span class="w">    </span><span class="n">prev_heap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heap</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">heap</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">incr</span><span class="p">;</span><span class="w"></span>
 
-    <span class="k">return</span> <span class="n">prev_heap</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">prev_heap</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre>
 <p>Another memory layout strategy is to place the stack at the end
 of RAM and the heap after bss. That way the heap can grow upwards
@@ -494,10 +494,10 @@ as the heap works well for my purposes.</p>
 <li><a href="https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib">https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib</a></li>
 <li><a href="https://embeddedartistry.com/blog/2017/02/15/implementing-malloc-first-fit-free-list/">https://embeddedartistry.com/blog/2017/02/15/implementing-malloc-first-fit-free-list/</a></li>
 </ul>
-<pre class="lang-c">   <span class="p">.</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-   <span class="n">PROVIDE</span> <span class="p">(</span><span class="n">_heap_start</span> <span class="o">=</span> <span class="p">.);</span>
-   <span class="n">_end</span> <span class="o">=</span> <span class="p">.</span> <span class="p">;</span>
-<span class="p">}</span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="n">PROVIDE</span><span class="w"> </span><span class="p">(</span><span class="n">_heap_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.);</span><span class="w"></span>
+<span class="w">   </span><span class="n">_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre>
 <h2 id="absolute-symbol-definitions">Absolute symbol definitions</h2>
 <p>This section defines some useful absolute symbols for the application
@@ -510,8 +510,8 @@ load and save settings.</p>
 <ul>
 <li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/src/gem_settings_load_save.c">gem_settings_load_save.c</a></li>
 </ul>
-<pre class="lang-c"><span class="n">_nvm_settings_base_address</span> <span class="o">=</span> <span class="n">ORIGIN</span><span class="p">(</span><span class="n">nvm</span><span class="p">);</span>
-<span class="n">_nvm_settings_length</span> <span class="o">=</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+<pre class="lang-c"><span class="n">_nvm_settings_base_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ORIGIN</span><span class="p">(</span><span class="n">nvm</span><span class="p">);</span><span class="w"></span>
+<span class="n">_nvm_settings_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
 </pre>
 <p>Symbols for the calibration/look-up table in the NVM memory block.</p>
 <p>Gemini uses the other half of the NVM block to store the factory-
@@ -520,8 +520,8 @@ calibrated look-up table for translating ADC -&gt; frequency/DAC codes.</p>
 <ul>
 <li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/src/gem_voice_param_table_load_save.c">gem_voice_param_table_load_save.c</a></li>
 </ul>
-<pre class="lang-c"><span class="n">_nvm_lut_base_address</span> <span class="o">=</span> <span class="n">ORIGIN</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span> <span class="o">+</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
-<span class="n">_nvm_lut_length</span> <span class="o">=</span> <span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+<pre class="lang-c"><span class="n">_nvm_lut_base_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ORIGIN</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="n">_nvm_lut_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
 </pre>
 <div class="footnote">
 <hr />
