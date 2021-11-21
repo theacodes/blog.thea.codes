@@ -77,7 +77,7 @@
 <p>The ramp generator is the beginning of how an oscillator turns a <em>frequency input signal</em> into the various useful waveforms that are used to make musical sounds. For a VCO, the frequency input signal is a <strong>control voltage</strong>, hence "voltage-controlled". For a DCO, the frequency input signal is a <strong>digital clock</strong>, hence "digitally-controlled".</p>
 <p>The difference in the type of input signal has a significant impact on the circuit design. Before getting into those differences, let's look at the heart of the ramp generator that's shared between both designs: the <strong>integrator</strong>.</p>
 <h2 id="the-integrator">The integrator</h2>
-<p>An integrator is a electronic circuit that performs the mathematical operation of <a href="https://en.wikipedia.org/wiki/Integral"><em>Integration</em></a>. This is a fancy word from calculus but don't be afraid- it's actually pretty straightforward in practice.</p>
+<p>An integrator is an electronic circuit that performs the mathematical operation of <a href="https://en.wikipedia.org/wiki/Integral"><em>Integration</em></a>. This is a fancy word from calculus but don't be afraid- it's actually pretty straightforward in practice.</p>
 <p>The purpose of an integrator is to produce an output signal that changes (increase or decreases) at a rate that corresponds to the magnitude and duration of the input signal. In this case the input and output signals are both voltage. If you apply a <strong>constant</strong> voltage to an integrator, it will create a consistent increase or decrease in the output voltage over time (a <em>ramp</em>):</p>
 <p><img alt="An ideal integrator" src="../static/juno/integrator-ramp.png" /></p>
 <p>More voltage means that the ramp will have a steeper slope. This is going to be helpful in generating a sawtooth waveform- the integrator ramp produces exactly one cycle of a sawtooth waveform. The trick is getting it to restart so that it creates a repeating (or <em>periodic</em>) sawtooth waveform.</p>
@@ -191,7 +191,7 @@
 </pre>
 <p>If you select the component values for <code>R</code> and <code>C</code> and pick a desired output amplitude then you can plug those into the equation and you'll have the formula for determining frequency given a control voltage. In this case, I chose <code>200kΩ</code>, <code>1nF</code>, and <code>-12V</code> (don't worry about these values too much, I'll cover how to pick these values later):</p>
 <pre class="lang-python3"><span class="n">R</span> <span class="o">=</span> <span class="mi">200</span><span class="n">kΩ</span>
-<span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span> 
+<span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span>
 <span class="n">Vout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">12</span><span class="n">V</span>
 
 <span class="k">def</span> <span class="nf">frequency_for_control_voltage</span><span class="p">(</span><span class="n">Vin</span><span class="p">):</span>
@@ -216,7 +216,7 @@
 </pre>
 <p>&amp; plugging in the same values gives you the function:</p>
 <pre class="lang-python3"><span class="n">R</span> <span class="o">=</span> <span class="mi">200</span><span class="n">kΩ</span>
-<span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span> 
+<span class="n">C</span> <span class="o">=</span> <span class="mi">1</span><span class="n">nF</span>
 <span class="n">Vout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">12</span><span class="n">V</span>
 
 <span class="k">def</span> <span class="nf">control_voltage_for_frequency</span><span class="p">(</span><span class="n">frequency</span><span class="p">):</span>
@@ -257,7 +257,7 @@
 <p>For now, assume that the input voltage to the comparator is some constant voltage. The transistor is really the key component in determining the frequency - how often it turns on and resets the circuit determines the frequency. The clock signal is a series of on/off periods so you could use that to turn the transistor on and off for each cycle of the clock.</p>
 <p>If you were to connect the clock straight to the transistor then things wouldn't work quite right. Since the clock stays high for half of its cycle, that means that the transistor would stay on for half as cycle as well and the capacitor wouldn't be able to charge for half of the time:</p>
 <p><img alt="A dco with the clock directly connected, showing an output that's flat for half of the time" src="../static/juno/dco-no-diff.png" /></p>
-<p>So there has to be some circuit between between the clock and the transistor that makes sure the transistor is only turned on for a <em>very short</em> period of time during the clock cycle to let the capacitor discharge.</p>
+<p>So there has to be a circuit between between the clock and the transistor that makes sure the transistor is only turned on for a <em>very short</em> period of time during the clock cycle to let the capacitor discharge.</p>
 <h2 id="the-rc-differentiator">The RC differentiator</h2>
 <p>You can build a circuit that detects sharp changes in an input signal- like the rising or falling edge of a clock- and outputs short voltage spikes. This circuit is called an <a href="https://www.electronics-tutorials.ws/rc/rc-differentiator.html"><em>RC differentiator</em></a><sup id="fnref:high-pass"><a class="footnote-ref" href="#fn:high-pass">5</a></sup>. That's a fancy word but it's a really simple circuit. Check out the circuit below and the animation to see its effect on the clock input:</p>
 <p><img alt="A schematic showing an RC differentiator transforming a clock signal into spikes" src="../static/juno/rcdiff.png" /></p>
@@ -393,7 +393,7 @@
 <li>The op-amps used are <a href="https://www.ti.com/product/TL082">TL08x</a>, a very common general-purpose op-amp. Back in the day, the TL08x series had higher noise than the TL07x series. That's no longer true and the modern amps are practically identical. If you were designing a new DCO and wanted to select a fancier, modern op-amp you might consider something like the the <a href="https://www.ti.com/product/OPA1641">OPA164x</a>.</li>
 </ul>
 <h2 id="waveshapers">Waveshapers</h2>
-<p>The Juno's oscillators can can output more than just a sawtooth waveform- they can also output a pulse waveform with variable pulse width and a "sub" waveform which is a square waveform at half of the input frequency.</p>
+<p>The Juno's oscillators can output more than just a sawtooth waveform- they can also output a pulse waveform with variable pulse width and a "sub" waveform which is a square waveform at half of the input frequency.</p>
 <p><img alt="Illustration of the various Juno waveforms" src="/static/juno/waveforms.png" /></p>
 <p>The Juno 6, 60, &amp; 106 all generate these waveforms the same way. The sub waveform is the easiest. Since it's a square waveform that's half the clock frequency, the clock input is sent through a <a href="https://en.wikipedia.org/wiki/Flip-flop_(electronics)#D_flip-flop">D-type Flip-Flop</a> configured as a simple <a href="https://www.electronics-tutorials.ws/counter/count_1.html">divide-by-two circuit</a>:</p>
 <p><img alt="The schematic for the sub waveform using a divide-by-two circuit" src="/static/juno/divide-by-two.png" /></p>

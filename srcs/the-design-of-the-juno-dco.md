@@ -57,7 +57,7 @@ The difference in the type of input signal has a significant impact on the circu
 
 ## The integrator
 
-An integrator is a electronic circuit that performs the mathematical operation of [*Integration*](https://en.wikipedia.org/wiki/Integral). This is a fancy word from calculus but don't be afraid- it's actually pretty straightforward in practice.
+An integrator is an electronic circuit that performs the mathematical operation of [*Integration*](https://en.wikipedia.org/wiki/Integral). This is a fancy word from calculus but don't be afraid- it's actually pretty straightforward in practice.
 
 The purpose of an integrator is to produce an output signal that changes (increase or decreases) at a rate that corresponds to the magnitude and duration of the input signal. In this case the input and output signals are both voltage. If you apply a **constant** voltage to an integrator, it will create a consistent increase or decrease in the output voltage over time (a *ramp*):
 
@@ -226,7 +226,7 @@ If you select the component values for `R` and `C` and pick a desired output amp
 
 ```python
 R = 200kΩ
-C = 1nF 
+C = 1nF
 Vout = -12V
 
 def frequency_for_control_voltage(Vin):
@@ -258,7 +258,7 @@ Vin = -(C * R * Vout) / time
 
 ```python
 R = 200kΩ
-C = 1nF 
+C = 1nF
 Vout = -12V
 
 def control_voltage_for_frequency(frequency):
@@ -288,7 +288,7 @@ Alright, let's review. The key takeaways from VCOs are:
 
 [^schmitt]: The [Schmitt trigger](https://en.wikipedia.org/wiki/Schmitt_trigger) is a common, simple to use type of comparator that will work in a practical circuit.
 [^expo]: This is generally accomplished using an [*exponential converter*](https://northcoastsynthesis.com/news/exponential-converters-and-how-they-work/).
-[^lies]: The circuit as shown actually needs *negative* control voltage, but in a real VCO circuit it would take positive control voltage and run it through an [exponential converter](https://northcoastsynthesis.com/news/exponential-converters-and-how-they-work/) before applying it to the ramp generator. 
+[^lies]: The circuit as shown actually needs *negative* control voltage, but in a real VCO circuit it would take positive control voltage and run it through an [exponential converter](https://northcoastsynthesis.com/news/exponential-converters-and-how-they-work/) before applying it to the ramp generator.
 
 
 ## The digitally-controlled analog oscillator
@@ -315,7 +315,7 @@ If you were to connect the clock straight to the transistor then things wouldn't
 
 ![A dco with the clock directly connected, showing an output that's flat for half of the time](../static/juno/dco-no-diff.png)
 
-So there has to be some circuit between between the clock and the transistor that makes sure the transistor is only turned on for a *very short* period of time during the clock cycle to let the capacitor discharge.
+So there has to be a circuit between between the clock and the transistor that makes sure the transistor is only turned on for a *very short* period of time during the clock cycle to let the capacitor discharge.
 
 
 ## The RC differentiator
@@ -477,7 +477,7 @@ That's pretty much the Juno-106 design. Here's a few more things that might be i
 
 [^discharge]: This is calculated from the [capacitor discharge formula](http://hyperphysics.phy-astr.gsu.edu/hbase/electric/capdis.html).
 [^rc-rule-of-thumb]: It takes [just about 5 times longer](https://www.electronics-tutorials.ws/rc/rc_2.html) than the RC constant for a capacitor to fully charge or discharge.
-[^ow-my-brain]: This is actually pretty complex to calculate as far as I know - the op amp's output is constantly falling during the discharge phase, so the voltage across the capacitor will change constantly as well. 
+[^ow-my-brain]: This is actually pretty complex to calculate as far as I know - the op amp's output is constantly falling during the discharge phase, so the voltage across the capacitor will change constantly as well.
 [^negative-nancy]: This is totally not obvious from the Juno-106's schematic. It threw me off for a long time!
 
 
@@ -511,7 +511,7 @@ Some other interesting things about the Juno-6 & 60 implementation are:
 
 ## Waveshapers
 
-The Juno's oscillators can can output more than just a sawtooth waveform- they can also output a pulse waveform with variable pulse width and a "sub" waveform which is a square waveform at half of the input frequency.
+The Juno's oscillators can output more than just a sawtooth waveform- they can also output a pulse waveform with variable pulse width and a "sub" waveform which is a square waveform at half of the input frequency.
 
 ![Illustration of the various Juno waveforms](/static/juno/waveforms.png)
 
@@ -543,7 +543,7 @@ The Juno uses a standard TL08x op-amp as an **inverting** comparator[^better-com
 
 And that's about it! ✨
 
-[^better-compare]: Using an op amp as a comparator works in some cases, but there are also [dedicated comparator components](https://www.ti.com/lit/ds/symlink/lm397.pdf) that generally perform much better. 
+[^better-compare]: Using an op amp as a comparator works in some cases, but there are also [dedicated comparator components](https://www.ti.com/lit/ds/symlink/lm397.pdf) that generally perform much better.
 
 
 ## Resources and further reading
