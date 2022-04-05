@@ -171,10 +171,10 @@ the same, the domains are different (<code>github-proxy.thea.codes</code> vs <co
 permissions: read
 </pre>
 <p>But I want it to be machine readable so I'll use JSON:</p>
-<pre class="lang-json"><span class="p">{</span>
-    <span class="nt">&quot;real_token&quot;</span><span class="p">:</span> <span class="s2">&quot;7e096a6633471a2c967718d4b435f0ecdac5c426&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span>
-<span class="p">}</span>
+<pre class="lang-json"><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;real_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7e096a6633471a2c967718d4b435f0ecdac5c426&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre>
 <h2 id="securing-the-real-key">Securing the real key</h2>
 <p>Cool. Of course I can't just hand this token as-is to the thing that's talking to the proxy. The real token is right there in <em>plaintext</em>. The app or whatever could just pluck the real token out of the proxy token and bypass the proxy! What I need to do is protect it so that only the proxy can read it.</p>
@@ -236,10 +236,10 @@ aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85
 <p>The output of encryption is binary data so base64 encoding is used to turn it into something easier to deal with.</p>
 </blockquote>
 <p>Okay. So I now have an encrypted real token. Now I can update the proxy token to include that instead of the plaintext real token.</p>
-<pre class="lang-json"><span class="p">{</span>
-    <span class="nt">&quot;enc_real_token&quot;</span><span class="p">:</span> <span class="s2">&quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span>
-<span class="p">}</span>
+<pre class="lang-json"><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;enc_real_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aR5PGrONkL8gCnymVu/JpbGFr6LySmkfP5XwTdjSqvM7rPKKh8kBY0CV4KPGq1Axf77AinNGrNrwGq85VRkK96v7vZHBFR23qD1xVflm+BksFAeFmakgMb0XoqFLVtEQEJ6r8Iw8f8D0dInSJ7al3ZILntslVInTNmKBwYo5pJebq41TLd7HPUVsDxw6KbULl/TGeOA79BW9E3DzWX60linHb0UTE+SFuHPDJxMXUL8YXBav/+8OrRmH3n4CJIEmjhQd4GoZ2pUtjfzMCXGIikpZ3qld2/KWazoh6mghxz5RNRbKcGhJSWAz4+JHu0712UEWmk7qeS9n98VvU8lQKA==&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre>
 <p>When the proxy gets the proxy token it can use the <strong>private</strong> key to decrypt the token.</p>
 <p><img alt="Illustration of using the private key to decrypt our API token" src="../static/proxy-9.png" /></p>

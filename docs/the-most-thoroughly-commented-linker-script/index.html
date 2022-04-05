@@ -109,7 +109,7 @@ with <code>-Wstack-usage=STACK_SIZE</code>.</p>
 <li><a href="https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html">https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html</a></li>
 <li><a href="https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html</a></li>
 </ul>
-<pre class="lang-c"><span class="n">STACK_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEFINED</span><span class="p">(</span><span class="n">__stack_size__</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nl">__stack_size__</span> <span class="p">:</span><span class="w"> </span><span class="mh">0x800</span><span class="p">;</span><span class="w"></span>
+<pre class="lang-c"><span class="n">STACK_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEFINED</span><span class="p">(</span><span class="n">__stack_size__</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">__stack_size__</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0x800</span><span class="p">;</span><span class="w"></span>
 </pre>
 <h2 id="memory-space-definition">Memory space definition</h2>
 <p>This section declare blocks of memories for specific purposes. Since an
@@ -193,7 +193,7 @@ some sections are just placed in the output ELF for debugging.</p>
 Page 5, Segments</li>
 <li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
 </ul>
-<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="nl">text</span> <span class="p">:</span><span class="w"></span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">text</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
 <span class="w">   </span><span class="p">{</span><span class="w"></span>
 </pre>
 <p>This segment must be 4-byte aligned as defined in ARM ELF
@@ -361,11 +361,11 @@ have entries in the exidx and extab sections.</p>
 <li><a href="https://developer.arm.com/documentation/ihi0038/b/">https://developer.arm.com/documentation/ihi0038/b/</a></li>
 <li><a href="https://stackoverflow.com/a/57463515">https://stackoverflow.com/a/57463515</a></li>
 </ul>
-<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">extab</span> <span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="n">extab</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">extab</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armextab</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
 <span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rom</span><span class="w"></span>
 
-<span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="nl">exidx</span> <span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="n">exidx</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="n">PROVIDE</span><span class="w"> </span><span class="p">(</span><span class="n">__exidx_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.);</span><span class="w"></span>
 <span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">exidx</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armexidx</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
 <span class="w">      </span><span class="n">PROVIDE</span><span class="w"> </span><span class="p">(</span><span class="n">__exidx_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.);</span><span class="w"></span>
@@ -399,7 +399,7 @@ named these symbols differently.</p>
 <li><a href="https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA">https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA</a></li>
 <li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
 </ul>
-<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="nl">relocate</span> <span class="p">:</span><span class="w"></span>
+<pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">relocate</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
 <span class="w">   </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 <span class="w">      </span><span class="n">_srelocate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
