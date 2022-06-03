@@ -90,7 +90,7 @@ I don't write *everything* from scratch. There are several high quality librarie
 Here's some of the libraries we use:
 
 - [TinyUSB](https://github.com/hathach/tinyusb): an excellent and small USB library.
-- [Marco Paland's printf](https://github.com/mpaland/printf): a printf implementation optimized for microcontrollers.
+- [printf for embedded systems](https://github.com/eyalroz/printf): a lightweight but feature-filled printf implementation optimized for microcontrollers.
 - [libfixmath](https://github.com/PetteriAimonen/libfixmath): a small library for [fixed-point arthemetic](https://en.wikipedia.org/wiki/Fixed-point_arithmetic), which is super handy on microcontrollers that don't have a floating-point unit.
 - [µnit](https://nemequ.github.io/munit/): a very small, very useful testing framework.
 
