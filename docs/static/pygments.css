@@ -47,6 +47,7 @@ pre .py { color: #F8F8F2 } /* Name.Property */
 pre .nt { color: #FFB8D1 } /* Name.Tag */
 pre .nv { color: #F8F8F2 } /* Name.Variable */
 pre .ow { color: #FFB8D1 } /* Operator.Word */
+pre .pm { color: #F8F8F2 } /* Punctuation.Marker */
 pre .w { color: #A8757B } /* Text.Whitespace */
 pre .mb { color: #C5A3FF } /* Literal.Number.Bin */
 pre .mf { color: #C5A3FF } /* Literal.Number.Float */

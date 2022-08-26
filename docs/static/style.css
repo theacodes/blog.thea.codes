@@ -158,10 +158,11 @@ article blockquote {
 }
 
 article img {
-  width: 90%;
+  max-width: 90%;
   margin: 0 auto;
   display: block;
   padding: 2em 0;
+  max-height: 65vh;
 }
 
 article img.small {
