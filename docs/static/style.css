@@ -278,3 +278,24 @@ footer {
 .support-me a, .support-me a:hover, .support-me a:active, .support-me a:visited {
   color: #c2ffdf;
 }
+
+
+.sponsor {
+  display: block;
+  padding: 2em;
+  margin: 4em auto;
+  max-width: 50%;
+  /* color: white; */
+  background-color: #c2ffdf;
+}
+
+
+@media(max-width: 768px) {
+  .sponsor {
+    max-width: 80%;
+  }
+}
+
+.support-me a, .support-me a:hover, .support-me a:active, .support-me a:visited {
+  color: #c2ffdf;
+}
