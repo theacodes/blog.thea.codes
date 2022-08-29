@@ -1,8 +1,9 @@
 ---
 title: Using Python to vectorize artwork for PCBs
-date: 2022-08-23
+date: 2022-08-29
 legacy_url: yes
 description: Gluing together clever libraries to make beautiful printed circuit boards
+sponsor: pcbway
 ---
 
 The maker community has long been creating _amazing_ art with printed circuit boards (PCB). From the incredible variety of [#badgelife](https://twitter.com/search?q=%23badgelife&src=typed_query) from folks like [TwinkleTwinkie](https://www.tindie.com/stores/twinkletwinkie/) to the [adorable and accessible kits](https://www.alpenglowindustries.com/store.html#/) from folks like [Alpenglow](https://www.alpenglowindustries.com/#/), we've been misusing the circuit board fabrication process to great effect. I also (mis)use PCBs to create front panels for [Winterbloom]'s modules:
@@ -378,3 +379,9 @@ Hopefully this article has given some insight into raster-to-vector conversion a
 
 [full code]: https://gist.github.com/theacodes/2e13e4e05700279734ca4b34df370adb
 [gingerbread.convert]: https://github.com/wntrblm/Gingerbread#using-convert
+
+
+<aside class="sponsor" id="sponsor">
+    <a href="https://pcbway.com" target="_blank"><img src="/static/pcbway.png"></a>
+    This artcle was kindly sponsored by <a href="https://pcbway.com" target="_blank">PCBWay</a>. They provide fantastic, high-quality printed circuit boards along with additional services like assembly, 3d printing, and sheet metal fabrication. I use PCBWay for both prototype and production boards and I can't recommend them enough- the board in the photograph at the beginning of this post was made by PCBWay!
+</aside>
