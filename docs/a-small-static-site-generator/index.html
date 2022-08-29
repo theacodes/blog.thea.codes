@@ -53,10 +53,10 @@
   <content>
     <p>There are like, a hundred different static site generators written in Python (and even more written in other languages).</p>
 <p>So I decided to write my own. Why? Well, I just kind of wanted to. I had a
-desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wanted to keep things really minimalistic. I decided to use <a href="https://pages.github.com/">GitHub Pages</a> to host the output as they recently announced support for <a href="https://blog.github.com/2018-05-01-github-pages-custom-domains-https/">SSL for custom domains</a>.</p>
+desire to move my blog away from <a href="https://ghost.org/" referrerpolicy="origin" rel="noopener" target="_blank">Ghost</a> and I wanted to keep things really minimalistic. I decided to use <a href="https://pages.github.com/" referrerpolicy="origin" rel="noopener" target="_blank">GitHub Pages</a> to host the output as they recently announced support for <a href="https://blog.github.com/2018-05-01-github-pages-custom-domains-https/" referrerpolicy="origin" rel="noopener" target="_blank">SSL for custom domains</a>.</p>
 <h2 id="rendering-content">Rendering content</h2>
 <p>Every static site generator needs to take some source format (like Markdown or ReStructuredText) and turn it into HTML. Since I was moving from Ghost I decided to stick with Markdown.</p>
-<p>Since I recently integrated <a href="https://github.github.com/gfm/">Github-flavored Markdown</a> rendering into <a href="https://github.com/pypa/warehouse">Warehouse</a>, I decided to use the underlying library I made for that - <a href="https://pypi.org/project/cmarkgfm">cmarkgfm</a>. Rendering Markdown to HTML with <code>cmarkgfm</code> looks something like this:</p>
+<p>Since I recently integrated <a href="https://github.github.com/gfm/" referrerpolicy="origin" rel="noopener" target="_blank">Github-flavored Markdown</a> rendering into <a href="https://github.com/pypa/warehouse" referrerpolicy="origin" rel="noopener" target="_blank">Warehouse</a>, I decided to use the underlying library I made for that - <a href="https://pypi.org/project/cmarkgfm" referrerpolicy="origin" rel="noopener" target="_blank">cmarkgfm</a>. Rendering Markdown to HTML with <code>cmarkgfm</code> looks something like this:</p>
 <pre class="lang-python3"><span class="kn">import</span> <span class="nn">cmarkgfm</span>
 
 
@@ -66,11 +66,11 @@ desire to move my blog away from <a href="https://ghost.org/">Ghost</a> and I wa
         <span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;autolink&#39;</span><span class="p">,</span> <span class="s1">&#39;strikethrough&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">content</span>
 </pre>
-<p><code>cmarkgfm</code> does have convenience method called <code>github_flavored_markdown_to_html</code>, but it uses GitHub's <a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">tagfilter</a> extension which isn't desirable when I want to embed scripts and stuff into posts. So I just hand-picked the extensions I wanted to use.</p>
+<p><code>cmarkgfm</code> does have convenience method called <code>github_flavored_markdown_to_html</code>, but it uses GitHub's <a href="https://github.github.com/gfm/#disallowed-raw-html-extension-" referrerpolicy="origin" rel="noopener" target="_blank">tagfilter</a> extension which isn't desirable when I want to embed scripts and stuff into posts. So I just hand-picked the extensions I wanted to use.</p>
 <h2 id="collecting-sources">Collecting sources</h2>
 <p>Okay, we have a way to render Markdown but we also need a way to collect all
 of our source files. I decided to store all of sources under <code>./src</code>. We can
-use <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a> to collect them all:</p>
+use <a href="https://docs.python.org/3/library/pathlib.html" referrerpolicy="origin" rel="noopener" target="_blank"><code>pathlib</code></a> to collect them all:</p>
 <pre class="lang-python3"><span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
 
@@ -88,7 +88,7 @@ title: Post time
 
 <span class="gh"># Markdown content here.</span>
 </pre>
-<p>There's a really nice and simple existing library for frontmatter called <a href="https://pypi.org/project/python-frontmatter/">python-frontmatter</a>. I can use
+<p>There's a really nice and simple existing library for frontmatter called <a href="https://pypi.org/project/python-frontmatter/" referrerpolicy="origin" rel="noopener" target="_blank">python-frontmatter</a>. I can use
 this to extract the frontmatter and the the raw content:</p>
 <pre class="lang-python3"><span class="kn">import</span> <span class="nn">frontmatter</span>
 
@@ -99,7 +99,7 @@ this to extract the frontmatter and the the raw content:</p>
 </pre>
 <p>The returned <code>post</code> object has <code>.content</code> property that has the post content and otherwise acts as a dictionary to fetch the frontmatter keys.</p>
 <h2 id="rendering-the-posts">Rendering the posts</h2>
-<p>Now that we have the post content and frontmatter, we can render them. I decided to use <a href="https://pypi.org/project/jinja2">jinja2</a> to place the <code>cmarkgfm</code>-rendered post Markdown and frontmatter into a simple HTML template.</p>
+<p>Now that we have the post content and frontmatter, we can render them. I decided to use <a href="https://pypi.org/project/jinja2" referrerpolicy="origin" rel="noopener" target="_blank">jinja2</a> to place the <code>cmarkgfm</code>-rendered post Markdown and frontmatter into a simple HTML template.</p>
 <p>Here's the template:</p>
 <pre class="lang-html"><span class="cp">&lt;!doctype html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
@@ -128,7 +128,7 @@ this to extract the frontmatter and the the raw content:</p>
     <span class="n">rendered</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
     <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
 </pre>
-<p>Notice that I store the rendered HTML in <code>./docs</code>. This is because I configured GitHub Pages to publish content from the <a href="https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch">doc directory</a>.</p>
+<p>Notice that I store the rendered HTML in <code>./docs</code>. This is because I configured GitHub Pages to publish content from the <a href="https://help.github.com/articles/configuring-a-publishing-source-for-github-pages/#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch" referrerpolicy="origin" rel="noopener" target="_blank">doc directory</a>.</p>
 <p>Now that we can render a single post, we can loop through all of the posts using the <code>get_sources</code> function we created above:</p>
 <pre class="lang-python3"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
@@ -187,7 +187,7 @@ this to extract the frontmatter and the the raw content:</p>
     <span class="n">main</span><span class="p">()</span>
 </pre>
 <h2 id="check-this-out-on-github">Check this out on GitHub</h2>
-<p>So the page you're reading now was rendered with this code! You can go and see the full source code for this, including syntax highlighting support, over at <a href="https://github.com/theacodes/blog.thea.codes/">theacodes/blog.thea.codes</a></p>
+<p>So the page you're reading now was rendered with this code! You can go and see the full source code for this, including syntax highlighting support, over at <a href="https://github.com/theacodes/blog.thea.codes/" referrerpolicy="origin" rel="noopener" target="_blank">theacodes/blog.thea.codes</a></p>
   </content>
 
   

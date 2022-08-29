@@ -4,3 +4,4 @@ livereload
 python-frontmatter
 pygments
 pymdown-extensions
+markdown_link_attr_modifier

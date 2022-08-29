@@ -55,11 +55,11 @@
 <p><img alt="phase-shifed sine waves" src="../static/phase_shift.svg" /></p>
 <div class="image-caption"><a href=https://commons.wikimedia.org/wiki/File:Phase_shift.svg" target="_blank">Peppergrower / CC BY-SA</a></div>
 
-<p>Unfortunately, I couldn't find any good resources on how to accomplish this with my favorite 32-bit ARM microcontroller, the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18">SAM D21</a>, which is used in the Arduino Zero and Adafruit's M0 series. So I set out to figure this out - and with a little help from Twitter and friends I was able to get it working.</p>
+<p>Unfortunately, I couldn't find any good resources on how to accomplish this with my favorite 32-bit ARM microcontroller, the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18" referrerpolicy="origin" rel="noopener" target="_blank">SAM D21</a>, which is used in the Arduino Zero and Adafruit's M0 series. So I set out to figure this out - and with a little help from Twitter and friends I was able to get it working.</p>
 <p>This method should also work with the SAM D51 and other chips in the SAM family with the <em>TCC</em> peripheral.</p>
 <h2 id="how-pwm-works-on-the-sam-d21">How PWM works on the SAM D21</h2>
 <p>In order to pull this off I first needed to understand at the hardware level how PWMs are generated. Arduino &amp; friends <em>really</em> abstract this because there are several different ways to accomplish a PWM output and the peripheral that does this, the TCC, is extremely complex. The reason this is such a complex peripheral is that it's not just for generating PWMs - it can be used to control complex motor drivers and such!</p>
-<p>Luckily, Shawn Hymel has a great blog post on <a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/">creating PWM outputs using registers</a>. This was my starting point for making this happen.</p>
+<p>Luckily, Shawn Hymel has a great blog post on <a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/" referrerpolicy="origin" rel="noopener" target="_blank">creating PWM outputs using registers</a>. This was my starting point for making this happen.</p>
 <p>Getting a TCC to create a PWM output comes down to these steps:</p>
 <ol>
 <li>Enable the bus clock to the TCC.</li>
@@ -195,12 +195,12 @@ at the start. Setting this value will cause that TCC's output to be out of phase
 <h2 id="wrapping-up">Wrapping up</h2>
 <p>That's all! Thanks for reading this and I hope it's helpful to some poor soul who's fighting with the PWM output on the SAMD21. Here's some resources if you want to read more about this sort of stuff.</p>
 <ul>
-<li><a href="https://en.wikipedia.org/wiki/Pulse-width_modulation">PWM on Wikipedia</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Phase_(waves)">Phase on Wikipedia</a></li>
-<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">SAM D21 Datasheet</a></li>
-<li><a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/">Shawn Hymel's blog post on SAM D21 PWMs</a></li>
-<li><a href="https://github.com/ocrdu/Arduino_SAMD21_turbo_PWM">Arduino SAMD21 Turbo PWM library</a></li>
-<li><a href="http://ww1.microchip.com/downloads/en/AppNotes/Atmel-42357-Using-the-Timer-Counter-for-Control-Applications_ApplicationNote_AT07690.pdf">SAM D11 TCC application notes</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Pulse-width_modulation" referrerpolicy="origin" rel="noopener" target="_blank">PWM on Wikipedia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Phase_(waves)" referrerpolicy="origin" rel="noopener" target="_blank">Phase on Wikipedia</a></li>
+<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">SAM D21 Datasheet</a></li>
+<li><a href="https://shawnhymel.com/1710/arduino-zero-samd21-raw-pwm-using-cmsis/" referrerpolicy="origin" rel="noopener" target="_blank">Shawn Hymel's blog post on SAM D21 PWMs</a></li>
+<li><a href="https://github.com/ocrdu/Arduino_SAMD21_turbo_PWM" referrerpolicy="origin" rel="noopener" target="_blank">Arduino SAMD21 Turbo PWM library</a></li>
+<li><a href="http://ww1.microchip.com/downloads/en/AppNotes/Atmel-42357-Using-the-Timer-Counter-for-Control-Applications_ApplicationNote_AT07690.pdf" referrerpolicy="origin" rel="noopener" target="_blank">SAM D11 TCC application notes</a></li>
 </ul>
   </content>
 

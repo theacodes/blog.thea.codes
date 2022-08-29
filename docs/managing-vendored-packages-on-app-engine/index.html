@@ -48,13 +48,13 @@
   </aside>
   <h1>Managing vendored packages on App Engine</h1>
   <content>
-    <p><strong>N.B.:</strong> You don't need to follow this post anymore. I've gotten this functionality built-in to the Google App Engine standard environment. See the <a href="https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27">official documentation</a>.</p>
-<p>Recently I had a discussion with <a href="http://github.com/webmaven">Michael Bernstein</a> about vendoring packages in App Engine projects and some of the headaches that come with doing that. We worked together to solve various issues, both in what <a href="https://github.com/GoogleCloudPlatform/appengine-python-bottle-skeleton/pull/12">we were doing</a> and with the <a href="https://github.com/pypa/pip/pull/2007">tools available</a> to us. This post is intended to catalogue my personal approach to vendoring in App Engine.</p>
+    <p><strong>N.B.:</strong> You don't need to follow this post anymore. I've gotten this functionality built-in to the Google App Engine standard environment. See the <a href="https://cloud.google.com/appengine/docs/standard/python/tools/using-libraries-python-27" referrerpolicy="origin" rel="noopener" target="_blank">official documentation</a>.</p>
+<p>Recently I had a discussion with <a href="http://github.com/webmaven" referrerpolicy="origin" rel="noopener" target="_blank">Michael Bernstein</a> about vendoring packages in App Engine projects and some of the headaches that come with doing that. We worked together to solve various issues, both in what <a href="https://github.com/GoogleCloudPlatform/appengine-python-bottle-skeleton/pull/12" referrerpolicy="origin" rel="noopener" target="_blank">we were doing</a> and with the <a href="https://github.com/pypa/pip/pull/2007" referrerpolicy="origin" rel="noopener" target="_blank">tools available</a> to us. This post is intended to catalogue my personal approach to vendoring in App Engine.</p>
 <h3 id="the-problem">The problem</h3>
-<p>Even trivial python web applications often need one or more third-party packages. The generally agreed way to do this is to simple use <code>pip install</code> to make it happen. Modern development and deployment practices usually require each application to have its own <a href="http://virtualenv.readthedocs.org/en/latest/">virtualenv</a> to isolate application-specific packages from system-wide packages. This is absolutely fantastic and perfectly follows the guidelines laid out in the <a href="http://12factor.net/dependencies">twelve-factor app</a>.</p>
+<p>Even trivial python web applications often need one or more third-party packages. The generally agreed way to do this is to simple use <code>pip install</code> to make it happen. Modern development and deployment practices usually require each application to have its own <a href="http://virtualenv.readthedocs.org/en/latest/" referrerpolicy="origin" rel="noopener" target="_blank">virtualenv</a> to isolate application-specific packages from system-wide packages. This is absolutely fantastic and perfectly follows the guidelines laid out in the <a href="http://12factor.net/dependencies" referrerpolicy="origin" rel="noopener" target="_blank">twelve-factor app</a>.</p>
 <p>Unfortunately, those of us using App Engine do not have proper virtualenv support. In an ideal world we would create our <code>requirements.txt</code> and the app engine runtime would take care of the rest (downloading, installing, and wiring these packages in a virtualenv). This means we have to resort to vendoring.</p>
 <h3 id="what-is-vendoring">What is vendoring?</h3>
-<p>Vendoring is when you essentially bundle third-party dependencies within your application's source tree. It's an <a href="https://gist.github.com/datagrok/8577287">anti-pattern</a>, but it's the only choice we've got. What you end up with is a folder structure that looks like this:</p>
+<p>Vendoring is when you essentially bundle third-party dependencies within your application's source tree. It's an <a href="https://gist.github.com/datagrok/8577287" referrerpolicy="origin" rel="noopener" target="_blank">anti-pattern</a>, but it's the only choice we've got. What you end up with is a folder structure that looks like this:</p>
 <pre><code>my-application/
 - handlers/
   - cool_feature.py
@@ -82,7 +82,7 @@ google-api-python-client==1.2
 <pre><code>pip install --target=lib -r requirements.txt
 </code></pre>
 <p>If you're using <code>requirements.txt</code> it's also a good idea to avoid adding your <code>lib</code> folder to your version control system. Add the <code>lib</code> folder to <code>.gitignore</code> (or similar) and be sure to let collaborators know that an additional step is required when cloning/pulling.</p>
-<p>As of the time of writing there is currently an <a href="https://github.com/pypa/pip/issues/1489">issue with pip</a> that's preventing the updating of packages. I have submitted a <a href="https://github.com/pypa/pip/pull/2007">pull request</a> to fix this and it should hopefully make it into the next release.</p>
+<p>As of the time of writing there is currently an <a href="https://github.com/pypa/pip/issues/1489" referrerpolicy="origin" rel="noopener" target="_blank">issue with pip</a> that's preventing the updating of packages. I have submitted a <a href="https://github.com/pypa/pip/pull/2007" referrerpolicy="origin" rel="noopener" target="_blank">pull request</a> to fix this and it should hopefully make it into the next release.</p>
 <p>Once this fix lands you can upgrade packages as expected:</p>
 <pre><code>pip install --upgrade --target=lib requests
 </code></pre>
@@ -131,7 +131,7 @@ google-api-python-client==1.2
 <span class="c1"># Change &#39;lib&#39; to whichever directory you use for your vendored packages.</span>
 <span class="n">add_vendor_packages</span><span class="p">(</span><span class="s1">&#39;lib&#39;</span><span class="p">)</span>
 </pre>
-<p>The code above is the result of a lot of fumbling. This is so easy to get wrong and it's easy to make it only work halfway. It probably still doesn't cover every edge case. If you find problems with it please let me know as I will gladly update this code to fix it. Big thanks again to <a href="https://github.com/webmaven">Michael</a> for helping this work with namespaced packages.</p>
+<p>The code above is the result of a lot of fumbling. This is so easy to get wrong and it's easy to make it only work halfway. It probably still doesn't cover every edge case. If you find problems with it please let me know as I will gladly update this code to fix it. Big thanks again to <a href="https://github.com/webmaven" referrerpolicy="origin" rel="noopener" target="_blank">Michael</a> for helping this work with namespaced packages.</p>
 <h3 id="conclusion">Conclusion</h3>
 <p>Vendoring with App Engine requires:</p>
 <ol>

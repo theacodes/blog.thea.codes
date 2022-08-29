@@ -51,8 +51,8 @@
   </aside>
   <h1>Reading analog values with the SAMD21's ADC</h1>
   <content>
-    <p>I've been diving deeper and deeper into the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18">SAM D21's</a> hardware over the last few weeks. I've been trying to grasp as much as I can at the hardware level so that I can take advantage of some of the more advanced features that higher-level environments like <a href="https://www.arduino.cc/">Arduino</a> and <a href="https://circuitpython.org">CircuitPython</a> can obscure behind the friendly <code>analogRead</code> function. This means working at things at the hardware register level.</p>
-<p>Today I started working with the SAM D21's <a href="https://en.wikipedia.org/wiki/Analog-to-digital_converter">Analog to Digital Converter</a> (ADC). This peripheral lets you measure analog voltage on one of the microcontroller's pins and is super useful for my synthesizer projects. This post walks through setting up the ADC and reading a value. It's also pretty likely that this information applies to other controllers in the SAM family, such as the SAM D51.</p>
+    <p>I've been diving deeper and deeper into the <a href="https://www.microchip.com/wwwproducts/en/ATsamd21g18" referrerpolicy="origin" rel="noopener" target="_blank">SAM D21's</a> hardware over the last few weeks. I've been trying to grasp as much as I can at the hardware level so that I can take advantage of some of the more advanced features that higher-level environments like <a href="https://www.arduino.cc/" referrerpolicy="origin" rel="noopener" target="_blank">Arduino</a> and <a href="https://circuitpython.org" referrerpolicy="origin" rel="noopener" target="_blank">CircuitPython</a> can obscure behind the friendly <code>analogRead</code> function. This means working at things at the hardware register level.</p>
+<p>Today I started working with the SAM D21's <a href="https://en.wikipedia.org/wiki/Analog-to-digital_converter" referrerpolicy="origin" rel="noopener" target="_blank">Analog to Digital Converter</a> (ADC). This peripheral lets you measure analog voltage on one of the microcontroller's pins and is super useful for my synthesizer projects. This post walks through setting up the ADC and reading a value. It's also pretty likely that this information applies to other controllers in the SAM family, such as the SAM D51.</p>
 <h2 id="how-the-adc-works">How the ADC works</h2>
 <p>The ADC is one of the SAM D21's more straightforward peripherals so thankfully the setup isn't too complex and boils down to these steps:</p>
 <ol>
@@ -126,7 +126,7 @@
 <span class="w">                     </span><span class="n">ADC_INPUTCTRL_MUXNEG_GND</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
 <span class="w">                     </span><span class="n">ADC_INPUTCTRL_MUXPOS_PIN3</span><span class="p">;</span><span class="w"></span>
 </pre>
-<p>Okay, one last task before you can start taking measurements: you have to configure the input pin for the ADC. The code above specified that you want to use <code>AIN3</code>/<code>PB09</code> as the input pin so you'll need to configure that for input. By the way, you can find a complete list of analog input pins in section 33.8.8 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">SAM D21 datasheet</a>. Here's the code for that:</p>
+<p>Okay, one last task before you can start taking measurements: you have to configure the input pin for the ADC. The code above specified that you want to use <code>AIN3</code>/<code>PB09</code> as the input pin so you'll need to configure that for input. By the way, you can find a complete list of analog input pins in section 33.8.8 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">SAM D21 datasheet</a>. Here's the code for that:</p>
 <pre class="lang-c"><span class="cm">/* Set PB09 as an input pin. */</span><span class="w"></span>
 <span class="n">PORT</span><span class="o">-&gt;</span><span class="n">Group</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">DIRCLR</span><span class="p">.</span><span class="n">reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PORT_PB09</span><span class="p">;</span><span class="w"></span>
 
@@ -165,11 +165,11 @@
 <p>I hope this post is helpful for someone - either someone wanting to learn more about register-level microcontroller programming or someone looking to get the SAM D21 ADC working for their project. I'll be writing a follow up post on some more advanced features of the ADC soon - stay tuned!</p>
 <p>Here's some resources about the SAM D21 ADC that I used when researching this topic and writing this post, they may be useful as further reading:</p>
 <ul>
-<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">SAM D21 Datasheet</a></li>
-<li><a href="https://github.com/adafruit/circuitpython/blob/main/ports/atmel-samd/common-hal/analogio/AnalogIn.c">CircuitPython's AnalogIn source code</a></li>
-<li><a href="https://github.com/adafruit/samd-peripherals/blob/master/samd/samd21/adc.c">Adafruit's samd-peripheral's ADC source code</a></li>
-<li><a href="https://github.com/arduino/ArduinoCore-samd/blob/master/cores/arduino/wiring_analog.c">Arduino's SAMD21 core analog source code</a></li>
-<li><a href="https://github.com/Molorius/ATSAMD21-ADC">ATSAMD21-ADC library</a></li>
+<li><a href="http://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">SAM D21 Datasheet</a></li>
+<li><a href="https://github.com/adafruit/circuitpython/blob/main/ports/atmel-samd/common-hal/analogio/AnalogIn.c" referrerpolicy="origin" rel="noopener" target="_blank">CircuitPython's AnalogIn source code</a></li>
+<li><a href="https://github.com/adafruit/samd-peripherals/blob/master/samd/samd21/adc.c" referrerpolicy="origin" rel="noopener" target="_blank">Adafruit's samd-peripheral's ADC source code</a></li>
+<li><a href="https://github.com/arduino/ArduinoCore-samd/blob/master/cores/arduino/wiring_analog.c" referrerpolicy="origin" rel="noopener" target="_blank">Arduino's SAMD21 core analog source code</a></li>
+<li><a href="https://github.com/Molorius/ATSAMD21-ADC" referrerpolicy="origin" rel="noopener" target="_blank">ATSAMD21-ADC library</a></li>
 </ul>
   </content>
 

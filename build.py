@@ -3,6 +3,7 @@ from typing import Iterator, Sequence
 
 import markdown
 import markdown.extensions.fenced_code
+import markdown_link_attr_modifier
 import pymdownx.magiclink
 import frontmatter
 import jinja2
@@ -24,7 +25,8 @@ markdown_ = markdown.Markdown(
         "footnotes",
         "pymdownx.smartsymbols",
         markdown.extensions.fenced_code.FencedCodeExtension(lang_prefix="language-"),
-        pymdownx.magiclink.MagiclinkExtension(hide_protocol=False,)
+        pymdownx.magiclink.MagiclinkExtension(hide_protocol=False,),
+        markdown_link_attr_modifier.LinkAttrModifierExtension(new_tab="external_only", custom_attrs=dict(referrerpolicy="origin")),
     ]
 )
 

@@ -6,6 +6,7 @@ import build
 def rebuild():
     build.main()
 
+rebuild()
 
 server = livereload.Server()
 server.setHeader("Cache-Control", "no-store")

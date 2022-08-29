@@ -51,12 +51,12 @@
   </aside>
   <h1>The most thoroughly commented linker script (probably)</h1>
   <content>
-    <p>While developing the firmware for Winterbloom's <a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux">Castor &amp; Pollux</a>, I got very curious as to just what the Microchip/Atmel-provided linker script was doing.</p>
+    <p>While developing the firmware for Winterbloom's <a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux" referrerpolicy="origin" rel="noopener" target="_blank">Castor &amp; Pollux</a>, I got very curious as to just what the Microchip/Atmel-provided linker script was doing.</p>
 <p>If you've never heard of or seen a linker script before you're not alone. Most of us never even have to think about them, however, on memory constained embedded devices it's not uncommon to need to modify the default linker script.</p>
 <p>The linker script controls how <code>ld</code> combines all of your <code>.o</code> files into a single <code>.elf</code> and how that resulting <code>.elf</code> file gets loaded by the target processor.</p>
 <p>So I was staring at this script that made absolutely no sense to me. It's filled with incantations and mysterious symbols and there's no indication of what they're for or where they come from.</p>
-<p>So I did a <strong>lot</strong> of research and now I can present to you <strong>the most thoroughly commented linker script</strong><sup id="fnref:probably"><a class="footnote-ref" href="#fn:probably">1</a></sup>.</p>
-<p>You can see this script in its entirety, comments and all, on <a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/blob/master/firmware/scripts/samd21g18a.ld">GitHub</a>. But if you'd like to read it here instead it's transcribed below.</p>
+<p>So I did a <strong>lot</strong> of research and now I can present to you <strong>the most thoroughly commented linker script</strong><sup id="fnref:probably"><a class="footnote-ref" href="#fn:probably" referrerpolicy="origin">1</a></sup>.</p>
+<p>You can see this script in its entirety, comments and all, on <a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/blob/master/firmware/scripts/samd21g18a.ld" referrerpolicy="origin" rel="noopener" target="_blank">GitHub</a>. But if you'd like to read it here instead it's transcribed below.</p>
 <h2 id="output-format">Output format</h2>
 <p>Output format sets the ELF output format to use a specific BFD backend.</p>
 <p>The first is the default BFD. The second and third arguments are used
@@ -69,9 +69,9 @@ default.</p>
 <p>The list of acceptable values can be obtained using <code>objdump -i</code>.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://sourceware.org/binutils/docs/ld/Format-Commands.html#Format-Commands">https://sourceware.org/binutils/docs/ld/Format-Commands.html#Format-Commands</a></li>
-<li><a href="https://sourceware.org/binutils/docs/ld/BFD.html">https://sourceware.org/binutils/docs/ld/BFD.html</a></li>
-<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
+<li><a href="https://sourceware.org/binutils/docs/ld/Format-Commands.html#Format-Commands" referrerpolicy="origin" rel="noopener" target="_blank">https://sourceware.org/binutils/docs/ld/Format-Commands.html#Format-Commands</a></li>
+<li><a href="https://sourceware.org/binutils/docs/ld/BFD.html" referrerpolicy="origin" rel="noopener" target="_blank">https://sourceware.org/binutils/docs/ld/BFD.html</a></li>
+<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
     Section 11.1.11, Cortex M0+ Configuration</li>
 </ul>
 <pre class="lang-c"><span class="n">OUTPUT_FORMAT</span><span class="p">(</span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;elf32-littlearm&quot;</span><span class="p">)</span><span class="w"></span>
@@ -86,7 +86,7 @@ the various memory spaces.</p>
 to store calibration and user settings.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
+<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
     Section 10.2, Physical Memory Map</li>
 </ul>
 <pre class="lang-c"><span class="n">FLASH_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x40000</span><span class="p">;</span><span class="w">      </span><span class="cm">/* 256kB */</span><span class="w"></span>
@@ -104,10 +104,10 @@ flag and you can enable compiler warnings for stack usage
 with <code>-Wstack-usage=STACK_SIZE</code>.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://embeddedartistry.com/blog/2020/08/17/three-gcc-flags-for-analyzing-memory-usage/">https://embeddedartistry.com/blog/2020/08/17/three-gcc-flags-for-analyzing-memory-usage/</a></li>
-<li><a href="https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/how-much-stack-memory-do-i-need-for-my-arm-cortex--m-applications">https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/how-much-stack-memory-do-i-need-for-my-arm-cortex--m-applications</a></li>
-<li><a href="https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html">https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html</a></li>
-<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html</a></li>
+<li><a href="https://embeddedartistry.com/blog/2020/08/17/three-gcc-flags-for-analyzing-memory-usage/" referrerpolicy="origin" rel="noopener" target="_blank">https://embeddedartistry.com/blog/2020/08/17/three-gcc-flags-for-analyzing-memory-usage/</a></li>
+<li><a href="https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/how-much-stack-memory-do-i-need-for-my-arm-cortex--m-applications" referrerpolicy="origin" rel="noopener" target="_blank">https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/how-much-stack-memory-do-i-need-for-my-arm-cortex--m-applications</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gnat_ugn/Static-Stack-Usage-Analysis.html</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html</a></li>
 </ul>
 <pre class="lang-c"><span class="n">STACK_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEFINED</span><span class="p">(</span><span class="n">__stack_size__</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">__stack_size__</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0x800</span><span class="p">;</span><span class="w"></span>
 </pre>
@@ -119,8 +119,8 @@ types of data can go in the address space.</p>
 <p>These blocks will be used in the <code>SECTIONS</code> command below.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://sourceware.org/binutils/docs/ld/MEMORY.html#MEMORY">https://sourceware.org/binutils/docs/ld/MEMORY.html#MEMORY</a></li>
-<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
+<li><a href="https://sourceware.org/binutils/docs/ld/MEMORY.html#MEMORY" referrerpolicy="origin" rel="noopener" target="_blank">https://sourceware.org/binutils/docs/ld/MEMORY.html#MEMORY</a></li>
+<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
     Section 10.2, Physical Memory Map</li>
 </ul>
 <pre class="lang-c"><span class="n">MEMORY</span><span class="w"></span>
@@ -136,7 +136,7 @@ bootloader. The bootloader takes the first 0x2000 bytes of flash
 memory.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://github.com/adafruit/uf2-samdx1#configuration">https://github.com/adafruit/uf2-samdx1#configuration</a></li>
+<li><a href="https://github.com/adafruit/uf2-samdx1#configuration" referrerpolicy="origin" rel="noopener" target="_blank">https://github.com/adafruit/uf2-samdx1#configuration</a></li>
 </ul>
 <pre class="lang-c"><span class="w">    </span><span class="n">bootloader</span><span class="w"> </span><span class="p">(</span><span class="n">rx</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ORIGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00000000</span><span class="p">,</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BOOTLOADER_SIZE</span><span class="w"></span>
 </pre>
@@ -181,7 +181,7 @@ are the ones that'll be placed into the memory (segments)
 some sections are just placed in the output ELF for debugging.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://sourceware.org/binutils/docs/ld/SECTIONS.html#SECTIONS">https://sourceware.org/binutils/docs/ld/SECTIONS.html#SECTIONS</a></li>
+<li><a href="https://sourceware.org/binutils/docs/ld/SECTIONS.html#SECTIONS" referrerpolicy="origin" rel="noopener" target="_blank">https://sourceware.org/binutils/docs/ld/SECTIONS.html#SECTIONS</a></li>
 </ul>
 <pre class="lang-c"><span class="n">SECTIONS</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
@@ -189,9 +189,9 @@ some sections are just placed in the output ELF for debugging.</p>
 <p>The text segment contains program code and read-only data.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://developer.arm.com/documentation/dui0101/a/">https://developer.arm.com/documentation/dui0101/a/</a>
+<li><a href="https://developer.arm.com/documentation/dui0101/a/" referrerpolicy="origin" rel="noopener" target="_blank">https://developer.arm.com/documentation/dui0101/a/</a>
 Page 5, Segments</li>
-<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
+<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections" referrerpolicy="origin" rel="noopener" target="_blank">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
 </ul>
 <pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">text</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
 <span class="w">   </span><span class="p">{</span><span class="w"></span>
@@ -222,12 +222,12 @@ intialization. The <code>_efixed</code> symbol is unused but
 included for completeness.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
+<li><a href="https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf" referrerpolicy="origin" rel="noopener" target="_blank">https://ww1.microchip.com/downloads/en/DeviceDoc/SAM_D21_DA1_Family_DataSheet_DS40001882F.pdf</a>
 Secion 8.3.3, Fetching of Initial Instructions</li>
-<li><a href="https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf">https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf</a>
+<li><a href="https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf" referrerpolicy="origin" rel="noopener" target="_blank">https://static.docs.arm.com/ddi0403/eb/DDI0403E_B_armv7m_arm.pdf</a>
 Section B1.5.3, The vector table
 Section B3.2.5, Vector Table Offset Register, VTOR</li>
-<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
+<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c" referrerpolicy="origin" rel="noopener" target="_blank">startup_samd21.c</a></li>
 </ul>
 <pre class="lang-c"><span class="w">      </span><span class="n">_sfixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.;</span><span class="w"></span>
 <span class="w">      </span><span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">vectors</span><span class="w"> </span><span class="p">.</span><span class="n">vectors</span><span class="p">.</span><span class="o">*</span><span class="p">))</span><span class="w"></span>
@@ -250,9 +250,9 @@ Vague Linking.</li>
 </ul>
 <p>References:</p>
 <ul>
-<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
-<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Vague-Linkage.html">https://gcc.gnu.org/onlinedocs/gcc/Vague-Linkage.html</a></li>
-<li><a href="https://stackoverflow.com/questions/5518083/what-is-a-linkonce-section">https://stackoverflow.com/questions/5518083/what-is-a-linkonce-section</a></li>
+<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections" referrerpolicy="origin" rel="noopener" target="_blank">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Vague-Linkage.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gcc/Vague-Linkage.html</a></li>
+<li><a href="https://stackoverflow.com/questions/5518083/what-is-a-linkonce-section" referrerpolicy="origin" rel="noopener" target="_blank">https://stackoverflow.com/questions/5518083/what-is-a-linkonce-section</a></li>
 </ul>
 <pre class="lang-c"><span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">text</span><span class="w"> </span><span class="p">.</span><span class="n">text</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">t</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
 <span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">rodata</span><span class="w"> </span><span class="p">.</span><span class="n">rodata</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
@@ -261,7 +261,7 @@ Vague Linking.</li>
 <p>The following sections are for the C/C++ runtime. These are generally used by crt0.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://en.wikipedia.org/wiki/Crt0">https://en.wikipedia.org/wiki/Crt0</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Crt0" referrerpolicy="origin" rel="noopener" target="_blank">https://en.wikipedia.org/wiki/Crt0</a></li>
 </ul>
 <h3 id="initializers">Initializers</h3>
 <ul>
@@ -277,11 +277,11 @@ Vague Linking.</li>
 <p>Executed by the C runtime at startup via <code>__libc_init_array</code>.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c">https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c</a></li>
-<li><a href="https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/init.c">https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/init.c</a>;</li>
-<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
-<li><a href="https://developer.arm.com/documentation/dui0475/h/the-arm-c-and-c---libraries/c---initialization--construction-and-destruction">https://developer.arm.com/documentation/dui0475/h/the-arm-c-and-c---libraries/c---initialization--construction-and-destruction</a></li>
-<li><a href="https://stackoverflow.com/questions/15265295/understanding-the-libc-init-array">https://stackoverflow.com/questions/15265295/understanding-the-libc-init-array</a></li>
+<li><a href="https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c" referrerpolicy="origin" rel="noopener" target="_blank">https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c</a></li>
+<li><a href="https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/init.c" referrerpolicy="origin" rel="noopener" target="_blank">https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/init.c</a>;</li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
+<li><a href="https://developer.arm.com/documentation/dui0475/h/the-arm-c-and-c---libraries/c---initialization--construction-and-destruction" referrerpolicy="origin" rel="noopener" target="_blank">https://developer.arm.com/documentation/dui0475/h/the-arm-c-and-c---libraries/c---initialization--construction-and-destruction</a></li>
+<li><a href="https://stackoverflow.com/questions/15265295/understanding-the-libc-init-array" referrerpolicy="origin" rel="noopener" target="_blank">https://stackoverflow.com/questions/15265295/understanding-the-libc-init-array</a></li>
 </ul>
 <pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 <span class="w">      </span><span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">init</span><span class="p">))</span><span class="w"></span>
@@ -306,7 +306,7 @@ Vague Linking.</li>
 </pre>
 <p>References:</p>
 <ul>
-<li><a href="https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/fini.c">https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/fini.c</a></li>
+<li><a href="https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/fini.c" referrerpolicy="origin" rel="noopener" target="_blank">https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/misc/fini.c</a></li>
 </ul>
 <pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 <span class="w">      </span><span class="n">KEEP</span><span class="p">(</span><span class="o">*</span><span class="p">(.</span><span class="n">fini</span><span class="p">))</span><span class="w"></span>
@@ -320,8 +320,8 @@ Vague Linking.</li>
 <h3 id="c-runtime-static-constructors">C++ runtime: static constructors</h3>
 <p>References:</p>
 <ul>
-<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
-<li><a href="https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c">https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
+<li><a href="https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c" referrerpolicy="origin" rel="noopener" target="_blank">https://github.com/gcc-mirror/gcc/blob/master/libgcc/crtstuff.c</a></li>
 </ul>
 <pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 <span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtbegin</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">ctors</span><span class="p">))</span><span class="w"></span>
@@ -334,7 +334,7 @@ Vague Linking.</li>
 doesn't exit - except when powered off or reset.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gccint/Initialization.html</a></li>
 </ul>
 <pre class="lang-c"><span class="w">      </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 <span class="w">      </span><span class="n">KEEP</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">crtbegin</span><span class="p">.</span><span class="n">o</span><span class="p">(.</span><span class="n">dtors</span><span class="p">))</span><span class="w"></span>
@@ -358,8 +358,8 @@ examine backtraces.</p>
 have entries in the exidx and extab sections.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://developer.arm.com/documentation/ihi0038/b/">https://developer.arm.com/documentation/ihi0038/b/</a></li>
-<li><a href="https://stackoverflow.com/a/57463515">https://stackoverflow.com/a/57463515</a></li>
+<li><a href="https://developer.arm.com/documentation/ihi0038/b/" referrerpolicy="origin" rel="noopener" target="_blank">https://developer.arm.com/documentation/ihi0038/b/</a></li>
+<li><a href="https://stackoverflow.com/a/57463515" referrerpolicy="origin" rel="noopener" target="_blank">https://stackoverflow.com/a/57463515</a></li>
 </ul>
 <pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">ARM</span><span class="p">.</span><span class="n">extab</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="o">*</span><span class="p">(.</span><span class="n">ARM</span><span class="p">.</span><span class="n">extab</span><span class="o">*</span><span class="w"> </span><span class="p">.</span><span class="n">gnu</span><span class="p">.</span><span class="n">linkonce</span><span class="p">.</span><span class="n">armextab</span><span class="p">.</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
@@ -395,9 +395,9 @@ relocate section in flash. If I wrote the startup script I would have
 named these symbols differently.</p>
 <p>References:</p>
 <ul>
-<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
-<li><a href="https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA">https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA</a></li>
-<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
+<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections" referrerpolicy="origin" rel="noopener" target="_blank">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
+<li><a href="https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA" referrerpolicy="origin" rel="noopener" target="_blank">https://www.sourceware.org/binutils/docs/ld/Output-Section-LMA.html#Output-Section-LMA</a></li>
+<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c" referrerpolicy="origin" rel="noopener" target="_blank">startup_samd21.c</a></li>
 </ul>
 <pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">relocate</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
 <span class="w">   </span><span class="p">{</span><span class="w"></span>
@@ -422,11 +422,11 @@ defaults to <code>-fno-common</code> these days so there shouldn't be
 anything in there, but it's included for completeness.</p>
 <p>References:</p>
 <ul>
-<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
-<li><a href="https://en.wikipedia.org/wiki/.bss">https://en.wikipedia.org/wiki/.bss</a></li>
-<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html</a>
+<li><a href="http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections" referrerpolicy="origin" rel="noopener" target="_blank">http://www.sco.com/developers/gabi/latest/ch4.sheader.html#special_sections</a></li>
+<li><a href="https://en.wikipedia.org/wiki/.bss" referrerpolicy="origin" rel="noopener" target="_blank">https://en.wikipedia.org/wiki/.bss</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html" referrerpolicy="origin" rel="noopener" target="_blank">https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html</a>
 Section -fcommon</li>
-<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
+<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c" referrerpolicy="origin" rel="noopener" target="_blank">startup_samd21.c</a></li>
 </ul>
 <pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">bss</span><span class="w"> </span><span class="p">(</span><span class="n">NOLOAD</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
 <span class="w">   </span><span class="p">{</span><span class="w"></span>
@@ -447,8 +447,8 @@ usused but included for completeness.</p>
 aligned on an eight byte boundary.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c">startup_samd21.c</a></li>
-<li><a href="https://developer.arm.com/documentation/ihi0042/e/">https://developer.arm.com/documentation/ihi0042/e/</a>
+<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/third_party/samd21/gcc/gcc/startup_samd21.c" referrerpolicy="origin" rel="noopener" target="_blank">startup_samd21.c</a></li>
+<li><a href="https://developer.arm.com/documentation/ihi0042/e/" referrerpolicy="origin" rel="noopener" target="_blank">https://developer.arm.com/documentation/ihi0042/e/</a>
 Section 5.2.1.2, Stack constraints at a public interface</li>
 </ul>
 <pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="n">stack</span><span class="w"> </span><span class="p">(</span><span class="n">NOLOAD</span><span class="p">)</span><span class="o">:</span><span class="w"></span>
@@ -490,9 +490,9 @@ heap to overwrite the stack. Leaving the entire end of RAM available
 as the heap works well for my purposes.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://en.wikipedia.org/wiki/Sbrk">https://en.wikipedia.org/wiki/Sbrk</a></li>
-<li><a href="https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib">https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib</a></li>
-<li><a href="https://embeddedartistry.com/blog/2017/02/15/implementing-malloc-first-fit-free-list/">https://embeddedartistry.com/blog/2017/02/15/implementing-malloc-first-fit-free-list/</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Sbrk" referrerpolicy="origin" rel="noopener" target="_blank">https://en.wikipedia.org/wiki/Sbrk</a></li>
+<li><a href="https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib" referrerpolicy="origin" rel="noopener" target="_blank">https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib</a></li>
+<li><a href="https://embeddedartistry.com/blog/2017/02/15/implementing-malloc-first-fit-free-list/" referrerpolicy="origin" rel="noopener" target="_blank">https://embeddedartistry.com/blog/2017/02/15/implementing-malloc-first-fit-free-list/</a></li>
 </ul>
 <pre class="lang-c"><span class="w">   </span><span class="p">.</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ALIGN</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w"></span>
 <span class="w">   </span><span class="n">PROVIDE</span><span class="w"> </span><span class="p">(</span><span class="n">_heap_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.);</span><span class="w"></span>
@@ -508,7 +508,7 @@ This symbol is used by the settings module to know where to
 load and save settings.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/src/gem_settings_load_save.c">gem_settings_load_save.c</a></li>
+<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/src/gem_settings_load_save.c" referrerpolicy="origin" rel="noopener" target="_blank">gem_settings_load_save.c</a></li>
 </ul>
 <pre class="lang-c"><span class="n">_nvm_settings_base_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ORIGIN</span><span class="p">(</span><span class="n">nvm</span><span class="p">);</span><span class="w"></span>
 <span class="n">_nvm_settings_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
@@ -518,7 +518,7 @@ load and save settings.</p>
 calibrated look-up table for translating ADC -&gt; frequency/DAC codes.</p>
 <p>References:</p>
 <ul>
-<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/src/gem_voice_param_table_load_save.c">gem_voice_param_table_load_save.c</a></li>
+<li><a href="https://github.com/theacodes/Winterbloom_Castor_and_Pollux/tree/master/firmware/src/gem_voice_param_table_load_save.c" referrerpolicy="origin" rel="noopener" target="_blank">gem_voice_param_table_load_save.c</a></li>
 </ul>
 <pre class="lang-c"><span class="n">_nvm_lut_base_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ORIGIN</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
 <span class="n">_nvm_lut_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LENGTH</span><span class="p">(</span><span class="n">nvm</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
@@ -527,7 +527,7 @@ calibrated look-up table for translating ADC -&gt; frequency/DAC codes.</p>
 <hr />
 <ol>
 <li id="fn:probably">
-<p>Probably.&#160;<a class="footnote-backref" href="#fnref:probably" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<p>Probably.&#160;<a class="footnote-backref" href="#fnref:probably" referrerpolicy="origin" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>

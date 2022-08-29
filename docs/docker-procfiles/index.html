@@ -48,16 +48,16 @@
   </aside>
   <h1>Docker, procfiles, and health checks</h1>
   <content>
-    <p><em>(full source code is available on <a href="https://github.com/theacodes/docker-procfile">github</a>)</em></p>
-<p><a href="https://docker.io">Docker</a> has an interesting best practice of only executing <a href="https://docs.docker.com/articles/dockerfile_best-practices/">one process per container</a>:</p>
+    <p><em>(full source code is available on <a href="https://github.com/theacodes/docker-procfile" referrerpolicy="origin" rel="noopener" target="_blank">github</a>)</em></p>
+<p><a href="https://docker.io" referrerpolicy="origin" rel="noopener" target="_blank">Docker</a> has an interesting best practice of only executing <a href="https://docs.docker.com/articles/dockerfile_best-practices/" referrerpolicy="origin" rel="noopener" target="_blank">one process per container</a>:</p>
 <blockquote>
 <p>In almost all cases, you should only run a single process in a single container. Decoupling applications into multiple containers makes it much easier to scale horizontally and reuse containers. If that service depends on another service, make use of container linking.</p>
 </blockquote>
-<p>This is a great rule of thumb, but there are a few cases where running multiple processes <em>is</em> actually necessary. In fact, Docker acknowledges this in their tutorial on <a href="https://docs.docker.com/articles/using_supervisord/">running supervisord</a> in Docker.</p>
-<p>I came across one such case recently. I wanted to run an <a href="http://python-rq.org/">rq</a> worker on <a href="">Google App Engine Managed VMs</a>. It's highly recommended to provide a simple HTTP health check. Usually this is trivial to provide as you are usually running an actual web application. But in the case of rq it's not that simple - rq is not a web application and there's no way to make it respond to these health checks by itself.</p>
+<p>This is a great rule of thumb, but there are a few cases where running multiple processes <em>is</em> actually necessary. In fact, Docker acknowledges this in their tutorial on <a href="https://docs.docker.com/articles/using_supervisord/" referrerpolicy="origin" rel="noopener" target="_blank">running supervisord</a> in Docker.</p>
+<p>I came across one such case recently. I wanted to run an <a href="http://python-rq.org/" referrerpolicy="origin" rel="noopener" target="_blank">rq</a> worker on <a href="" referrerpolicy="origin">Google App Engine Managed VMs</a>. It's highly recommended to provide a simple HTTP health check. Usually this is trivial to provide as you are usually running an actual web application. But in the case of rq it's not that simple - rq is not a web application and there's no way to make it respond to these health checks by itself.</p>
 <p>I needed to run two processes: the rq worker process and a simple web application that could respond to health checks.</p>
 <h3 id="running-multiple-processes">Running multiple processes</h3>
-<p>As mentioned above, <a href="https://docs.docker.com/articles/using_supervisord/">using supervisord</a> is a completely valid solution. However, I wanted something that required a little less configuration. This is where I decided on using <a href="http://ddollar.github.io/foreman/">foreman's</a> <a href="http://ddollar.github.io/foreman/#PROCFILE">procfile</a>. Foreman is an extremely lightweight process manager. An added bonus is that Foreman can export a supervisord config file if you decide to switch. For this project, I decided to use <a href="https://github.com/nickstenning/honcho">Honcho</a> which is a python clone of Foreman primarily because it didn't require me to install ruby in my container.</p>
+<p>As mentioned above, <a href="https://docs.docker.com/articles/using_supervisord/" referrerpolicy="origin" rel="noopener" target="_blank">using supervisord</a> is a completely valid solution. However, I wanted something that required a little less configuration. This is where I decided on using <a href="http://ddollar.github.io/foreman/" referrerpolicy="origin" rel="noopener" target="_blank">foreman's</a> <a href="http://ddollar.github.io/foreman/#PROCFILE" referrerpolicy="origin" rel="noopener" target="_blank">procfile</a>. Foreman is an extremely lightweight process manager. An added bonus is that Foreman can export a supervisord config file if you decide to switch. For this project, I decided to use <a href="https://github.com/nickstenning/honcho" referrerpolicy="origin" rel="noopener" target="_blank">Honcho</a> which is a python clone of Foreman primarily because it didn't require me to install ruby in my container.</p>
 <p>With Honcho, our Procfile looks like this:</p>
 <pre><code>worker: rqworker
 monitor: python monitor.py
@@ -65,7 +65,7 @@ monitor: python monitor.py
 <p>Both processes can be started locally by executing <code>honcho start</code>, but how do I get docker to start this? My first attempt was:</p>
 <pre><code>CMD /env/bin/honcho start
 </code></pre>
-<p>However, this created a small problem: when Honcho starts processes it uses the system Python and the system site-packages. This is unfortunate because my Dockerfile is set up to install all dependencies into a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtualenv</a>:</p>
+<p>However, this created a small problem: when Honcho starts processes it uses the system Python and the system site-packages. This is unfortunate because my Dockerfile is set up to install all dependencies into a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/" referrerpolicy="origin" rel="noopener" target="_blank">virtualenv</a>:</p>
 <pre><code>WORKDIR /app
 RUN virtualenv /env
 ADD requirements.txt /app/requirements.txt
@@ -79,7 +79,7 @@ ADD . /app
 <script type="text/javascript" src="https://asciinema.org/a/23417.js" id="asciicast-23417" async></script>
 
 <h3 id="monitoring-processes-with-python-flask-and-psutil">Monitoring processes with Python, Flask, and psutil.</h3>
-<p>The monitoring application is a simple <a href="http://flask.pocoo.org/">Flask</a> application that uses <a href="https://github.com/giampaolo/psutil">psutil</a> to monitor the status of the worker process. Luckily, <code>rqworker</code> has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on <a href="https://github.com/theacodes/docker-procfile/blob/master/monitor.py">github</a>.</p>
+<p>The monitoring application is a simple <a href="http://flask.pocoo.org/" referrerpolicy="origin" rel="noopener" target="_blank">Flask</a> application that uses <a href="https://github.com/giampaolo/psutil" referrerpolicy="origin" rel="noopener" target="_blank">psutil</a> to monitor the status of the worker process. Luckily, <code>rqworker</code> has a flag that will write its PID to a file that can be read by the monitor application. The full source is available on <a href="https://github.com/theacodes/docker-procfile/blob/master/monitor.py" referrerpolicy="origin" rel="noopener" target="_blank">github</a>.</p>
   </content>
 
   
