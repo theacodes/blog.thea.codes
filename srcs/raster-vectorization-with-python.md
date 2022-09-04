@@ -28,7 +28,7 @@ In this article, I want to talk about just one approach for converting artwork f
 
 ## The challenge
 
-Like many [EDA]/[CAD] software packages, KiCAD works fundamentally differently from art design programs because it has a different purpose - KiCAD is for designing physical, manufacturable objects. The challenge presented here is to covert an image of some artwork into KiCAD's vector format.
+Like many [EDA]/[CAD] software packages, KiCAD works fundamentally differently from art design programs because it has a different purpose - KiCAD is for designing physical, manufacturable objects. The challenge presented here is to convert an image of some artwork into KiCAD's vector format.
 
 ![Illustration of an artwork file named input.png and a KiCAD footprint named output.kicad_mod](/static/2022-8-25/in-out.png)
 
@@ -137,7 +137,7 @@ The first is that Potrace path segments can be either lines or [cubic Bezier cur
 
 ![An illustration of a line next to an illustration of a bezier curve](/static/2022-8-25/line-bezier.png)
 
-KiCAD's polygons must be a list of _points_ forming line segments, so these Bezier curves need to be approximated by a series of lines. A very, very simple approach is to this is to use a constant number of line segments to approximate the curve[^adaptive]:
+KiCAD's polygons must be a list of _points_ forming line segments, so these Bezier curves need to be approximated by a series of lines. A very, very simple approach is to use a constant number of line segments to approximate the curve[^adaptive]:
 
 ![An illustration of a bezier curve approximated by line segments](/static/2022-8-25/bezier-approximation.png)
 
@@ -177,7 +177,7 @@ Potrace does offer some help here: each path has a _sign_. A positive sign indic
 
 Path `1` is positive (shown in blue) so it is a polygon. The subsequent paths `2` and `3` are negative (shown in red), which indicates that they are holes in the polygon defined by path `1`. Path `4` is positive so it indicates a new polygon. Path `5` is negative so it indicates that it's a hole in the polygon defined by path `4`.
 
-This information is used to create a list of polygons along with any holes in that polygon. From there, the polygons are be "simplified" by subtracting the holes using [boolean operations]:
+This information is used to create a list of polygons along with any holes in that polygon. From there, the polygons are "simplified" by subtracting the holes using [boolean operations]:
 
 ![Illustration of two holes being subtracted from a polygon](/static/2022-8-25/boolean.png)
 
