@@ -8,7 +8,7 @@ description: A deep look into the black magic that is linker scripts.
 
 While developing the firmware for Winterbloom's [Castor & Pollux](https://github.com/theacodes/Winterbloom_Castor_and_Pollux), I got very curious as to just what the Microchip/Atmel-provided linker script was doing.
 
-If you've never heard of or seen a linker script before you're not alone. Most of us never even have to think about them, however, on memory constained embedded devices it's not uncommon to need to modify the default linker script.
+If you've never heard of or seen a linker script before you're not alone. Most of us never even have to think about them, however, on memory constrained embedded devices it's not uncommon to need to modify the default linker script.
 
 The linker script controls how `ld` combines all of your `.o` files into a single `.elf` and how that resulting `.elf` file gets loaded by the target processor.
 
