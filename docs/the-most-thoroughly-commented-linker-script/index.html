@@ -272,7 +272,7 @@ Vague Linking.</li>
 <pre class="lang-c++"><span class="kt">int</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">some_func</span><span class="p">()</span><span class="w"></span>
 </pre>
 <p>For C, handles functions designated as constructors:</p>
-<pre><code>void intialize_thing(void) __attribute__((constructor));
+<pre><code>void initialize_thing(void) __attribute__((constructor));
 </code></pre>
 <p>Executed by the C runtime at startup via <code>__libc_init_array</code>.</p>
 <p>References:</p>
@@ -299,7 +299,7 @@ Vague Linking.</li>
 <h3 id="finalizers">Finalizers</h3>
 <ul>
 <li>C++ runtime: destructors for static variables.</li>
-<li>C runtime: designated finializers</li>
+<li>C runtime: designated finalizers</li>
 </ul>
 <p>For C, handles functions designated as destructors:</p>
 <pre class="lang-c"><span class="kt">void</span><span class="w"> </span><span class="nf">destroy_thing</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">destructor</span><span class="p">));</span><span class="w"></span>
@@ -442,7 +442,7 @@ Section -fcommon</li>
 <p>Cortex-M stacks grow down, so the stack starts at <code>_estack</code> and
 grows towards <code>_sstack</code>. The startup script sets the vector
 table's stack pointer to <code>_estack</code> on startup. <code>_sstack</code> is
-usused but included for completeness.</p>
+unused but included for completeness.</p>
 <p>The ARM procedure call standard (AAPCS) requires the stack to be
 aligned on an eight byte boundary.</p>
 <p>References:</p>
