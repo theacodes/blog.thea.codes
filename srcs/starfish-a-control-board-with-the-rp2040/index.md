@@ -300,7 +300,7 @@ Next up is the 5 V inputs:
   </kicad-schematic>
 </div>
 
-Once again utilizing the 74HC2G34 but this time as a high-to-low level translator ([U402]). This requires a little slight of hand- the inputs generally aren't supposed to go above V~CC~ (3.3 V in this case) but the datasheet clarifies:
+Once again utilizing the 74HC2G34 but this time as a high-to-low level translator ([U402]). This requires a little sleight of hand- the inputs generally aren't supposed to go above V~CC~ (3.3 V in this case) but the datasheet clarifies:
 
 > The minimum input and output voltage ratings may be exceeded if the input and output current ratings are observed.
 
