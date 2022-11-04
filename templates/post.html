@@ -12,8 +12,8 @@
 {% endif %}
 
 {% if post.preview_image %}
-<meta property="og:image" content="https://blog.thea.codes/static/{{post.preview_image}}">
-<meta property="twitter:image" content="https://blog.thea.codes/static/{{post.preview_image}}">
+<meta property="og:image" content="https://blog.thea.codes/{{post.stem}}/{{post.preview_image}}">
+<meta property="twitter:image" content="https://blog.thea.codes/{{post.stem}}/{{post.preview_image}}">
 {% endif %}
 
 {% if post.preview_image_alt %}
@@ -28,7 +28,7 @@
 {% block content %}
 <article>
   <aside class="timestamp">
-    <time>Posted by Stargirl Flowers on {{post['date'].strftime('%B %d, %Y')}}</time>
+    <time>Posted by Stargirl Flowers on {{post['date'].strftime('%B %e, %Y')}}</time>
     · <a href="/">view all posts</a>
   </aside>
   <h1>{{post.title}}</h1>

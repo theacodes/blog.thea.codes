@@ -1,0 +1,118 @@
+/* [data-kicanvas] {
+    --crop-height: yes;
+    --min-page-width: 150;
+    --font-family: Nunito;
+    --font-size: 1.5;
+    --line-spacing: 1.1;
+    --background: white;
+    --stroke: #282634;
+    --stroke-width: 0.3;
+    --fill: #131218;
+    --highlight: #19e0ff;
+    --symbol-fill: #dcc8ff;
+    --symbol-stroke: #433e56;
+    --symbol-field: #4e896b;
+    --symbol-ref: #716799;
+    --symbol-value: #716799;
+    --wire: ##433e56;
+    --junction: ##433e56;
+    --no-connect: #ff81ad;
+    --pin-radius: 0.254;
+    --pin-color: #634e89;
+    --pin-name: #433e56;
+    --pin-number: #716799;
+    --label: #cb6488;
+    --hierarchical-label: #4e896b;
+}
+[data-kicanvas] {
+    position: relative;
+    margin: 2rem auto;
+    display: block;
+    text-align: right;
+}
+[data-kicanvas].loaded .kicanvas-hide {
+    display: none !important;
+}
+[data-kicanvas] canvas,
+[data-kicanvas] img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+[data-kicanvas].loaded .kicanvas-help {
+    display: revert;
+}
+[data-kicanvas] .kicanvas-help {
+    display: none;
+    font-size: 1rem;
+}
+[data-kicanvas] .kicanvas-help button {
+    border: none;
+    background: none;
+}
+.kicanvas-dialog {
+    font-size: 1.2rem;
+    margin: auto;
+    width: 30rem;
+    max-width: 80vw;
+    border: none !important;
+    box-shadow: 0 0 #0000, 0 0 #0000, 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 1.6rem;
+}
+.kicanvas-dialog .property {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+.kicanvas-dialog .property input {
+    font-size: 1.1rem;
+}
+.kicanvas-dialog button {
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+    display: block;
+    width: 100%;
+    border: 1px solid transparent;
+    background: #17a2b8;
+    color: white;
+    padding: 0.2rem 1rem;
+    border-radius: 1rem;
+} */
+
+
+kicad-schematic {
+    margin: 2rem auto;
+    display: block;
+    text-align: right;
+    --crop-height: yes;
+    --min-page-width: 150;
+    --font-family: Nunito;
+    --line-spacing: 1;
+    --font-size: 1.8;
+}
+
+kicad-schematic canvas,
+kicad-schematic img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+kicad-schematic[loaded] img {
+    display: none !important;
+}
+
+kicad-schematic .help {
+    display: none;
+    font-size: 1rem;
+}
+
+kicad-schematic[loaded] .help {
+    display: revert;
+}
+
+kicad-schematic .help button {
+    border: none;
+    background: none;
+}
