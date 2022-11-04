@@ -2,7 +2,7 @@
 title: Creating a pick and place control board with the RP2040
 date: 2022-11-04
 description: A look into the hardware design of Starfish
-preview-image: 0-starfish.jpg
+preview_image: 0-starfish.jpg
 ---
 
 This article will explore the hardware design of **Starfish**, a control board for a pick and place machine built around the Raspberry Pi [RP2040] microcontroller and Trinamic [TMC2209] motor drivers.
