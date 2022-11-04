@@ -69,7 +69,7 @@ Everything starts with power. Starfish runs on 24 V~DC~, interfaces with some no
 
 Starting from the left, the power comes in through screw terminals ([J201], [J202]). The extra screw terminal is for daisy-chaining power to other boards. Immediately following the screw terminals is a 3 A fuse ([F201]) and a [SMAJ28CA] bidirectional transient voltage suppression (TVS) diode ([D201]).
 
-The fuse is there to protection from *overcurrent* events. The motors, pumps, and valves all run directly from 24VDC and have external connections so it's important to have some protection from short circuits from connection issues or bad components.
+The fuse is there to protect the rest of the circuit from *overcurrent* events. The motors, pumps, and valves all run directly from 24VDC and have external connections so it's important to have some protection from short circuits from connection issues or bad components.
 
 The TVS diode is there for exactly what it's designed for - transient voltage suppression. If there's a big voltage spike on the power input due to static discharge or inductive switching, the TVS will shunt it. It's important that the diode is *bidirectional*, since a unidirectional diode would simply burn up with reverse voltage.
 
