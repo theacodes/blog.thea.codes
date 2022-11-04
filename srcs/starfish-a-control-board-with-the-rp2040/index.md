@@ -628,7 +628,7 @@ Whew, that's a lot! Laying out these motor drivers can be very intimiating, but 
 
 I hope this write-up was informative and useful for you. You can view the hardware design files for Starfish on [GitHub] if you'd like to take a closer look at anything. I am not an expert and I'm sure that there are things that could be done much better on this design, so feedback is welcome!
 
-If you're interested in an open source pick and place, definitely check out the [Lumen] project. It's been really wonderful seeing how the community has taken the core idea and adapted it to their needs.
+If you're interested in an open source pick and place, definitely check out the [Lumen](https://opulo.io) project. It's been really wonderful seeing how the community has taken the core idea and adapted it to their needs.
 
 [GitHub]: https://github.com/wntrblm/jellyfish-and-starfish
 
