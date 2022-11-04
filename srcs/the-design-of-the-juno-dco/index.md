@@ -3,7 +3,7 @@ title: "The Design of the Roland Juno oscillators"
 date: 2020-12-31
 legacy_url: yes
 description: A comprehensive deep dive into the design of Roland's legendary DCO
-preview_image: juno/juno-logo.png
+preview_image: juno-logo.png
 ---
 
 

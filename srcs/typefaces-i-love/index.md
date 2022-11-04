@@ -3,7 +3,7 @@ title: "A few of my favorite typefaces"
 date: 2021-09-12
 legacy_url: yes
 description: A little showcase for some typefaces that I find lovely
-preview_image: 2021-8-2/brevia.png
+preview_image: brevia.png
 ---
 
 Ah, *typefaces*. They're ubiquitous in our modern, digital world. Digital type has evolved from the early, necessarily simple bitmap fonts of the Commodore 64 and IBM PC to incredibly expressive vector illustrated typefaces we use today. Unless you take the time to journal by hand or you're lucky enough to have someone send you a hand-written letter, you're almost always reading through the lens of a typeface.
