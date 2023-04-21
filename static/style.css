@@ -168,7 +168,7 @@ article blockquote {
     margin: 2em 0;
 }
 
-article img {
+article img, article video {
     max-width: 90%;
     margin: 0 auto;
     display: block;
