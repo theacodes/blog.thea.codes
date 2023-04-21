@@ -1,6 +1,6 @@
 ---
 title: Introducing KiCanvas
-date: 2023-03-30
+date: 2023-04-20
 description: An interactive, browser-based viewer for KiCAD files
 ---
 
