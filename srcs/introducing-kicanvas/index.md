@@ -65,7 +65,6 @@ This is a project I'm truly creating for the community. It will always be free a
 - [@mithro](https://github.com/mithro)
 - [@jeremysf](https://github.com/jeremysf)
 - [@blues](https://github.com/blues)
-- [@bradanlane](https://github.com/bradanlane)
 - [@timonsku](https://github.com/timonsku)
 - [@todbot](https://github.com/todbot)
 - [@friggeri](https://github.com/friggeri)
