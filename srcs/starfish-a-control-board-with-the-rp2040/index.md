@@ -368,7 +368,7 @@ Here's a breakdown of the schematic:
 * [D1001] and [R1003] form the indicator LED- you know I love indicator LEDs.
 * [D1002] is a relatively beefy Schottky [flyback diode]. Since the DC motor is an inductive load this prevents the voltage spike that occurs when the motor is switched off from damaging the MOSFET.
 
-THe layout for the buffer and two MOSFETs is relatively straightforward:
+The layout for the buffer and two MOSFETs is relatively straightforward:
 
 <figure data-layered>
   <img title="front" src="./mosfet-front.png" class="active">
