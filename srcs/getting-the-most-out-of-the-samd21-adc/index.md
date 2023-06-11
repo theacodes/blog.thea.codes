@@ -242,7 +242,7 @@ high_expected = ...
 high_measured = ...
 
 gain_error = (high_measured - low_measured) / (high_expected - low_expected)
-offset_error = low_expected - (gain_error * low_measured)
+offset_error = low_measured - (gain_error * low_expected)
 ```
 
 The gain error is a positive or negative integer that defines a constant value that's applied to every measurement. The gain error is a fractional number that is multiplied by every measurement after offset adjustments are applied. When setting the registers it's important to note that `OFFSETCORR` is in [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) and `GAINCORR` is expressed as an integer that's `2048 / gain correction`. Here's an example of setting the registers:
