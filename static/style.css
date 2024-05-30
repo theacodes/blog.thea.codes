@@ -180,6 +180,11 @@ article img.small {
     width: 30%;
 }
 
+article img.medium {
+    width: 50%;
+}
+
+
 article iframe {
     margin: 2em auto;
     display: block;
