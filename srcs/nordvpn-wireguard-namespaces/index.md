@@ -6,7 +6,7 @@ description: Using Linux's fancy networking to keep torrent traffic private
 
 Lately I've been working on improving my rag-tag [homelab] and I wanted to set up a [bittorrent] client on the homelab server. Most modern clients have web UIs so getting it running relatively easy, however, you **really** want use a privacy-focused [VPN] while seeding or downloading torrents. That makes things a little more complicated.
 
-In my case, I wanted to be able to run [Transmission] on my homelab server and have it use [NordVPN] to talk to the outside world. In typical usage, you'd set up the VPN client and _all_ your outbound internet traffic would go through the VPN. In my case, I didn't want that- I wanted to Transmission to use the VPN. This is called [split tunneling][split-tunneling] and there's a lot of ways to do it. After a lot of research, trial and error, and lots of swearing I figured out a method that I feel works well for my use case. This post walks through how I set up and hopefully it'll help someone.
+In my case, I wanted to be able to run [Transmission] on my homelab server and have it use [NordVPN] to talk to the outside world. In typical usage, you'd set up the VPN client and _all_ your outbound internet traffic would go through the VPN. In my case, I didn't want that- I wanted Transmission to be the only app that uses the VPN. This is called [split tunneling][split-tunneling] and there's a lot of ways to do it. After a lot of research, trial and error, and lots of swearing I figured out a method that I feel works well for my use case. This post walks through how I set everything up and hopefully it'll help someone.
 
 [homelab]: https://www.reddit.com/r/homelab/
 [bittorrent]: https://en.wikipedia.org/wiki/BitTorrent
