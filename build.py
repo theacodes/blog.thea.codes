@@ -1,3 +1,4 @@
+import datetime
 import pathlib
 from typing import Sequence
 import shutil
@@ -15,6 +16,7 @@ import witchhazel
 jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader("templates"),
 )
+jinja_env.globals["current_year"] = datetime.datetime.now().year
 
 markdown_ = markdown.Markdown(
     extensions=[
