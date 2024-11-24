@@ -36,7 +36,7 @@ As someone with their [own open hardware tattoo][oshw-tattoo], yeah, I'm really 
 
 ## Losing the market
 
-I very, very rarely agree with Drew DeVault, but [his post from last year][drew] nailed it:
+Drew DeVault's [post from last year][drew] nailed it:
 
 > Prusa made one of the classic errors in open source business models: they made their product, made it open source, sold it, and assumed that they were done working on their business model.
 
