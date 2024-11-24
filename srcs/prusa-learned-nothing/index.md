@@ -31,7 +31,7 @@ The Hackaday article sums this up well:
 
 > So will the Prusa Core ONE be a good printer? Almost certainly. Will I buy one? Very likely. But part of me will always be disappointed that the guy with the open source hardware logo tattoo took his ball and went home as soon as the game starting getting tough.
 
-As someone with their [own open hardware tattoo](oshw-tattoo), yeah, I'm really disappointed.
+As someone with their [own open hardware tattoo][oshw-tattoo], yeah, I'm really disappointed.
 
 
 ## Losing the market
