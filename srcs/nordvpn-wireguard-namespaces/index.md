@@ -63,8 +63,8 @@ PersistentKeepalive = 25
 
 [NordLynx]: https://support.nordvpn.com/hc/en-us/articles/19564565879441-What-is-NordLynx
 [nord-access-token]: https://support.nordvpn.com/hc/en-us/articles/20286980309265-How-to-use-a-token-with-NordVPN-on-Linux
-[nord-config-generator]: https://nord-configs-crafter.pages.dev/
-[private-key-generator]: https://nord-configs-crafter.pages.dev/key
+[nord-config-generator]: https://wg-nord.pages.dev/
+[private-key-generator]: https://wg-nord.pages.dev//key
 
 ## Setting up wg-netns
 
