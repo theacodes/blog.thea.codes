@@ -1,11 +1,11 @@
 ---
 title: Reflecting on my 2023
 date: 2023-12-30
-description: TODO
-preview_image: TODO
+description: A look back through my journey around the sun
+preview_image: workshop.jpg
 ---
 
-Just as with [last year](../my-2023), I wanted to take some time to reflect on my journey through the last year. Because my memory is a leaky pot, it's useful for me to write down and reflect on events before they fade forever. As always, this article is less technical than my usual content, however, I hope it provides some entertainment if you read through it.
+Just as with [last year](../my-2022), I wanted to take some time to reflect on my journey through the last year. Because my memory is a leaky pot, it's useful for me to write down and reflect on events before they fade forever. As always, this article is less technical than my usual content, however, I hope it provides some entertainment if you read through it.
 
 ## KiCanvas
 
