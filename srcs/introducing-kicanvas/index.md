@@ -51,7 +51,7 @@ Thankfully, the article was well received and folks really liked the interactive
 
 At the end of December, after working through various proof of concepts, I shared the [idea of KiCanvas] and asked for financial support to spend time creating it. I am absolutely blown away by the number of people who sponsored this project. Having a little financial security for a few months means so much to me. I also really appreciate everyone who spent time talking to me about how KiCanvas would be helpful to them.
 
-[Starfish]: ./starfish-a-control-board-with-the-rp2040
+[Starfish]: ../starfish-a-control-board-with-the-rp2040
 [Canvas]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
 [InteractiveHTMLBom]: https://github.com/openscopeproject/InteractiveHtmlBom
 [idea of KiCanvas]: https://twitter.com/theavalkyrie/status/1608274303232970753
