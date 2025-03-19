@@ -460,7 +460,7 @@ Once that's configured you'll need to configure the port multiplexer to connect 
 ```c
 PORT->Group[0].DIRSET.reg = (1 << 15);
 PORT->Group[0].PINCFG[15].reg |= PORT_PINCFG_PMUXEN;
-PORT->Group[0].PMUX[15 >> 1].bit.PMUXO |= PORT_PMUX_PMUXO_H;
+PORT->Group[0].PMUX[15 >> 1].bit.PMUXO |= PORT_PMUX_PMUXO_H_VAL;
 ```
 
 With that complete you can connect an oscilloscope to `PA15` and observe the clock:
