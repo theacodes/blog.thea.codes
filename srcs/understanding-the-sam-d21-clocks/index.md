@@ -460,8 +460,10 @@ Once that's configured you'll need to configure the port multiplexer to connect 
 ```c
 PORT->Group[0].DIRSET.reg = (1 << 15);
 PORT->Group[0].PINCFG[15].reg |= PORT_PINCFG_PMUXEN;
-PORT->Group[0].PMUX[15 >> 1].bit.PMUXO |= PORT_PMUX_PMUXO_H_VAL;
+PORT->Group[0].PMUX[15 >> 1].bit.PMUXO |= PORT_PMUX_PMUXO_H;
 ```
+
+> Note that for even-numbered pins you'll need to use `PORT_PMUX_PMUXE_H`, for example, for `PA10` you'd use `PORT->Group[PORTA].PMUX[11 >> 1].reg |= PORT_PMUX_PMUXE_H;`.
 
 With that complete you can connect an oscilloscope to `PA15` and observe the clock:
 
