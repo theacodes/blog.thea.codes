@@ -94,11 +94,11 @@ At this point you'll need to prepare a configuration file based on the one you g
 {
   "name": "nordvpn",
   "managed": true,
+  "dns-server": ["103.86.96.100"],
   "interfaces": [
     {
       "name": "nordvpn",
       "address": ["10.5.0.2/16"],
-      "dns-server": ["103.86.96.100"],
       "private-key": "YOUR PRIVATE KEY",
       "peers": [
         {
