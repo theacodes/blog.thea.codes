@@ -134,7 +134,7 @@ Needless to say it's been fun and there's _so_ much more to come. Stay tuned, I'
 
 ## OSHWA
 
-I continued my work within the [Open Hardware Association (OSHWA)][oshwa] last year, include serving as the [president of the board][president-announcement], pitching in on web design for the [2025 summit site][ohs-2025], and working to clean up and modernize our hosting infrastructure. I even had the delight of decommissioning a server running Ubuntu **10.04**!
+I continued my work within the [Open Hardware Association (OSHWA)][oshwa] last year, including serving as the [president of the board][president-announcement], pitching in on web design for the [2025 summit site][ohs-2025], and working to clean up and modernize our hosting infrastructure. I even had the delight of decommissioning a server running Ubuntu **10.04**!
 
 ![Old Ubuntu image](./ubuntu-old.jpg)
 
