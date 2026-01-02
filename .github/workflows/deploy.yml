@@ -23,6 +23,9 @@ jobs:
             url: ${{ steps.deployment.outputs.page_url }}
 
         steps:
+            - name: Configure GitHub Pages
+              uses: actions/configure-pages@v5
+
             - uses: actions/checkout@v3
 
             - uses: actions/setup-python@v4
@@ -37,8 +40,8 @@ jobs:
               run: |
                   python3 build.py
 
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v1
+            - name: Upload GitHub Pages artifact
+              uses: actions/upload-pages-artifact@v4
               with:
                   path: docs
 
